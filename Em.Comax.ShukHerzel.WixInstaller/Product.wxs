@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+	<!-- Product Definition -->
+	<Product
+	  Id="*"
+	  Name="Em.Comax.ShukHerzel.WixInstaller"
+	  Language="1033"
+	  Version="1.0.0.0"
+	  Manufacturer="EwaveMobile"
+	  UpgradeCode="d1572bb9-149e-4541-a2e3-4fa1e15ab1ec">
+
+		<!-- Package Settings -->
+		<Package
+		  InstallerVersion="500"
+		  Compressed="yes"
+		  InstallScope="perMachine" />
+
+		<!-- Major Upgrade Configuration -->
+		<MajorUpgrade
+		  DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+		<!-- Media Template -->
+		<MediaTemplate />
+
+		<!-- Features -->
+		<Feature
+		  Id="ProductFeature"
+		  Title="Em.Comax.ShukHerzel.WixInstaller"
+		  Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+
+	<!-- Directory Structure -->
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="EwaveMobile\Em.Comax.ShukHerzel.installer" />
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<!-- Components and Service Configuration -->
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+
+			<!-- Windows Service Component -->
+			<Component
+			  Id="EM_Comax_ShukHerzel_Service_Component"
+			  Guid="AAF7E59A-69AF-4202-8267-41EB8F7E0E6E">
+
+				<!-- Service Executable -->
+				<File
+				  Id="EM_Comax_ShukHerzel_Service_File"
+				  Source="$(var.EM_Comax_ShukHerzel_Service.TargetPath)"
+				  KeyPath="yes" />
+
+				<!-- Service Installation -->
+				<ServiceInstall
+				  Id="EM_Comax_ShukHerzel_ServiceInstall"
+				  Type="ownProcess"
+				  Name="EM.Comax.ShukHerzel.Service"
+				  DisplayName="EM Comax ShukHerzel Service"
+				  Description="Handles background tasks for ShukHerzel."
+				  Start="auto"
+				  Account="LocalSystem"
+				  ErrorControl="normal" />
+
+				<!-- Service Control -->
+				<ServiceControl
+				  Id="EM_Comax_ShukHerzel_ServiceControl"
+				  Start="install"
+				  Stop="both"
+				  Remove="uninstall"
+				  Name="EM.Comax.ShukHerzel.Service"
+				  Wait="yes" />
+			</Component>
+
+		</ComponentGroup>
+	</Fragment>
+
+</Wix>

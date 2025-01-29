@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EM.Comax.ShukHerzel.Models\EM.Comax.ShukHerzel.Models.csproj" />
+    <ProjectReference Include="..\EM.Comax.ShukHerzl.Common\EM.Comax.ShukHerzl.Common.csproj" />
+  </ItemGroup>
+
+</Project>

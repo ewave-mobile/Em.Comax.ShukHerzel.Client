@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EFCore.BulkExtensions" Version="8.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EM.Comax.ShukHerzel.Models\EM.Comax.ShukHerzel.Models.csproj" />
+    <ProjectReference Include="..\EM.Comax.ShukHerzl.Common\EM.Comax.ShukHerzl.Common.csproj" />
+  </ItemGroup>
+
+</Project>
