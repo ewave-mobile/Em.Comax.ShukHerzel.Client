@@ -55,6 +55,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[Temp].[PriceUpdates]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[Temp].[promotions]",
          "ObjectType": 0
       }

@@ -15,5 +15,6 @@ namespace EM.Comax.ShukHerzel.Integration.interfaces
         string BuildComaxCatalogUrl(Configuration config, Branch branch, DateTime LastUpdateDate);
 
         Task<string> GetCatalogXmlAsync(Branch branch, DateTime lastUpdateDate, CancellationToken cancellationToken = default);
+        Task<List<ItemSalePriceDto>> GetNewPricesAsync(Branch branch, DateTime fromDate, CancellationToken cancellationToken = default);
     }
 }

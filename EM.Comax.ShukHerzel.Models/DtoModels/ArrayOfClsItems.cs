@@ -127,6 +127,10 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
         public decimal DiagonalOptic { get; set; } = 0;
         public decimal HeightOptic { get; set; } = 0;
         public string? NameInWeb { get; set; }
+        public string? ManufacturingCountry { get; set; }
+        public decimal? Content { get; set; }
+        public string? ContentUnit { get; set; }
+        public decimal? ContentMeasure { get; set; }
     }
 
     public class ItemModel

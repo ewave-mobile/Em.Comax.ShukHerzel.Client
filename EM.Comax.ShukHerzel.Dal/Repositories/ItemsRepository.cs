@@ -150,12 +150,13 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
 
         public async Task CleanExpiredPromotions()
         {
-            //get all items in the items table that have expired todate field and delete all promotion related data and set is sent to esl false
-            var now = DateTime.Now;
-            var expiredPromotions = await _context.Items
-                .Where(x => x.IsPromotion && x.PromotionToDate < now)
-                .ToListAsync();
+            // Use DateTime.Today to disregard the hour
+            var today = DateTime.Today;
 
+            // Only select items where the promotion expiration date is before today.
+            var expiredPromotions = await _context.Items
+                .Where(x => x.IsPromotion && x.PromotionToDate < today)
+                .ToListAsync();
             // all promotions related fields set to null
             foreach (var item in expiredPromotions)
             {

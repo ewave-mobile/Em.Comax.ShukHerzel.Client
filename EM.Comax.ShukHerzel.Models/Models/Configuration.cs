@@ -47,6 +47,8 @@ public partial class Configuration
 
     public bool? WithOutArchive { get; set; }
 
+    public bool? SelByPriceList { get; set; }
+
     public DateTime? PromotionLastUpdatedDate { get; set; }
 
     public bool? PromotionJustActive { get; set; }

@@ -17,8 +17,8 @@ namespace EM.Comax.ShukHerzel.WorkerService
     public class Program
     {
         // Define constants for service name and target installation directory
-        private const string ServiceName = "EM.Comax.ShukHerzel.Service1";
-        private const string TargetDirectory = @"C:\Program Files (x86)\EwaveMobile\Em.Comax.ShukHerzel.installer\";
+        private const string ServiceName = "EM.Comax.ShukHerzel.Service";
+        private const string TargetDirectory = @"C:\Program Files (x86)\EwaveMobile\Em.Comax.ShukHerzel.installer1\";
         private const string ExecutableName = "EM.Comax.ShukHerzel.Service.exe";
         private static readonly string ExecutablePath = Path.Combine(TargetDirectory, ExecutableName);
 
@@ -68,13 +68,11 @@ namespace EM.Comax.ShukHerzel.WorkerService
                         services.AddScoped<Service.Jobs.PromotionJob>();
                         services.AddScoped<Service.Jobs.OperativeJob>();
                         services.AddScoped<Service.Jobs.MaintenanceJob>();
+
                         // Register Quartz services
                         services.AddQuartz(q =>
                         {
-                            // Use Microsoft Dependency Injection Job Factory
                             q.UseMicrosoftDependencyInjectionJobFactory();
-
-                            // Register Jobs and Triggers
                             q.AddJobAndTrigger<Service.Jobs.SyncItemsJob>(hostContext.Configuration);
                             q.AddJobAndTrigger<Service.Jobs.TempCatalogJob>(hostContext.Configuration);
                             q.AddJobAndTrigger<Service.Jobs.PromotionJob>(hostContext.Configuration);
@@ -82,10 +80,7 @@ namespace EM.Comax.ShukHerzel.WorkerService
                             q.AddJobAndTrigger<Service.Jobs.MaintenanceJob>(hostContext.Configuration);
                         });
 
-                        // Add Quartz hosted service
                         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-
-                        // Register Service Lifecycle Logger
                         services.AddHostedService<ServiceLifecycleLogger>();
                     })
                     .Build();
@@ -133,37 +128,85 @@ namespace EM.Comax.ShukHerzel.WorkerService
                 string sourceExecutablePath = Process.GetCurrentProcess().MainModule.FileName;
                 Console.WriteLine($"Source executable path: {sourceExecutablePath}");
 
-                // Copy the executable to the target directory
-                Console.WriteLine($"Copying executable to: {ExecutablePath}");
-                File.Copy(sourceExecutablePath, ExecutablePath, overwrite: true);
-                Console.WriteLine($"Copied executable to: {ExecutablePath}");
+                // If source != destination, copy the file
+                if (!string.Equals(sourceExecutablePath, ExecutablePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine($"Copying executable to: {ExecutablePath}");
+                    File.Copy(sourceExecutablePath, ExecutablePath, overwrite: true);
+                    Console.WriteLine($"Copied executable to: {ExecutablePath}");
+                }
+                else
+                {
+                    Console.WriteLine("Source and target paths are the same. Skipping copy.");
+                }
 
                 // Install the service using sc.exe via CliWrap
                 Console.WriteLine("Creating service...");
-                await Cli.Wrap("sc")
+
+                // Construct the command in a sc-friendly format:
+                //   sc create EM.Comax.ShukHerzel.Service1
+                //      binPath= "C:\Program Files (x86)\...\EM.Comax.ShukHerzel.Service.exe"
+                //      start=auto
+                //      DisplayName= "EM Comax ShukHerzel Service"
+                //      Description= "Handles background tasks for ShukHerzel."
+                var scCreateCommand = Cli.Wrap("sc")
                     .WithArguments(new[]
                     {
-                        "create",
-                        $"\"{ServiceName}\"",
-                        $"binPath= \"{ExecutablePath}\"",
-                        "start= auto",
-                        $"DisplayName= \"EM Comax ShukHerzel Service\"",
-                        $"Description= \"Handles background tasks for ShukHerzel.\""
-                    })
-                    .ExecuteAsync();
+        "create",
+        ServiceName,                      // e.g. "EM.Comax.ShukHerzel.Service1"
+        "binPath= \"" + ExecutablePath + "\"",
+        "start=auto",
+        "DisplayName= \"EM.Comax.ShukHerzel.Service\""
+                        // "Description= \"Handles background tasks for ShukHerzel.\""
+                        // ... etc. if you want
+                    });
+
+                // Now execute it
+                //write line of command to console
+                Console.WriteLine(scCreateCommand.ToString());
+                var createResult = await scCreateCommand.ExecuteAsync();
+                Console.WriteLine($"sc create ExitCode: {createResult.ExitCode}");
+              //  Console.WriteLine($"StdOut: {createResult}");
+              //  Console.WriteLine($"StdErr: {createResult.StandardError}");
+
+                if (createResult.ExitCode != 0)
+                {
+                    // If you want to bail out, do it here
+                    Console.WriteLine("Service creation failed due to non-zero exit code.");
+                    Console.WriteLine("Press any key to exit...");
+                    Console.ReadKey();
+                    return;
+                }
+
                 Console.WriteLine("Service created successfully.");
 
                 // Start the service
                 Console.WriteLine("Starting service...");
-                await Cli.Wrap("sc")
-                    .WithArguments(new[] { "start", $"\"{ServiceName}\"" })
+                var startResult = await Cli.Wrap("sc")
+                    .WithArguments(new[] { "start", ServiceName })
                     .ExecuteAsync();
-                Console.WriteLine("Service started successfully.");
+                Console.WriteLine($"sc start ExitCode: {startResult.ExitCode}");
+                //Console.WriteLine($"StdOut: {startResult.StandardOutput}");
+                //Console.WriteLine($"StdErr: {startResult.StandardError}");
+
+                if (startResult.ExitCode == 0)
+                {
+                    Console.WriteLine("Service started successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("Service could not be started. Check the StdErr above for details.");
+                }
+
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Installation failed: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
             }
         }
 
@@ -178,19 +221,22 @@ namespace EM.Comax.ShukHerzel.WorkerService
 
                 // Stop the service
                 Console.WriteLine("Stopping service...");
-                await Cli.Wrap("sc")
-                    .WithArguments(new[] { "stop", $"\"{ServiceName}\"" })
+                var stopResult = await Cli.Wrap("sc")
+                    .WithArguments(new[] { "stop", ServiceName })
                     .ExecuteAsync();
-                Console.WriteLine("Service stopped successfully.");
+                Console.WriteLine($"sc stop ExitCode: {stopResult.ExitCode}");
+              //  Console.WriteLine($"StdOut: {stopResult.StandardOutput}");
+               // Console.WriteLine($"StdErr: {stopResult.StandardError}");
 
                 // Delete the service
                 Console.WriteLine("Deleting service...");
-                await Cli.Wrap("sc")
-                    .WithArguments(new[] { "delete", $"\"{ServiceName}\"" })
+                var deleteResult = await Cli.Wrap("sc")
+                    .WithArguments(new[] { "delete", ServiceName })
                     .ExecuteAsync();
-                Console.WriteLine("Service deleted successfully.");
+                Console.WriteLine($"sc delete ExitCode: {deleteResult.ExitCode}");
+              //  Console.WriteLine($"StdOut: {deleteResult.StandardOutput}");
+               // Console.WriteLine($"StdErr: {deleteResult.StandardError}");
 
-                // Remove the executable from the target directory
                 if (File.Exists(ExecutablePath))
                 {
                     Console.WriteLine($"Deleting executable from: {ExecutablePath}");

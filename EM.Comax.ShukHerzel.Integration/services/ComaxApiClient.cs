@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace EM.Comax.ShukHerzel.Integration.services
 {
@@ -98,7 +99,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
             // Note: You might need to handle null or empty strings carefully, or pass them as blank.
 
            // var baseUrl = config.ComaxApiUrl; // e.g. "https://ws.comax.co.il/Comax_WebServices/Items_Service.asmx/Get_AllItemsDetailsBySearch"
-            var endpoint = "Items_Service.asmx/Get_AllItemsDetailsBySearch"; // or whatever your endpoint is
+            var endpoint = ComaxConstants.CATALOG_METHOD_URL; // or whatever your endpoint is
             // Build the query string with each param
             // (In real code, use UriBuilder or HttpUtility to URL-encode your parameters properly)
             var query = $"?ItemID={config.ItemId}" +
@@ -118,7 +119,8 @@ namespace EM.Comax.ShukHerzel.Integration.services
                         $"&LoginID={config.LoginId}" +
                         $"&LoginPassword={config.LoginPassword}" +
                         $"&ShowInWeb={config.ShowInWeb?.ToString() ?? "False"}" +
-                        $"&WithOutArchive={config.WithOutArchive?.ToString() ?? "False"}";
+                        $"&WithOutArchive={config.WithOutArchive?.ToString() ?? "False"}" +
+                        $"&SelByPriceList={config.SelByPriceList?.ToString() ?? "False"}";
 
             // Combine
            // return baseUrl + query;
@@ -151,7 +153,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
 
                 // 2. Post to Comax's "GetPromotionsDef" endpoint
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("Promotions_Service.asmx/GetPromotionsDef", jsonContent, cancellationToken);
+                var response = await _httpClient.PostAsync(ComaxConstants.PROMOTION_METHOD_URL, jsonContent, cancellationToken);
                 await _databaseLogger.LogTraceAsync(_httpClient.BaseAddress?.ToString() + "Promotions_Service.asmx/GetPromotionsDef", JsonConvert.SerializeObject(body),"", response.StatusCode.ToString());
                 response.EnsureSuccessStatusCode();
 
@@ -171,5 +173,96 @@ namespace EM.Comax.ShukHerzel.Integration.services
                 return new PromotionDto();
             }
         }
+
+        public async Task<List<ItemSalePriceDto>> GetNewPricesAsync(Branch branch, DateTime fromDate, CancellationToken cancellationToken = default)
+        {
+            // Assume you have fetched your configuration from _configService
+            var config = await _configService.getCompanyConfig(Constants.SHUK_HERZEL_COMPANY_ID);
+
+            // Build the SOAP envelope
+            var soapEnvelope = $@"<?xml version=""1.0"" encoding=""utf-8""?>
+<soap:Envelope xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance""
+               xmlns:xsd=""http://www.w3.org/2001/XMLSchema""
+               xmlns:soap=""{ComaxConstants.SOAP_ENVELOPE_NAMESPACE}"">
+  <soap:Body>
+    <{ComaxConstants.SOAP_ACTION_GET_ALL_ITEMS_PRICES} xmlns=""{ComaxConstants.COMAX_WS_NAMESPACE}"">
+      <ItemID></ItemID>
+      <DepartmentID></DepartmentID>
+      <GroupID></GroupID>
+      <Sub_GroupID></Sub_GroupID>
+      <ItemModelID></ItemModelID>
+      <ItemColorID></ItemColorID>
+      <ItemSizeID></ItemSizeID>
+      <StoreID>{branch.ComaxStoreId}</StoreID>
+      <PriceListID>{branch.ComaxPriceListId}</PriceListID>
+      <StoreIDForOpenOrdersOffset></StoreIDForOpenOrdersOffset>
+      <SupplierID></SupplierID>
+      <CustomerID></CustomerID>
+      <LastUpdatedFromDate>{fromDate.ToString("dd/MM/yyyy HH:mm")}</LastUpdatedFromDate>
+      <LoginID>{config.LoginId}</LoginID>
+      <LoginPassword>{config.LoginPassword}</LoginPassword>
+      <ChangesAfter></ChangesAfter>
+    </{ComaxConstants.SOAP_ACTION_GET_ALL_ITEMS_PRICES}>
+  </soap:Body>
+</soap:Envelope>";
+
+            var queryParameters = $"?op={ComaxConstants.SOAP_ACTION_GET_ALL_ITEMS_PRICES}" +
+                         $"&SalesPriceArray={branch.SalesPriceArray}" +
+                         $"&SelByPriceList={config.SelByPriceList.ToString().ToLower()}" +
+                         $"&FromDate_UpdatePrice={fromDate.ToString("dd/MM/yyyy HH:mm")}";
+            var requestUrl = ComaxConstants.PRICE_METHOD_URL + queryParameters;
+            // Set up the HttpRequestMessage
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUrl)
+            {
+                Content = new StringContent(soapEnvelope, Encoding.UTF8, ComaxConstants.CONTENT_TYPE_XML)
+            };
+
+            // Optionally, add cookies or other headers here if required
+
+            // Make the HTTP request
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var responseXml = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            // You can now use an XML parser or XmlSerializer to deserialize the response.
+            // For example, using XmlSerializer:
+            var serializer = new XmlSerializer(typeof(GetAllItemsPricesBySearchResultDto));
+            using (var reader = new StringReader(ExtractInnerXml(responseXml))) // Extract the inner XML of the response if needed
+            {
+                if (serializer.Deserialize(reader) is GetAllItemsPricesBySearchResultDto result)
+                {
+                    return result.Items;
+                }
+            }
+            return new List<ItemSalePriceDto>();
+        }
+        private string ExtractInnerXml(string soapResponse)
+        {
+            var doc = new System.Xml.XmlDocument();
+            doc.LoadXml(soapResponse);
+
+            // Create a namespace manager for the SOAP envelope
+            var nsManager = new System.Xml.XmlNamespaceManager(doc.NameTable);
+            nsManager.AddNamespace("soap", "http://schemas.xmlsoap.org/soap/envelope/");
+            nsManager.AddNamespace("comax", ComaxConstants.COMAX_WS_NAMESPACE); // e.g., "http://ws.comax.co.il/Comax_WebServices/"
+
+            // Navigate to the node that contains the actual result.
+            // Assuming the response structure is:
+            // <soap:Envelope>
+            //   <soap:Body>
+            //     <Get_AllItemsPricesBySearchResponse xmlns="http://ws.comax.co.il/Comax_WebServices/">
+            //       <Get_AllItemsPricesBySearchResult> ... </Get_AllItemsPricesBySearchResult>
+            //     </Get_AllItemsPricesBySearchResponse>
+            //   </soap:Body>
+            // </soap:Envelope>
+            var resultNode = doc.SelectSingleNode("//soap:Body/comax:Get_AllItemsPricesBySearchResponse/comax:Get_AllItemsPricesBySearchResult", nsManager);
+            if (resultNode != null)
+                return resultNode.OuterXml;
+
+            // If not found, return the whole response (or throw an exception)
+            return soapResponse;
+        }
+
     }
 }

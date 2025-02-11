@@ -17,38 +17,41 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
         {
         }
 
-        public async Task DeleteExpiredPromotionsAsync()
+       public async Task DeleteExpiredPromotionsAsync()
+{
+    // Get today's date (time set to midnight)
+    var today = DateTime.Today;
+
+    // Filter promotions where ToDate is not null or whitespace
+    var promotions = await _context.Promotions
+        .Where(x => !string.IsNullOrWhiteSpace(x.ToDate))
+        .ToListAsync();
+
+    // Parse and filter the expired promotions by comparing only the date portion
+    var expiredPromotionsToDelete = promotions
+        .Where(promotion =>
         {
-            var now = DateTime.Now;
-
-            // Filter promotions where ToDate is not null and parseable, and less than the current date
-            var expiredPromotions = await _context.Promotions
-                .Where(x => !string.IsNullOrWhiteSpace(x.ToDate)) // Ensure ToDate is not null or empty
-                .ToListAsync();
-
-            // Parse and filter the expired promotions
-            var expiredPromotionsToDelete = expiredPromotions
-                .Where(promotion =>
-                {
-                    // Try parsing ToDate to a DateTime
-                    if (DateTime.TryParseExact(promotion.ToDate.Trim(),
-                                               "dd/MM/yyyy HH:mm:ss",
-                                               CultureInfo.InvariantCulture,
-                                               DateTimeStyles.None,
-                                               out DateTime parsedDate))
-                    {
-                        return parsedDate < now; // Check if parsed date is earlier than now
-                    }
-                    return false;
-                })
-                .ToList();
-
-            // Bulk delete expired promotions
-            if (expiredPromotionsToDelete.Any())
+            if (DateTime.TryParseExact(
+                    promotion.ToDate.Trim(),
+                    "dd/MM/yyyy HH:mm:ss",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out DateTime parsedDate))
             {
-                await _context.BulkDeleteAsync(expiredPromotionsToDelete);
+                // Compare only the date parts: if parsed date is before today, mark for deletion
+                return parsedDate.Date < today;
             }
-        }
+            return false;
+        })
+        .ToList();
+
+    // Bulk delete expired promotions if any exist
+    if (expiredPromotionsToDelete.Any())
+    {
+        await _context.BulkDeleteAsync(expiredPromotionsToDelete);
+    }
+}
+
 
         public async Task DeleteTransferredItemsOlderThanAsync(int retentionDays)
         {

@@ -21,6 +21,8 @@ public partial class Branch
 
     public long? ComaxPriceListId { get; set; }
 
+    public long? SalesPriceArray { get; set; }
+
     public int? Order { get; set; }
 
     public bool? IsServiceSync { get; set; }
@@ -32,4 +34,6 @@ public partial class Branch
     public DateTime? LastCatalogTimeStamp { get; set; }
 
     public DateTime? LastPromotionTimeStamp { get; set; }
+
+    public DateTime? LastPriceTimeStamp { get; set; }
 }

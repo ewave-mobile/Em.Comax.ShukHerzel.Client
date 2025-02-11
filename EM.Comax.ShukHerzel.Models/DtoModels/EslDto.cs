@@ -12,7 +12,7 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
         public string id { get; set; } // Maps to Barcode
         public string name { get; set; } // Maps to ProductDesc
         public decimal? price { get; set; } // Maps to Price
-        public string size { get; set; } // Maps to Capacity
+       // public string size { get; set; } // Maps to Capacity
         public Custom custom { get; set; }
     }
     public class Custom
@@ -31,6 +31,8 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
         public string SwWeighable { get; set; }
         public string StoreId { get; set; }
         public string AllBarcodes { get; set; }
+        public string Size { get; set; }
+        public string IsPromotion { get; set; }
 
     }
 }

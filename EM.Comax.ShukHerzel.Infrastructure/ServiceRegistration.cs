@@ -82,6 +82,8 @@ namespace EM.Comax.ShukHerzl.Infrastructure
             services.AddScoped<IItemsRepository,ItemsRepository>();
             services.AddScoped<IApiClientService, ApiClientService>();
             services.AddScoped<IBadItemLogRepository, BadItemLogRepository>();
+            services.AddScoped<IPriceUpdateService, PriceUpdateService>();
+            services.AddScoped<IPriceUpdateRepository, PriceUpdateRepository>();
             // Possibly register Quartz only if we're in the service
             if (isService)
             {

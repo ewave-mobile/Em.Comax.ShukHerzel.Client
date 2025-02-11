@@ -29,6 +29,8 @@ public partial class ShukHerzelEntities : DbContext
 
     public virtual DbSet<Item> Items { get; set; }
 
+    public virtual DbSet<PriceUpdate> PriceUpdates { get; set; }
+
     public virtual DbSet<Promotion> Promotions { get; set; }
 
     public virtual DbSet<ServiceLog> ServiceLogs { get; set; }
@@ -383,6 +385,7 @@ public partial class ShukHerzelEntities : DbContext
                 .HasMaxLength(250)
                 .HasColumnName("EslStoreID");
             entity.Property(e => e.LastCatalogTimeStamp).HasColumnType("datetime");
+            entity.Property(e => e.LastPriceTimeStamp).HasColumnType("datetime");
             entity.Property(e => e.LastPromotionTimeStamp).HasColumnType("datetime");
             entity.Property(e => e.LastRun).HasColumnType("datetime");
         });
@@ -498,6 +501,46 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.Size).HasMaxLength(50);
             entity.Property(e => e.TextForWeb).HasMaxLength(500);
             entity.Property(e => e.TotalPromotionPrice).HasColumnType("decimal(18, 2)");
+        });
+
+        modelBuilder.Entity<PriceUpdate>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__PriceUpd__3214EC27CEF2B27A");
+
+            entity.ToTable("PriceUpdates", "Temp");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.AlternateId)
+                .HasMaxLength(50)
+                .HasColumnName("AlternateID");
+            entity.Property(e => e.Barcode).HasMaxLength(50);
+            entity.Property(e => e.BranchId).HasColumnName("BranchID");
+            entity.Property(e => e.CompanyId).HasColumnName("CompanyID");
+            entity.Property(e => e.CreatedDateTime)
+                .HasPrecision(3)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasColumnName("createdDateTime");
+            entity.Property(e => e.Currency).HasMaxLength(50);
+            entity.Property(e => e.IsIncludeVat).HasMaxLength(50);
+            entity.Property(e => e.IsTransferredToOper).HasColumnName("isTransferredToOper");
+            entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.NetPrice).HasMaxLength(50);
+            entity.Property(e => e.OperationEndDate).HasMaxLength(200);
+            entity.Property(e => e.OperationGuid).HasColumnName("operationGuid");
+            entity.Property(e => e.Price).HasMaxLength(50);
+            entity.Property(e => e.PriceListId)
+                .HasMaxLength(50)
+                .HasColumnName("PriceListID");
+            entity.Property(e => e.SalePrice).HasMaxLength(50);
+            entity.Property(e => e.ShekelNetPrice).HasMaxLength(50);
+            entity.Property(e => e.ShekelPrice).HasMaxLength(50);
+            entity.Property(e => e.Size).HasMaxLength(50);
+            entity.Property(e => e.TransferredDateTime)
+                .HasPrecision(3)
+                .HasColumnName("transferredDateTime");
+            entity.Property(e => e.XmlId)
+                .HasMaxLength(50)
+                .HasColumnName("Xml_ID");
         });
 
         modelBuilder.Entity<Promotion>(entity =>

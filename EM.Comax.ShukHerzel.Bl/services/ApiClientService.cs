@@ -173,7 +173,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 id = item.Barcode?.Trim() ?? string.Empty,
                 name = item.Name?.Trim() ?? string.Empty,
                 price = item.Price,
-                size = item.Size?.ToString() ?? string.Empty,
+                
                 custom = new Custom
                 {
                     ManufacturingCountry = item.ManufacturingCountry?.Trim() ?? string.Empty,
@@ -189,7 +189,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     SwWeighable = item.SwWeighable.HasValue && item.SwWeighable.Value ? "true" : "false",
                     TextForWeb = item.TextForWeb?.Trim() ?? string.Empty,
                     StoreId = itemWithBranch.StoreId, // Ensure StoreId is captured if needed in DTO
-                    AllBarcodes = item.PromotionBarcodes ?? ""
+                    AllBarcodes = item.PromotionBarcodes ?? "",
+                    Size = item.Size?.ToString() ?? string.Empty,
+                    IsPromotion = item.IsPromotion.ToString() ?? "False"
                 }
             };
         }

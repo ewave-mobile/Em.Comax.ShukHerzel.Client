@@ -23,6 +23,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
         private readonly IItemsRepository _itemRepo;
         private readonly IDatabaseLogger _databaseLogger;
         private readonly IBadItemLogRepository _badItemLogRepository;
+        private readonly IPriceUpdateRepository _priceUpdateRepository;
 
         private const int BatchSize = 1000; // Adjust based on performance testing
 
@@ -31,13 +32,15 @@ namespace EM.Comax.ShukHerzel.Bl.services
             IPromotionsRepository promoRepo,
             IItemsRepository itemRepo,
             IDatabaseLogger databaseLogger,
-            IBadItemLogRepository badItemLogRepository)
+            IBadItemLogRepository badItemLogRepository,
+            IPriceUpdateRepository priceUpdateRepository)
         {
             _allItemsRepo = allItemsRepo;
             _promoRepo = promoRepo;
             _itemRepo = itemRepo;
             _databaseLogger = databaseLogger;
             _badItemLogRepository = badItemLogRepository;
+            _priceUpdateRepository = priceUpdateRepository;
         }
 
         public async Task SyncAllItemsAndPromotionsAsync(IProgress<string> progress, CancellationToken cancellationToken = default)
@@ -67,7 +70,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                         Barcode = item.Barcode ?? "",
                         Message = "Price is zero.",
                         Guid = Guid.NewGuid().ToString(),
-                        TimeStamp = DateTime.UtcNow
+                        TimeStamp = DateTime.Now
                     }).ToList();
 
                     await _badItemLogRepository.BulkInsertBadItemsAsync(badItemLogs, BatchSize);
@@ -81,7 +84,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 }
 
                 // Insert valid items into the Items table
-                var now = DateTime.UtcNow; // Use UTC for consistency
+                var now = DateTime.Now; // Use UTC for consistency
                 var operativeItems = allItems.Select(item => MapItemWithoutPromotion(item, now)).ToList();
 
                 var bulkConfig = new BulkConfig
@@ -181,7 +184,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                     Barcode = promo.ItemKod ?? "",
                                     Message = "No matching Item found.",
                                     Guid = Guid.NewGuid().ToString(),
-                                    TimeStamp = DateTime.UtcNow
+                                    TimeStamp = DateTime.Now
                                 });
                                 //await _badItemLogRepository.AddAsync(new BadItemLog
                                 //{
@@ -216,7 +219,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
     .ToList();
 
                         await _itemRepo.BulkInsertOrUpdateAsync(uniqueItems, bulkConfig);
-                        await _itemRepo.BulkInsertOrUpdateAsync(itemsToUpdate, bulkConfig);
+                     //   await _itemRepo.BulkInsertOrUpdateAsync(itemsToUpdate, bulkConfig);
                         progress.Report("Bulk update of Items with Promotions completed.");
                         await _databaseLogger.LogServiceActionAsync("Bulk update of Items with Promotions completed.");
                     }
@@ -275,6 +278,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 ContentUnit = tempItem.ContentUnit,
                 Size = tempItem.Size,
                 SwWeighable = tempItem.SwWeighable?.ToLower() == "true",
+                ManufacturingCountry = tempItem.ManufacturingCountry,
                 //tryparse quantity to decimal
 
 
@@ -287,7 +291,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 PromotionToDate = null,
                 TotalPromotionPrice = null,
                 SwAllCustomers = false,
-
+                
                 // Serialize complex fields safely if necessary
 
             };

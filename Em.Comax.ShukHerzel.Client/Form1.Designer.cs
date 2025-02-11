@@ -38,6 +38,7 @@
             operTableJob = new Button();
             eslTransferJob = new Button();
             logTextBox = new RichTextBox();
+            PriceUpdatesButton = new Button();
             SuspendLayout();
             // 
             // branchList
@@ -103,7 +104,7 @@
             // 
             // promotionsTempJob
             // 
-            promotionsTempJob.Location = new Point(215, 321);
+            promotionsTempJob.Location = new Point(215, 304);
             promotionsTempJob.Name = "promotionsTempJob";
             promotionsTempJob.Size = new Size(333, 34);
             promotionsTempJob.TabIndex = 6;
@@ -139,11 +140,22 @@
             logTextBox.TabIndex = 9;
             logTextBox.Text = "";
             // 
+            // PriceUpdatesButton
+            // 
+            PriceUpdatesButton.Location = new Point(215, 344);
+            PriceUpdatesButton.Name = "PriceUpdatesButton";
+            PriceUpdatesButton.Size = new Size(333, 34);
+            PriceUpdatesButton.TabIndex = 10;
+            PriceUpdatesButton.Text = "עדכוני מחירים";
+            PriceUpdatesButton.UseVisualStyleBackColor = true;
+            PriceUpdatesButton.Click += PriceUpdatesButton_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(733, 781);
+            Controls.Add(PriceUpdatesButton);
             Controls.Add(logTextBox);
             Controls.Add(eslTransferJob);
             Controls.Add(operTableJob);
@@ -173,5 +185,6 @@
         private Button operTableJob;
         private Button eslTransferJob;
         private RichTextBox logTextBox;
+        private Button PriceUpdatesButton;
     }
 }

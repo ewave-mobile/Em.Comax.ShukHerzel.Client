@@ -14,9 +14,10 @@ namespace Em.Comax.ShukHerzel.Client
         private readonly IPromotionsService _promotionsService;
         private readonly IOperativeService _operativeService;
         private readonly IApiClientService _apiClientService;
+        private readonly IPriceUpdateService _priceUpdateService;
         //private const long SHUK_HERZEL_COMPANY_ID = 1;
 
-        public Form1(IBranchService branchService, IAllItemsService allItemsService, IPromotionsService promotionsService, IOperativeService operativeService, IApiClientService apiClientService)
+        public Form1(IBranchService branchService, IAllItemsService allItemsService, IPromotionsService promotionsService, IOperativeService operativeService, IApiClientService apiClientService, IPriceUpdateService priceUpdateService)
         {
             _branchService = branchService;
             _allItemsService = allItemsService;
@@ -25,7 +26,7 @@ namespace Em.Comax.ShukHerzel.Client
             _apiClientService = apiClientService;
             InitializeComponent();
             _ = initForm();
-          
+            _priceUpdateService = priceUpdateService;
         }
         private async Task<bool> initForm()
         {
@@ -205,23 +206,73 @@ namespace Em.Comax.ShukHerzel.Client
                 await _apiClientService.SendItemsToEslAsync(true, progress, cts.Token);
 
                 // Notify the user of completion
-               // progress.Report("ESL Synchronization completed successfully.");
+                // progress.Report("ESL Synchronization completed successfully.");
             }
             catch (OperationCanceledException)
             {
                 // Handle cancellation
-               // progress.Report("ESL Synchronization was canceled.");
+                // progress.Report("ESL Synchronization was canceled.");
             }
             catch (Exception ex)
             {
                 // Log any unexpected errors
-               // progress.Report($"Error during ESL Synchronization: {ex.Message}");
+                // progress.Report($"Error during ESL Synchronization: {ex.Message}");
                 logTextBox.AppendText($"Exception: {ex}{Environment.NewLine}");
             }
             finally
             {
                 // Re-enable the button regardless of the outcome
                 eslTransferJob.Enabled = true;
+            }
+        }
+
+        private async void PriceUpdatesButton_Click(object sender, EventArgs e)
+        {
+            logTextBox.Clear();
+
+            PriceUpdatesButton.Enabled = false;
+            DateTime yearAgo = DateTime.Now.AddYears(-1);
+            var progress = new Progress<string>(s => logTextBox.AppendText(s + Environment.NewLine));
+            using var cts = new CancellationTokenSource();
+            try
+            {
+                if (singleBranchCheckBox.Checked)
+                {
+                    // Insert promotions for just the selected branch
+                    var branch = (Branch)branchList.SelectedItem;
+                    if (branchCatalogCheckBox.Checked)
+                    {
+                        await _priceUpdateService.InsertPriceUpdatesAsync(branch, yearAgo, progress);
+                    }
+                    else
+                    {
+                        await _priceUpdateService.InsertPriceUpdatesAsync(branch, tempPullDateTime.Value, progress);
+                    }
+                }
+                else
+                {
+                    // Insert promotions for all branches in _branches
+                    foreach (var branch in _branches)
+                    {
+                        if (branchCatalogCheckBox.Checked)
+                        {
+                            await _priceUpdateService.InsertPriceUpdatesAsync(branch, yearAgo, progress);
+                        }
+                        else
+                        {
+                            await _priceUpdateService.InsertPriceUpdatesAsync(branch, tempPullDateTime.Value, progress);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logTextBox.AppendText($"Error: {ex.Message}{Environment.NewLine}{ex.StackTrace}");
+            }
+            finally
+            {
+                PriceUpdatesButton.Enabled = true;
+
             }
         }
     }
