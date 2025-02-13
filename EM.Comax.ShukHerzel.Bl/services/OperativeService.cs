@@ -1,18 +1,16 @@
-﻿// OperativeService.cs
+﻿using EFCore.BulkExtensions;
 using EM.Comax.ShukHerzel.Bl.interfaces;
+using EM.Comax.ShukHerzel.Models.DtoModels;
 using EM.Comax.ShukHerzel.Models.Interfaces;
 using EM.Comax.ShukHerzel.Models.Models;
-using EM.Comax.ShukHerzel.Models.DtoModels;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
-using EFCore.BulkExtensions;
 using EM.Comax.ShukHerzl.Common;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EM.Comax.ShukHerzel.Bl.services
 {
@@ -24,8 +22,10 @@ namespace EM.Comax.ShukHerzel.Bl.services
         private readonly IDatabaseLogger _databaseLogger;
         private readonly IBadItemLogRepository _badItemLogRepository;
         private readonly IPriceUpdateRepository _priceUpdateRepository;
+        private readonly IBranchRepository _branchRepository;
 
-        private const int BatchSize = 1000; // Adjust based on performance testing
+        // You may have a constant defined for the batch size
+        private const int BatchSize = 1000;
 
         public OperativeService(
             IAllItemsRepository allItemsRepo,
@@ -33,7 +33,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
             IItemsRepository itemRepo,
             IDatabaseLogger databaseLogger,
             IBadItemLogRepository badItemLogRepository,
-            IPriceUpdateRepository priceUpdateRepository)
+            IPriceUpdateRepository priceUpdateRepository,
+            IBranchRepository branchRepository)
         {
             _allItemsRepo = allItemsRepo;
             _promoRepo = promoRepo;
@@ -41,26 +42,33 @@ namespace EM.Comax.ShukHerzel.Bl.services
             _databaseLogger = databaseLogger;
             _badItemLogRepository = badItemLogRepository;
             _priceUpdateRepository = priceUpdateRepository;
+            _branchRepository = branchRepository;
         }
 
+        /// <summary>
+        /// Synchronizes Items, Promotions, and Price Updates.
+        /// </summary>
         public async Task SyncAllItemsAndPromotionsAsync(IProgress<string> progress, CancellationToken cancellationToken = default)
         {
             try
             {
                 await _databaseLogger.LogServiceActionAsync("Starting SyncAllItemsAndPromotions...");
-                
-                progress.Report("Starting synchronization of Items and Promotions...");
+                progress.Report("Starting synchronization of Items, Promotions, and Price Updates...");
 
-                // **ROUND 1: Insert all valid AllItems into the Items table**
+                var now = DateTime.Now; // Consider using UTC if appropriate
+
+                // ---------------------------
+                // ROUND 1: Process Catalog (AllItems) into Items (Upsert)
+                // ---------------------------
+
                 progress.Report("Removing duplicate operative Items...");
                 await _itemRepo.CleanExpiredPromotions();
                 await _allItemsRepo.RemoveDuplicateItemsAsync();
 
-                // Fetch non-transferred AllItems
                 var allItems = await _allItemsRepo.GetNonTransferredItemsAsync();
                 progress.Report($"Fetched {allItems.Count} Items from temp table.");
 
-                // Filter items with zero price
+                // Filter out items with zero price
                 var itemsWithZeroPrice = allItems.Where(item => item.Price == "0").ToList();
                 if (itemsWithZeroPrice.Any())
                 {
@@ -75,17 +83,39 @@ namespace EM.Comax.ShukHerzel.Bl.services
 
                     await _badItemLogRepository.BulkInsertBadItemsAsync(badItemLogs, BatchSize);
                     progress.Report($"Logged {badItemLogs.Count} bad items.");
-                    //get all item ids with zero price and mark them as bad
-                    var ids = itemsWithZeroPrice.Select(x => x.Id).ToList();
-                    await _allItemsRepo.MarkAsBad(ids);
-
-                    // Remove these items from AllItems
+                    var zeroPriceIds = itemsWithZeroPrice.Select(x => x.Id).ToList();
+                    await _allItemsRepo.MarkAsBad(zeroPriceIds);
                     allItems = allItems.Except(itemsWithZeroPrice).ToList();
                 }
 
-                // Insert valid items into the Items table
-                var now = DateTime.Now; // Use UTC for consistency
-                var operativeItems = allItems.Select(item => MapItemWithoutPromotion(item, now)).ToList();
+                // Map AllItems to operative Items (upsert mapping)
+                var operativeItems = allItems.Select(item => MapItem(item, now)).ToList();
+
+                // Use BulkInsertOrUpdate to upsert items based on Barcode and BranchId.
+                var bulkConfigOnlyItem = new BulkConfig
+                {
+                    PreserveInsertOrder = true,
+                    SetOutputIdentity = true,
+                    BatchSize = Constants.OPERATIVE_BATCH_SIZE,
+                    NotifyAfter = 1000,
+                    UpdateByProperties = new List<string> { "Barcode", "BranchId" },
+                    PropertiesToInclude = new List<string>
+    {
+        "Name",
+        "Price",
+        "CreateDateTime",
+        "OperationGuid",
+        "IsSentToEsl",
+        "IsPromotion",
+        "Content",
+        "ContentMeasure",
+        "ContentUnit",
+        "Size",
+        "SwWeighable",
+        "ManufacturingCountry"
+        // Add "Quantity" here if you want it updated as well.
+    }
+                };
 
                 var bulkConfig = new BulkConfig
                 {
@@ -93,46 +123,36 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     SetOutputIdentity = true,
                     BatchSize = Constants.OPERATIVE_BATCH_SIZE,
                     NotifyAfter = 1000,
-                    UpdateByProperties = new List<string> { "Barcode", "BranchId" }
+                    UpdateByProperties = new List<string> { "Barcode", "BranchId" },
+                    
                 };
 
-                progress.Report("Starting bulk insert of valid Items...");
-                await _itemRepo.BulkInsertOrUpdateAsync(operativeItems, bulkConfig);
-                progress.Report("Bulk insert of valid Items completed.");
-                await _databaseLogger.LogServiceActionAsync("Bulk insert of valid Items completed.");
-
-                // Mark AllItems as transferred
+                progress.Report("Starting bulk upsert of Items from Catalog...");
+                await _itemRepo.BulkInsertOrUpdateAsync(operativeItems, bulkConfigOnlyItem);
+                progress.Report("Bulk upsert of Items completed.");
                 var allItemIds = allItems.Select(a => a.Id).ToList();
                 await _allItemsRepo.MarkAsTransferredAsync(allItemIds, now);
                 progress.Report("Marked AllItems as transferred.");
-                await _databaseLogger.LogServiceActionAsync("Marked AllItems as transferred.");
 
-                // **ROUND 2: Process promotions and update items**
+                // ---------------------------
+                // ROUND 2: Process Promotions (existing logic)
+                // ---------------------------
                 await _promoRepo.DeleteExpiredPromotionsAsync();
                 var promos = await _promoRepo.GetNonTransferredPromotionsAsync();
                 if (promos.Any())
                 {
                     progress.Report($"Processing {promos.Count} Promotions...");
-
-                    // Create list of unique (Barcode, BranchId) from Promotions
                     var promoKeys = promos.Select(p => (p.ItemKod, p.BranchId)).Distinct().ToList();
-
-                    // Fetch matching Items for Promotions
                     progress.Report("Fetching matching Items for Promotions...");
                     var matchingItems = await _itemRepo.GetItemsByBarcodesAndBranchIdsAsync(promoKeys);
                     progress.Report($"Found {matchingItems.Count} matching Items for Promotions.");
-
-                    // Create a lookup for quick access
-                    var itemDict = matchingItems.ToDictionary(i => (i.Barcode, i.BranchId), i => i);
-
+                    var itemDict = matchingItems.ToDictionary(i => (i.Barcode, i.BranchId));
                     var itemsToUpdate = new List<Models.Models.Item>();
                     var promoIdsToMark = new List<long>();
-                    var noMatchBadLogs = new List<BadItemLog>();
                     int promoCount = 0;
                     foreach (var promo in promos)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
-
                         try
                         {
                             var key = (promo.ItemKod, promo.BranchId);
@@ -140,7 +160,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                             {
                                 if (promo.SwActive?.ToLower() != "true")
                                 {
-                                    item.PromotionKod =  null;
+                                    // Remove promotion details
+                                    item.PromotionKod = null;
                                     item.PromotionFromDate = null;
                                     item.PromotionToDate = null;
                                     item.TotalPromotionPrice = null;
@@ -149,7 +170,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                     item.Quantity = null;
                                     item.PromotionBarcodes = null;
                                     item.IsPromotion = false;
-                                    item.IsSentToEsl = false; // Set IsTransferred to 0 (false)
+                                    item.IsSentToEsl = false;
                                 }
                                 else
                                 {
@@ -163,12 +184,12 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                     item.Quantity = TryParseDecimal(promo.Quantity);
                                     item.PromotionBarcodes = promo.AnotherBarcodes;
                                     item.IsPromotion = true;
-                                    item.IsSentToEsl = false; // Set IsTransferred to 0 (false)
+                                    item.IsSentToEsl = false;
+                                    item.OperationGuid = promo.OperationGuid;
                                 }
                                 itemsToUpdate.Add(item);
                                 promoIdsToMark.Add(promo.Id);
                                 promoCount++;
-
                                 if (promoCount % 100 == 0)
                                 {
                                     progress.Report($"Processed {promoCount} Promotions...");
@@ -176,71 +197,96 @@ namespace EM.Comax.ShukHerzel.Bl.services
                             }
                             else
                             {
-                                var message = $"No matching Item found for Promotion ID {promo.Id} with Barcode {promo.ItemKod} and BranchId {promo.BranchId}.";
-                                progress.Report(message);
-                                // await _databaseLogger.LogServiceActionAsync(message);
-                                noMatchBadLogs.Add(new BadItemLog
-                                {
-                                    Barcode = promo.ItemKod ?? "",
-                                    Message = "No matching Item found.",
-                                    Guid = Guid.NewGuid().ToString(),
-                                    TimeStamp = DateTime.Now
-                                });
-                                //await _badItemLogRepository.AddAsync(new BadItemLog
-                                //{
-                                //    Barcode = promo.ItemKod ?? "",
-                                //    Message = "No matching Item found.",
-                                //    Guid = Guid.NewGuid().ToString(),
-                                //    TimeStamp = DateTime.UtcNow
-                                //});
+                                progress.Report($"No matching Item found for Promotion ID {promo.Id} with Barcode {promo.ItemKod} and BranchId {promo.BranchId}.");
+                                // Optionally log as a bad item
                             }
                         }
                         catch (Exception ex)
                         {
-                            var errorMessage = $"Error mapping Promotion ID {promo.Id}: {ex.Message}";
-                            progress.Report(errorMessage);
+                            progress.Report($"Error mapping Promotion ID {promo.Id}: {ex.Message}");
                             await _databaseLogger.LogErrorAsync("OPERATIVE_SERVICE", "Mapping Promotion to Item", ex);
                             continue;
                         }
                     }
-
-                    // Bulk update Items with Promotions
                     if (itemsToUpdate.Any())
                     {
-                        progress.Report("Starting bulk update of Items with Promotions...");
+                        progress.Report("Starting bulk update of Items with Promotion details...");
+                        // Group by (Barcode, BranchId) if duplicate updates occur.
                         var uniqueItems = itemsToUpdate
-    .GroupBy(x => new { x.Barcode, x.BranchId })
-    .Select(g =>
-    {
-        // If you need to combine or pick the “latest” item from the group, do it here
-        // For example, keep the item with the “newest” data
-        return g.OrderByDescending(item => item.CreateDateTime).First();
-    })
-    .ToList();
-
+                            .GroupBy(x => new { x.Barcode, x.BranchId })
+                            .Select(g => g.OrderByDescending(item => item.CreateDateTime).First())
+                            .ToList();
                         await _itemRepo.BulkInsertOrUpdateAsync(uniqueItems, bulkConfig);
-                     //   await _itemRepo.BulkInsertOrUpdateAsync(itemsToUpdate, bulkConfig);
                         progress.Report("Bulk update of Items with Promotions completed.");
-                        await _databaseLogger.LogServiceActionAsync("Bulk update of Items with Promotions completed.");
                     }
-                    if (noMatchBadLogs.Any())
-                    {
-                        await _badItemLogRepository.BulkInsertAsync(noMatchBadLogs);
-                    }
-
-                    // Bulk mark Promotions as transferred
                     if (promoIdsToMark.Any())
                     {
                         var distinctPromoIds = promoIdsToMark.Distinct().ToList();
                         progress.Report("Bulk marking Promotions as transferred...");
                         await _promoRepo.MarkAsTransferredAsync(distinctPromoIds, now);
                         progress.Report("Marked Promotions as transferred.");
-                        await _databaseLogger.LogServiceActionAsync("Marked Promotions as transferred.");
                     }
                 }
                 else
                 {
                     progress.Report("No Promotions to process.");
+                }
+
+                // ---------------------------
+                // ROUND 3: Process Price Updates (new logic)
+                // ---------------------------
+                progress.Report("Fetching Price Updates...");
+                var priceUpdates = await _priceUpdateRepository.GetNonTransferredItemsAsync();
+                if (priceUpdates.Any())
+                {
+                    progress.Report($"Fetched {priceUpdates.Count} Price Updates...");
+                    // Group price updates by (Barcode, BranchId) and pick the latest update per group.
+                    var groupedPriceUpdates = priceUpdates
+                        .GroupBy(p => new { p.Barcode, p.BranchId })
+                        .Select(g => g.OrderByDescending(p => p.CreatedDateTime).First())
+                        .ToList();
+
+                    // Fetch matching Items for these price updates.
+                    var priceUpdateKeys = groupedPriceUpdates.Select(p => (p.Barcode, p.BranchId)).Distinct().ToList();
+                    var matchingItemsForPrices = await _itemRepo.GetItemsByBarcodesAndBranchIdsAsync(priceUpdateKeys);
+                    var itemDictForPrices = matchingItemsForPrices.ToDictionary(i => (i.Barcode, i.BranchId));
+
+                    var itemsToUpdateWithPrices = new List<Models.Models.Item>();
+                    // List to keep track of price update IDs that had a matching item.
+                    var matchedPuIds = new List<long>();
+
+                    foreach (var pu in groupedPriceUpdates)
+                    {
+                        if (itemDictForPrices.TryGetValue((pu.Barcode, pu.BranchId), out var item))
+                        {
+                            UpdateItemWithPriceUpdate(item, pu);
+                            itemsToUpdateWithPrices.Add(item);
+                            // Only add the price update's ID if there is a matching item.
+                            matchedPuIds.Add(pu.Id);
+                        }
+                        else
+                        {
+                            progress.Report($"No matching Item found for Price Update with Barcode {pu.Barcode} and BranchId {pu.BranchId}");
+                        }
+                    }
+
+                    if (itemsToUpdateWithPrices.Any())
+                    {
+                        progress.Report("Starting bulk update of Items with Price Updates...");
+                        await _itemRepo.BulkInsertOrUpdateAsync(itemsToUpdateWithPrices, bulkConfig);
+                        progress.Report("Bulk update of Items with Price Updates completed.");
+                    }
+
+                    if (matchedPuIds.Any())
+                    {
+                        await _priceUpdateRepository.MarkAsTransferredAsync(matchedPuIds, now);
+                        progress.Report("Marked Price Updates as transferred.");
+                    }
+                }
+            
+                else
+                {
+                    progress.Report("No Price Updates to process.");
                 }
 
                 await _databaseLogger.LogServiceActionAsync("SyncAllItemsAndPromotions completed successfully.");
@@ -253,9 +299,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
             }
         }
 
-
         /// <summary>
         /// Maps a temp AllItem to an operative Item without promotion details.
+        /// (This mapping is used for the catalog upsert.)
         /// </summary>
         private Models.Models.Item MapItemWithoutPromotion(AllItem tempItem, DateTime now)
         {
@@ -270,83 +316,97 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 Name = tempItem.Name ?? "",
                 Price = price,
                 CreateDateTime = now,
-                OperationGuid = Guid.NewGuid(),
-                IsSentToEsl = false, // Assuming default value
-                IsPromotion = false, // Not part of a promotion yet
+                OperationGuid = tempItem.OperationGuid,
+                IsSentToEsl = false,
+                IsPromotion = false,
                 Content = tempItem.Content,
                 ContentMeasure = tempItem.ContentMeasure,
                 ContentUnit = tempItem.ContentUnit,
                 Size = tempItem.Size,
                 SwWeighable = tempItem.SwWeighable?.ToLower() == "true",
                 ManufacturingCountry = tempItem.ManufacturingCountry,
-                //tryparse quantity to decimal
-
-
-
-                Quantity = quantity,
-
-                // Initialize promotion-related fields
+                //Quantity = quantity,
+                // Initialize promotion-related fields to default values.
                 PromotionKod = "",
                 PromotionFromDate = null,
                 PromotionToDate = null,
                 TotalPromotionPrice = null,
-                SwAllCustomers = false,
-                
-                // Serialize complex fields safely if necessary
+                SwAllCustomers = false
+            };
+            return item;
+        }
+        private Models.Models.Item MapItem(AllItem tempItem, DateTime now)
+        {
+            decimal? price = TryParseDecimal(tempItem.Price);
+            decimal? quantity = TryParseDecimal(tempItem.Quantity);
 
+            var item = new Models.Models.Item
+            {
+                CompanyId = tempItem.CompanyId,
+                BranchId = tempItem.BranchId,
+                Barcode = tempItem.Barcode ?? "",
+                Name = tempItem.Name ?? "",
+                Price = price,
+                CreateDateTime = now,
+                OperationGuid = tempItem.OperationGuid,
+                IsSentToEsl = false,
+                IsPromotion = false,
+                Content = tempItem.Content,
+                ContentMeasure = tempItem.ContentMeasure,
+                ContentUnit = tempItem.ContentUnit,
+                Size = tempItem.Size,
+                SwWeighable = tempItem.SwWeighable?.ToLower() == "true",
+                ManufacturingCountry = tempItem.ManufacturingCountry,
+                //Quantity = quantity,
+                // Initialize promotion-related fields to default values.
+                //PromotionKod = "",
+                //PromotionFromDate = null,
+                //PromotionToDate = null,
+                //TotalPromotionPrice = null,
+                //SwAllCustomers = false
             };
             return item;
         }
 
         /// <summary>
-        /// Safely serializes an object to JSON, catches exceptions, and truncates to a specified max length.
+        /// Updates an operative Item with new price details from a PriceUpdate record.
         /// </summary>
-        private string SafeSerializeToJson(object? data, int maxLength = 2000)
+        private void UpdateItemWithPriceUpdate(Models.Models.Item item, PriceUpdate pu)
         {
-            if (data == null) return string.Empty;
-
-            try
-            {
-                var json = JsonConvert.SerializeObject(data);
-                return json.Length > maxLength ? json.Substring(0, maxLength) : json;
-            }
-            catch
-            {
-                // Optionally log the serialization error
-                return string.Empty;
-            }
+            // Update price-related fields on the operative item.
+            // Adjust conversion/parsing as needed; here we use TryParseDecimal.
+            item.Price = TryParseDecimal(pu.Price);
+            item.OperationGuid = pu.OperationGuid;
+            item.IsSentToEsl = false;
+            // Assume that your operative Item entity has properties for these price details.
+            //item.NetPrice = TryParseDecimal(pu.NetPrice);
+            //item.ShekelPrice = TryParseDecimal(pu.ShekelPrice);
+            //item.ShekelNetPrice = TryParseDecimal(pu.ShekelNetPrice);
+            //item.SalePrice = TryParseDecimal(pu.SalePrice);
+            //// For OperationEndDate, you can update as a string (or convert to DateTime if needed)
+            //// Here we simply store the provided string value.
+            //item.OperationEndDate = pu.OperationEndDate;
         }
 
         /// <summary>
-        /// Parses a string to DateTime.
+        /// Parses a string to DateTime using various formats.
         /// </summary>
         private DateTime? ParseDate(string? dateString)
         {
             if (string.IsNullOrWhiteSpace(dateString))
                 return null;
 
-            // Define the expected date formats
             string[] formats = { "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy", "MM/dd/yyyy HH:mm:ss", "MM/dd/yyyy" };
 
-            // Try parsing with the specified formats and culture
-            if (DateTime.TryParseExact(
-                dateString.Trim(),
-                formats,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out DateTime parsedDate))
+            if (DateTime.TryParseExact(dateString.Trim(), formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
             {
                 return parsedDate;
             }
-
-            // Optionally, log the failed parsing attempt for debugging
-            // await _databaseLogger.LogErrorAsync("OPERATIVE_SERVICE", "ParseDate", new Exception($"Failed to parse date string: {dateString}"));
-
             return null;
         }
 
         /// <summary>
-        /// Parses a string to decimal.
+        /// Tries to parse a string to decimal.
         /// </summary>
         private decimal? TryParseDecimal(string? decimalString)
         {
@@ -357,5 +417,4 @@ namespace EM.Comax.ShukHerzel.Bl.services
             return null;
         }
     }
-
 }

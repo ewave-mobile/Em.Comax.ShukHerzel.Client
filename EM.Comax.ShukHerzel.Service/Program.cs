@@ -68,6 +68,7 @@ namespace EM.Comax.ShukHerzel.WorkerService
                         services.AddScoped<Service.Jobs.PromotionJob>();
                         services.AddScoped<Service.Jobs.OperativeJob>();
                         services.AddScoped<Service.Jobs.MaintenanceJob>();
+                        services.AddScoped<Service.Jobs.PriceUpdateJob>();
 
                         // Register Quartz services
                         services.AddQuartz(q =>
@@ -78,6 +79,7 @@ namespace EM.Comax.ShukHerzel.WorkerService
                             q.AddJobAndTrigger<Service.Jobs.PromotionJob>(hostContext.Configuration);
                             q.AddJobAndTrigger<Service.Jobs.OperativeJob>(hostContext.Configuration);
                             q.AddJobAndTrigger<Service.Jobs.MaintenanceJob>(hostContext.Configuration);
+                            q.AddJobAndTrigger<Service.Jobs.PriceUpdateJob>(hostContext.Configuration);
                         });
 
                         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

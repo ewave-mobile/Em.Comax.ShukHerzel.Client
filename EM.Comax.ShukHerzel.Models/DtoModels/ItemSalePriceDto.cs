@@ -21,8 +21,8 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
 
         [XmlElement(ElementName = "AlternateID")]
         public string AlternateID { get; set; }
-
+       
         [XmlElement(ElementName = "SalesPrice")]
-        public ItemPriceDto SalesPrice { get; set; }
+        public SalesPriceWrapperDto SalesPrice { get; set; }
     }
 }

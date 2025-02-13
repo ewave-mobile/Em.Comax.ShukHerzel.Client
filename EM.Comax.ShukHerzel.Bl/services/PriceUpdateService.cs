@@ -125,7 +125,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
         private PriceUpdate MapPriceUpdate(ItemSalePriceDto item, Branch branch, DateTime now, Guid operationGuid)
         {
             // The nested SalesPrice property holds numeric and currency information.
-            var salesPrice = item.SalesPrice;
+            var salesPrice = item.SalesPrice.ClsItemPrices;
 
             return new PriceUpdate
             {

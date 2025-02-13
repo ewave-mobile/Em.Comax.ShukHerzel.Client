@@ -17,13 +17,15 @@ namespace EM.Comax.ShukHerzel.Service.Jobs
         private readonly IItemsRepository _itemsRepo;
         private readonly IPromotionsRepository _promotionsRepository;
         private readonly IConfiguration _configuration;
+        private readonly IPriceUpdateRepository _priceUpdateRepository;
 
         public MaintenanceJob(IDatabaseLogger databaseLogger,
                               IBadItemLogRepository badItemLogRepo,
                               IAllItemsRepository allItemsRepo,
                               IItemsRepository itemsRepo,
                               IConfiguration configuration,
-                              IPromotionsRepository promotionsRepository)
+                              IPromotionsRepository promotionsRepository,
+                              IPriceUpdateRepository priceUpdateRepository)
         {
             _databaseLogger = databaseLogger;
             _badItemLogRepo = badItemLogRepo;
@@ -31,6 +33,7 @@ namespace EM.Comax.ShukHerzel.Service.Jobs
             _itemsRepo = itemsRepo;
             _configuration = configuration;
             _promotionsRepository = promotionsRepository;
+            _priceUpdateRepository = priceUpdateRepository;
         }
 
         public async Task Execute(IJobExecutionContext context)
@@ -86,6 +89,7 @@ namespace EM.Comax.ShukHerzel.Service.Jobs
             // Implement the logic to delete old transferred records from temp tables
             await _allItemsRepo.DeleteTransferredItemsOlderThanAsync(retentionDays);
             await _promotionsRepository.DeleteTransferredItemsOlderThanAsync(retentionDays);
+            await _priceUpdateRepository.DeleteTransferredItemsOlderThanAsync(retentionDays);
             // Log.Information("Old temp records deleted successfully.");
             await _databaseLogger.LogServiceActionAsync("Old temp records deleted successfully.");
         }
