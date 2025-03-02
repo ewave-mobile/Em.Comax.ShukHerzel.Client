@@ -105,6 +105,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
 
                         foreach (var item in clsPromo.Items)
                         {
+                            
                             var entity = MapPromotion(clsPromo, branch, now, operationGuid, itemKod: item.Kod, itemKods );
                             toInsert.Add(entity);
                         }
