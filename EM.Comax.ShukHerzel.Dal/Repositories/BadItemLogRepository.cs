@@ -27,7 +27,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
         public Task DeleteLogsOlderThanAsync(int days)
         {
             //delete older than days
-            return _context.Database.ExecuteSqlRawAsync("DELETE FROM Log.BadItemLog WHERE DATEDIFF(DAY, CreatedAt, GETDATE()) > {0}", days);
+            return _context.Database.ExecuteSqlRawAsync("DELETE FROM Log.BadItemLog WHERE DATEDIFF(DAY, TimeStamp, GETDATE()) > {0}", days);
         }
     }
 }

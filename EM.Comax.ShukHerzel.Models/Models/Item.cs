@@ -41,7 +41,11 @@ public partial class Item
 
     public decimal? Quantity { get; set; }
 
-    public bool IsPromotion { get; set; }
+    public bool? SwPikadon { get; set; }
+
+    public string TrailingItem { get; set; }
+
+    public bool? IsPromotion { get; set; }
 
     public decimal? TotalPromotionPrice { get; set; }
 

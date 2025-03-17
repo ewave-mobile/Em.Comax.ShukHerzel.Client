@@ -191,7 +191,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     StoreId = itemWithBranch.StoreId, // Ensure StoreId is captured if needed in DTO
                     AllBarcodes = item.PromotionBarcodes ?? "",
                     Size = item.Size?.ToString() ?? string.Empty,
-                    IsPromotion = item.IsPromotion.ToString() ?? "False"
+                    IsPromotion = item.IsPromotion.ToString() ?? "False",
+                    SwPikadon = item.SwPikadon.ToString() ?? "False",
+                    TrailingItem = item.TrailingItem.ToString()
                 }
             };
         }

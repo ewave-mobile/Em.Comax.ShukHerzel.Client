@@ -501,6 +501,7 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.Size).HasMaxLength(50);
             entity.Property(e => e.TextForWeb).HasMaxLength(500);
             entity.Property(e => e.TotalPromotionPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TrailingItem).HasMaxLength(50);
         });
 
         modelBuilder.Entity<PriceUpdate>(entity =>

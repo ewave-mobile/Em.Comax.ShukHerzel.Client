@@ -131,6 +131,8 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
         public decimal? Content { get; set; }
         public string? ContentUnit { get; set; }
         public decimal? ContentMeasure { get; set; }
+        public string? SwPikadon { get; set; }
+        public string? TrailingItem { get; set; }
     }
 
     public class ItemModel

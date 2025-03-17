@@ -155,7 +155,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
 
             // Only select items where the promotion expiration date is before today.
             var expiredPromotions = await _context.Items
-                .Where(x => x.IsPromotion && x.PromotionToDate < today)
+                .Where(x => x.IsPromotion == true && x.PromotionToDate < today)
                 .ToListAsync();
             // all promotions related fields set to null
             foreach (var item in expiredPromotions)
@@ -166,10 +166,8 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                 item.PromotionKod = null;
                 item.TotalPromotionPrice = null;
                 item.IsSentToEsl = false;
-
             }
-             await _context.BulkUpdateAsync(expiredPromotions);
-
+            await _context.BulkUpdateAsync(expiredPromotions);
         }
     }
 }

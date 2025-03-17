@@ -33,6 +33,8 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
         public string AllBarcodes { get; set; }
         public string Size { get; set; }
         public string IsPromotion { get; set; }
+        public string SwPikadon { get; set; }
+        public string TrailingItem { get; set; }
 
     }
 }

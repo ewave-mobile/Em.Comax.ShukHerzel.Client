@@ -111,7 +111,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
         "ContentUnit",
         "Size",
         "SwWeighable",
-        "ManufacturingCountry"
+        "ManufacturingCountry",
+        "SwPikadon",
+        "TrailingItem"
         // Add "Quantity" here if you want it updated as well.
     }
                 };
@@ -356,6 +358,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 Size = tempItem.Size,
                 SwWeighable = tempItem.SwWeighable?.ToLower() == "true",
                 ManufacturingCountry = tempItem.ManufacturingCountry,
+                SwPikadon = tempItem.SwPikadon?.ToLower() == "1",
+                TrailingItem = tempItem.TrailingItem,
                 //Quantity = quantity,
                 // Initialize promotion-related fields to default values.
                 //PromotionKod = "",
