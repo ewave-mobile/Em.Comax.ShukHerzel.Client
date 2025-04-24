@@ -388,6 +388,7 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.LastPriceTimeStamp).HasColumnType("datetime");
             entity.Property(e => e.LastPromotionTimeStamp).HasColumnType("datetime");
             entity.Property(e => e.LastRun).HasColumnType("datetime");
+            entity.Property(e => e.PromotionStoreListId).HasColumnName("PromotionStoreListID");
         });
 
         modelBuilder.Entity<Company>(entity =>

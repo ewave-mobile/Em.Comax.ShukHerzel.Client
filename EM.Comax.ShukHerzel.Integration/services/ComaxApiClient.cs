@@ -146,7 +146,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
 
                 var body = new
                 {
-                    Params = $"{{'LastUpdatedDate':'{lastUpdateDate:dd/MM/yyyy HH:mm:ss}','JustActive':{config.PromotionJustActive?.ToString().ToLower() ?? "false"}, 'StoreList':'{branch.ComaxStoreId}','PriceListID':'{branch.ComaxPriceListId}'}}",
+                    Params = $"{{'LastUpdatedDate':'{lastUpdateDate:dd/MM/yyyy HH:mm:ss}','JustActive':{config.PromotionJustActive?.ToString().ToLower() ?? "false"}, 'StoreList':'{branch.PromotionStoreListId ?? 1}'}}",
                     LoginID = config.LoginId,
                     LoginPassword = config.LoginPassword
                 };

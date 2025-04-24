@@ -57,7 +57,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
         {
             //delete transferred promotions older than retention days
             var olderThan = DateTime.Now.AddDays(-retentionDays);
-            await _context.BulkDeleteAsync( _context.Promotions.Where(x => x.IsTransferredToOper == true && x.TransferredDateTime < olderThan));
+            await _context.BulkDeleteAsync( _context.Promotions.Where(x => (x.IsTransferredToOper == true && x.TransferredDateTime < olderThan) || x.CreatedDateTime < olderThan));
         }
 
         public async Task<List<Promotion>> GetNonTransferredPromotionsAsync()

@@ -192,8 +192,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     AllBarcodes = item.PromotionBarcodes ?? "",
                     Size = item.Size?.ToString() ?? string.Empty,
                     IsPromotion = item.IsPromotion.ToString() ?? "False",
-                    SwPikadon = item.SwPikadon.ToString() ?? "False",
-                    TrailingItem = item.TrailingItem.ToString()
+                    SwPikadon = item.SwPikadon?.ToString() ?? "False",
+                    TrailingItem = item.TrailingItem?.ToString() ?? ""
                 }
             };
         }

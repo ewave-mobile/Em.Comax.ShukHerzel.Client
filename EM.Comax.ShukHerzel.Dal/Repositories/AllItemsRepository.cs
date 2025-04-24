@@ -104,7 +104,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
         {
             //delete all items that are transferred and older than the given days
             var olderThan = DateTime.Now.AddDays(-days);
-            var itemsToDelete = await _context.AllItems.Where(x => x.IsTransferredToOper && x.TransferredDateTime < olderThan).ToListAsync();
+            var itemsToDelete = await _context.AllItems.Where(x => (x.IsTransferredToOper && x.TransferredDateTime < olderThan) || x.CreatedDateTime < olderThan ).ToListAsync();
 
             if (itemsToDelete.Count > 0)
             {

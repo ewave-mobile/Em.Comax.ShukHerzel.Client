@@ -23,6 +23,8 @@ public partial class Branch
 
     public long? SalesPriceArray { get; set; }
 
+    public long? PromotionStoreListId { get; set; }
+
     public int? Order { get; set; }
 
     public bool? IsServiceSync { get; set; }
