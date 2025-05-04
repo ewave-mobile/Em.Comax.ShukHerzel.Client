@@ -94,12 +94,17 @@ public AllItemsService(
                 if (allItems.Count > 0)
                 {
                     await InsertAllItemsAsync(allItems);
+                    await _databaseLogger.LogServiceActionAsync($"Finished inserting {allItems.Count} catalog items for branch {branch.Id}.");
+                } else {
+                     await _databaseLogger.LogServiceActionAsync($"No new catalog items to insert for branch {branch.Id}.");
                 }
-                
-                branch.LastCatalogTimeStamp = now;
-                await _branchRepository.UpdateAsync(branch);
-                await _databaseLogger.LogServiceActionAsync($"Catalog items inserted successfully.");
-                progress?.Report("Catalog items inserted successfully.");
+
+                // No longer need to set the property on the branch object directly
+                // branch.LastCatalogTimeStamp = now;
+                await _databaseLogger.LogServiceActionAsync($"Attempting to update LastCatalogTimeStamp for branch {branch.Id} to {now:O} using specific method.");
+                await _branchRepository.UpdateLastCatalogTimestampAsync(branch.Id, now); // Call the specific update method
+                await _databaseLogger.LogServiceActionAsync($"Successfully called UpdateLastCatalogTimestampAsync for branch {branch.Id}."); // Log completion of the call
+                progress?.Report("Catalog processing complete for branch.");
 
             }
             catch (Exception ex) {

@@ -102,13 +102,64 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
 
         public async Task DeleteTransferredItemsOlderThanAsync(int days)
         {
-            //delete all items that are transferred and older than the given days
-            var olderThan = DateTime.Now.AddDays(-days);
-            var itemsToDelete = await _context.AllItems.Where(x => (x.IsTransferredToOper && x.TransferredDateTime < olderThan) || x.CreatedDateTime < olderThan ).ToListAsync();
+            const int batchSize = 1000; // Define batch size internally
+            var cutoffDate = DateTime.UtcNow.AddDays(-days); // Use UtcNow for consistency
+            int totalDeleted = 0;
+            await _databaseLogger.LogServiceActionAsync($"Starting batch deletion of AllItems entries older than {cutoffDate:yyyy-MM-dd} with batch size {batchSize}...");
 
-            if (itemsToDelete.Count > 0)
+            try
             {
-                await _context.BulkDeleteAsync(itemsToDelete);
+                while (true)
+                {
+                    // Find a batch of IDs to delete:
+                    // Items that ARE transferred AND their transfer date is old
+                    // OR items (regardless of transfer status) whose creation date is old
+                    var idsToDelete = await _context.AllItems
+                        .Where(item => (item.IsTransferredToOper == true && item.TransferredDateTime < cutoffDate)
+                                    || item.CreatedDateTime < cutoffDate)
+                        .Select(item => item.Id) // Select only the IDs
+                        .Take(batchSize)         // Take only a batch
+                        .ToListAsync();          // Materialize the batch of IDs
+
+                    if (!idsToDelete.Any())
+                    {
+                        await _databaseLogger.LogServiceActionAsync("No more old AllItems entries found to delete in this pass.");
+                        break; // Exit the loop if no records are found
+                    }
+
+                    // Delete the batch using ExecuteDeleteAsync (Requires EF Core 7+)
+                    int deletedInBatch = 0;
+                    try
+                    {
+                        deletedInBatch = await _context.AllItems
+                                               .Where(item => idsToDelete.Contains(item.Id))
+                                               .ExecuteDeleteAsync(); // Perform the batch delete
+                    }
+                    catch (Exception batchEx)
+                    {
+                        await _databaseLogger.LogErrorAsync("ALLITEMS_REPOSITORY", $"Error deleting batch of {idsToDelete.Count} AllItems entries. IDs: {string.Join(",", idsToDelete)}", batchEx);
+                        throw; // Re-throw to halt the process on batch failure
+                    }
+
+                    totalDeleted += deletedInBatch;
+                    await _databaseLogger.LogServiceActionAsync($"Deleted batch of {deletedInBatch} old AllItems entries. Total deleted so far: {totalDeleted}.");
+
+                    // If we deleted fewer records than the batch size, it implies we might be done.
+                    if (deletedInBatch == 0 || deletedInBatch < batchSize)
+                    {
+                        break;
+                    }
+
+                    // Optional: await Task.Delay(100);
+                }
+
+                await _databaseLogger.LogServiceActionAsync($"Finished batch deletion. Total old AllItems entries removed: {totalDeleted}.");
+            }
+            catch (Exception ex)
+            {
+                // Log the main exception
+                await _databaseLogger.LogErrorAsync("ALLITEMS_REPOSITORY", "Error during DeleteTransferredItemsOlderThanAsync", ex);
+                throw; // Re-throw
             }
         }
 

@@ -119,34 +119,86 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             }
         }
 
-        public async Task DeleteOldOperativeRecordsAsync(int days)
+        public async Task DeleteOldOperativeRecordsAsync(int days) // Reverted signature to match interface
         {
-            // delete all sent to esl older than days while keeping one unique barcode per branchid 
-            string sql = $@"
-                DELETE FROM oper.items
-                WHERE IsSentToEsl = 1
-                AND CreateDateTime < DATEADD(day, -{days}, GETDATE())
-                AND Id NOT IN (
-                    SELECT Id
-                    FROM (
-                        SELECT Id, ROW_NUMBER() OVER (PARTITION BY Barcode, BranchId ORDER BY CreateDateTime DESC) AS rn
-                        FROM oper.items
-                    ) AS t
-                    WHERE rn = 1
-                );
-            ";
+            const int batchSize = 1000; // Define batch size internally
+            var cutoffDate = DateTime.UtcNow.AddDays(-days); // Consider using UtcNow if appropriate for your data
+            int totalDeleted = 0;
+            await _databaseLogger.LogServiceActionAsync($"Starting batch deletion of operative items older than {cutoffDate:yyyy-MM-dd} with batch size {batchSize}...");
 
             try
             {
-                await _context.Database.ExecuteSqlRawAsync(sql);
-                await _databaseLogger.LogServiceActionAsync("Old operative Items removed successfully.");
+                // 1. Find IDs of the latest record for each (Barcode, BranchId).
+                // This query fetches the single latest ID for every combination.
+                // Optimization: If performance is an issue on very large tables,
+                // this query could potentially be scoped further.
+                var latestRecordIds = await _context.Items
+                    .GroupBy(i => new { i.Barcode, i.BranchId })
+                    .Select(g => g.OrderByDescending(i => i.CreateDateTime).Select(i => i.Id).FirstOrDefault())
+                    .ToListAsync(); // Materialize the list of latest IDs
+
+                // Convert to HashSet for efficient lookups. Filter out default(long) if Id is non-nullable.
+                var latestRecordIdSet = new HashSet<long>(latestRecordIds.Where(id => id != 0));
+                await _databaseLogger.LogServiceActionAsync($"Identified {latestRecordIdSet.Count} unique latest operative items to preserve.");
+
+                while (true)
+                {
+                    // 2. Find a batch of IDs to delete: older than cutoff, IsSentToEsl=1, and NOT in the latest set
+                    var idsToDelete = await _context.Items
+                        .Where(i => i.IsSentToEsl == true
+                                    && i.CreateDateTime < cutoffDate
+                                    && !latestRecordIdSet.Contains(i.Id)) // Exclude the latest ones
+                        .Select(i => i.Id) // Select only the IDs
+                        .Take(batchSize)   // Take only a batch
+                        .ToListAsync();    // Materialize the batch of IDs
+
+                    if (!idsToDelete.Any())
+                    {
+                        await _databaseLogger.LogServiceActionAsync("No more old operative items found to delete in this pass.");
+                        break; // Exit the loop if no records are found to delete
+                    }
+
+                    // 3. Delete the batch using ExecuteDeleteAsync (Requires EF Core 7+)
+                    int deletedInBatch = 0;
+                    try
+                    {
+                         deletedInBatch = await _context.Items
+                                                .Where(i => idsToDelete.Contains(i.Id))
+                                                .ExecuteDeleteAsync(); // Perform the batch delete
+                    }
+                    catch(Exception batchEx)
+                    {
+                         await _databaseLogger.LogErrorAsync("ITEMS_REPOSITORY", $"Error deleting batch of {idsToDelete.Count} items. IDs: {string.Join(",", idsToDelete)}", batchEx);
+                         // Depending on requirements, you might want to break or continue here.
+                         // For now, we re-throw to halt the process on batch failure.
+                         throw;
+                    }
+
+
+                    totalDeleted += deletedInBatch;
+                    await _databaseLogger.LogServiceActionAsync($"Deleted batch of {deletedInBatch} old operative items. Total deleted so far: {totalDeleted}.");
+
+                    // If we deleted fewer records than the batch size, it implies we might be done.
+                    // Or if ExecuteDeleteAsync returns 0 unexpectedly.
+                    if (deletedInBatch == 0 || deletedInBatch < batchSize)
+                    {
+                        break;
+                    }
+
+                    // Optional: Add a small delay to prevent overwhelming the DB server
+                    // await Task.Delay(100);
+                }
+
+                await _databaseLogger.LogServiceActionAsync($"Finished batch deletion. Total old operative Items removed: {totalDeleted}.");
             }
             catch (Exception ex)
             {
-                await _databaseLogger.LogErrorAsync("OPERATIVE_SERVICE", "DeleteOldOperativeRecordsAsync", ex);
-                throw; // Re-throw to handle upstream if necessary
+                // Log the main exception if it occurs outside the batch loop or is re-thrown
+                await _databaseLogger.LogErrorAsync("ITEMS_REPOSITORY", "Error during DeleteOldOperativeRecordsAsync", ex);
+                throw; // Re-throw to allow upstream handling
             }
         }
+
 
         public async Task CleanExpiredPromotions()
         {
@@ -171,5 +223,3 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
         }
     }
 }
-     
-    

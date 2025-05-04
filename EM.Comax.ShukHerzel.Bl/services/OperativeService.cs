@@ -147,7 +147,23 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     progress.Report("Fetching matching Items for Promotions...");
                     var matchingItems = await _itemRepo.GetItemsByBarcodesAndBranchIdsAsync(promoKeys);
                     progress.Report($"Found {matchingItems.Count} matching Items for Promotions.");
-                    var itemDict = matchingItems.ToDictionary(i => (i.Barcode, i.BranchId));
+
+                    // Group items by key to identify duplicates
+                    var groupedItems = matchingItems.GroupBy(i => (i.Barcode, i.BranchId)).ToList();
+
+                    // Log warnings for duplicates separately
+                    foreach (var group in groupedItems)
+                    {
+                        if (group.Count() > 1)
+                        {
+                            await _databaseLogger.LogServiceActionAsync($"Warning: Duplicate key ({group.Key.Barcode}, {group.Key.BranchId}) found in Items table during promotion processing. Using the first occurrence.");
+                            progress.Report($"Warning: Duplicate key ({group.Key.Barcode}, {group.Key.BranchId}) found in Items table. Check data integrity.");
+                        }
+                    }
+
+                    // Create the dictionary using the first item from each group
+                    var itemDict = groupedItems.ToDictionary(g => g.Key, g => g.First());
+
                     var itemsToUpdate = new List<Models.Models.Item>();
                     var promoIdsToMark = new List<long>();
                     int promoCount = 0;
@@ -250,7 +266,22 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     // Fetch matching Items for these price updates.
                     var priceUpdateKeys = groupedPriceUpdates.Select(p => (p.Barcode, p.BranchId)).Distinct().ToList();
                     var matchingItemsForPrices = await _itemRepo.GetItemsByBarcodesAndBranchIdsAsync(priceUpdateKeys);
-                    var itemDictForPrices = matchingItemsForPrices.ToDictionary(i => (i.Barcode, i.BranchId));
+
+                    // Group items by key to identify duplicates
+                    var groupedItemsForPrices = matchingItemsForPrices.GroupBy(i => (i.Barcode, i.BranchId)).ToList();
+
+                    // Log warnings for duplicates separately
+                    foreach (var group in groupedItemsForPrices)
+                    {
+                        if (group.Count() > 1)
+                        {
+                             await _databaseLogger.LogServiceActionAsync($"Warning: Duplicate key ({group.Key.Barcode}, {group.Key.BranchId}) found in Items table during price update processing. Using the first occurrence.");
+                             progress.Report($"Warning: Duplicate key ({group.Key.Barcode}, {group.Key.BranchId}) found in Items table. Check data integrity.");
+                        }
+                    }
+
+                    // Create the dictionary using the first item from each group
+                    var itemDictForPrices = groupedItemsForPrices.ToDictionary(g => g.Key, g => g.First());
 
                     var itemsToUpdateWithPrices = new List<Models.Models.Item>();
                     // List to keep track of price update IDs that had a matching item.

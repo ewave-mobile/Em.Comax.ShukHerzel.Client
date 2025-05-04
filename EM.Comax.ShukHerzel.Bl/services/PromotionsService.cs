@@ -119,11 +119,22 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 }
 
                 progress?.Report($"Mapped {toInsert.Count} promotions. Inserting into DB...");
-                branch.LastPromotionTimeStamp = now;
-                await _branchRepository.UpdateAsync(branch);
-                await _promotionsRepository.BulkInsertAsync(toInsert);
+                // No longer need to set the property on the branch object directly
+                // branch.LastPromotionTimeStamp = now;
+                await _databaseLogger.LogServiceActionAsync($"Attempting to update LastPromotionTimeStamp for branch {branch.Id} to {now:O} using specific method.");
+                await _branchRepository.UpdateLastPromotionTimestampAsync(branch.Id, now); // Call the specific update method
+                await _databaseLogger.LogServiceActionAsync($"Successfully called UpdateLastPromotionTimestampAsync for branch {branch.Id}."); // Log completion of the call
 
-                progress?.Report("Promotions inserted successfully.");
+                if (toInsert.Any())
+                {
+                    await _databaseLogger.LogServiceActionAsync($"Attempting to insert {toInsert.Count} promotion entries for branch {branch.Id}.");
+                    await _promotionsRepository.BulkInsertAsync(toInsert);
+                    await _databaseLogger.LogServiceActionAsync($"Finished inserting {toInsert.Count} promotion entries for branch {branch.Id}.");
+                } else {
+                    await _databaseLogger.LogServiceActionAsync($"No new promotion entries to insert for branch {branch.Id}.");
+                }
+
+                progress?.Report("Promotion processing complete for branch.");
             }
             catch (Exception ex)
             {

@@ -86,12 +86,21 @@ namespace EM.Comax.ShukHerzel.Bl.services
 
                 progress?.Report($"Mapped {toInsert.Count} price updates. Inserting into DB...");
 
-                // Optionally update the branch’s last price update timestamp.
-                branch.LastPriceTimeStamp = now;
-                await _branchRepository.UpdateAsync(branch);
+                // Update the branch’s last price update timestamp using the specific method
+                // branch.LastPriceTimeStamp = now; // No longer needed
+                await _databaseLogger.LogServiceActionAsync($"Attempting to update LastPriceTimeStamp for branch {branch.Id} to {now:O} using specific method.");
+                await _branchRepository.UpdateLastPriceTimestampAsync(branch.Id, now); // Call the specific update method
+                await _databaseLogger.LogServiceActionAsync($"Successfully called UpdateLastPriceTimestampAsync for branch {branch.Id}.");
 
                 // 3. Insert the new records into the database (using a bulk insert for performance).
-                await _priceUpdateRepository.BulkInsertAsync(toInsert);
+                 if (toInsert.Any())
+                {
+                    await _databaseLogger.LogServiceActionAsync($"Attempting to insert {toInsert.Count} price update entries for branch {branch.Id}.");
+                    await _priceUpdateRepository.BulkInsertAsync(toInsert);
+                    await _databaseLogger.LogServiceActionAsync($"Finished inserting {toInsert.Count} price update entries for branch {branch.Id}.");
+                } else {
+                     await _databaseLogger.LogServiceActionAsync($"No new price update entries to insert for branch {branch.Id}.");
+                }
 
                 progress?.Report("Price updates inserted successfully.");
             }

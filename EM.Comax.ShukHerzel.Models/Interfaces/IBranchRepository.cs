@@ -9,7 +9,11 @@ namespace EM.Comax.ShukHerzel.Models.Interfaces
 {
     public interface IBranchRepository : IBaseRepository<Branch>
     {
-        //get all branches by company id
         Task<IEnumerable<Branch>> GetAllBranchesByCompanyIdAsync(long companyId);
+
+        // Methods for specific timestamp updates
+        Task UpdateLastCatalogTimestampAsync(long branchId, DateTime timestamp);
+        Task UpdateLastPromotionTimestampAsync(long branchId, DateTime timestamp);
+        Task UpdateLastPriceTimestampAsync(long branchId, DateTime timestamp);
     }
 }

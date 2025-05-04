@@ -11,13 +11,17 @@ using System.Threading.Tasks;
 
 namespace EM.Comax.ShukHerzel.Dal.Repositories
 {
-    public class PromotionsRepository: BaseRepository<Promotion>, IPromotionsRepository
+    public class PromotionsRepository : BaseRepository<Promotion>, IPromotionsRepository
     {
-        public PromotionsRepository(ShukHerzelEntities context) : base(context)
+        private readonly IDatabaseLogger _databaseLogger; // Added logger field
+
+        // Updated constructor to inject IDatabaseLogger
+        public PromotionsRepository(ShukHerzelEntities context, IDatabaseLogger databaseLogger) : base(context)
         {
+             _databaseLogger = databaseLogger; // Store logger instance
         }
 
-       public async Task DeleteExpiredPromotionsAsync()
+        public async Task DeleteExpiredPromotionsAsync()
 {
     // Get today's date (time set to midnight)
     var today = DateTime.Today;
@@ -55,9 +59,65 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
 
         public async Task DeleteTransferredItemsOlderThanAsync(int retentionDays)
         {
-            //delete transferred promotions older than retention days
-            var olderThan = DateTime.Now.AddDays(-retentionDays);
-            await _context.BulkDeleteAsync( _context.Promotions.Where(x => (x.IsTransferredToOper == true && x.TransferredDateTime < olderThan) || x.CreatedDateTime < olderThan));
+            const int batchSize = 1000; // Define batch size internally
+            var cutoffDate = DateTime.UtcNow.AddDays(-retentionDays); // Use UtcNow for consistency
+            int totalDeleted = 0;
+            await _databaseLogger.LogServiceActionAsync($"Starting batch deletion of Promotion entries older than {cutoffDate:yyyy-MM-dd} with batch size {batchSize}...");
+
+            try
+            {
+                while (true)
+                {
+                    // Find a batch of IDs to delete:
+                    // Promotions that ARE transferred AND their transfer date is old
+                    // OR promotions (regardless of transfer status) whose creation date is old
+                    var idsToDelete = await _context.Promotions
+                        .Where(promo => (promo.IsTransferredToOper == true && promo.TransferredDateTime < cutoffDate)
+                                     || promo.CreatedDateTime < cutoffDate)
+                        .Select(promo => promo.Id) // Select only the IDs
+                        .Take(batchSize)          // Take only a batch
+                        .ToListAsync();           // Materialize the batch of IDs
+
+                    if (!idsToDelete.Any())
+                    {
+                        await _databaseLogger.LogServiceActionAsync("No more old Promotion entries found to delete in this pass.");
+                        break; // Exit the loop if no records are found
+                    }
+
+                    // Delete the batch using ExecuteDeleteAsync (Requires EF Core 7+)
+                    int deletedInBatch = 0;
+                    try
+                    {
+                        deletedInBatch = await _context.Promotions
+                                               .Where(promo => idsToDelete.Contains(promo.Id))
+                                               .ExecuteDeleteAsync(); // Perform the batch delete
+                    }
+                    catch (Exception batchEx)
+                    {
+                        await _databaseLogger.LogErrorAsync("PROMOTIONS_REPOSITORY", $"Error deleting batch of {idsToDelete.Count} Promotion entries. IDs: {string.Join(",", idsToDelete)}", batchEx);
+                        throw; // Re-throw to halt the process on batch failure
+                    }
+
+                    totalDeleted += deletedInBatch;
+                    await _databaseLogger.LogServiceActionAsync($"Deleted batch of {deletedInBatch} old Promotion entries. Total deleted so far: {totalDeleted}.");
+
+                    // If we deleted fewer records than the batch size, it implies we might be done.
+                    if (deletedInBatch == 0 || deletedInBatch < batchSize)
+                    {
+                        break;
+                    }
+
+                    // Optional: await Task.Delay(100);
+                }
+
+                await _databaseLogger.LogServiceActionAsync($"Finished batch deletion. Total old Promotion entries removed: {totalDeleted}.");
+            }
+            catch (Exception ex)
+            {
+                // Log the main exception
+                await _databaseLogger.LogErrorAsync("PROMOTIONS_REPOSITORY", "Error during DeleteTransferredItemsOlderThanAsync", ex);
+                throw; // Re-throw
+            }
         }
 
         public async Task<List<Promotion>> GetNonTransferredPromotionsAsync()
