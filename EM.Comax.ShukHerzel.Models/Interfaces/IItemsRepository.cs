@@ -17,7 +17,11 @@ namespace EM.Comax.ShukHerzel.Models.Interfaces
         Task<List<Item>> GetItemsToSendAsync();
         Task MarkAsTransferredAsync(IEnumerable<long> ids, DateTime transferredDateTime);
         Task DeleteOldOperativeRecordsAsync(int days);
-
         Task CleanExpiredPromotions();
+        
+        // New methods for data management
+        Task<List<Item>> SearchItemsAsync(string barcode = null, long? branchId = null, string name = null);
+        Task SetItemNotSentAsync(long itemId);
+        Task RemovePromotionAsync(long itemId);
     }
 }

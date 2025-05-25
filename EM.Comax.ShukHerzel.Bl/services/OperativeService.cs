@@ -450,5 +450,56 @@ namespace EM.Comax.ShukHerzel.Bl.services
             }
             return null;
         }
+
+        /// <summary>
+        /// Searches for items in the operative table based on the provided criteria
+        /// </summary>
+        public async Task<List<Models.Models.Item>> SearchItemsAsync(string barcode = null, long? branchId = null, string name = null)
+        {
+            try
+            {
+                await _databaseLogger.LogServiceActionAsync($"Searching for items with barcode: {barcode ?? "any"}, branchId: {branchId?.ToString() ?? "any"}, name: {name ?? "any"}");
+                return await _itemRepo.SearchItemsAsync(barcode, branchId, name);
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("OPERATIVE_SERVICE", "SearchItemsAsync", ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Sets an item's IsSentToEsl flag to false so it will be sent in the next service iteration
+        /// </summary>
+        public async Task SetItemNotSentAsync(long itemId)
+        {
+            try
+            {
+                await _databaseLogger.LogServiceActionAsync($"Setting item ID {itemId} as not sent to ESL");
+                await _itemRepo.SetItemNotSentAsync(itemId);
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("OPERATIVE_SERVICE", "SetItemNotSentAsync", ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Removes promotion details from an item and sets it to be resent
+        /// </summary>
+        public async Task RemovePromotionAsync(long itemId)
+        {
+            try
+            {
+                await _databaseLogger.LogServiceActionAsync($"Removing promotion from item ID {itemId}");
+                await _itemRepo.RemovePromotionAsync(itemId);
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("OPERATIVE_SERVICE", "RemovePromotionAsync", ex);
+                throw;
+            }
+        }
     }
 }

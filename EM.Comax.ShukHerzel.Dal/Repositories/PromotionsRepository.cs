@@ -144,5 +144,33 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             };
             await _context.BulkUpdateAsync(promotions, bulkConfig);
         }
+
+        public async Task<List<Promotion>> SearchPromotionsAsync(string kod = null, string itemKod = null, long? branchId = null)
+        {
+            var query = _context.Promotions.AsQueryable();
+            
+            if (!string.IsNullOrEmpty(kod))
+                query = query.Where(p => p.Kod.Contains(kod));
+                
+            if (!string.IsNullOrEmpty(itemKod))
+                query = query.Where(p => p.ItemKod.Contains(itemKod));
+                
+            if (branchId.HasValue)
+                query = query.Where(p => p.BranchId == branchId.Value);
+                
+            return await query.ToListAsync();
+        }
+
+        public async Task SetPromotionNotTransferredAsync(long promotionId)
+        {
+            var promotion = await _context.Promotions.FindAsync(promotionId);
+            if (promotion != null)
+            {
+                promotion.IsTransferredToOper = false;
+                promotion.TransferredDateTime = null;
+                await _context.SaveChangesAsync();
+                await _databaseLogger.LogServiceActionAsync($"Promotion ID {promotionId} marked as not transferred to operative table.");
+            }
+        }
     }
 }

@@ -385,5 +385,79 @@ public AllItemsService(
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets catalog items from Comax API for specific barcodes and adds them to the temp AllItems table
+        /// </summary>
+        public async Task<List<AllItem>> GetItemsForBarcodesAsync(Branch branch, IEnumerable<string> barcodes, IProgress<string>? progress = null)
+        {
+            try
+            {
+                var barcodesArray = barcodes.ToArray();
+                var guid = Guid.NewGuid();
+                var now = DateTime.Now;
+                
+                progress?.Report($"מושך פריטים עבור סניף {branch.Description} עבור {barcodesArray.Length} ברקודים...");
+                await _databaseLogger.LogServiceActionAsync($"מושך פריטים עבור סניף {branch.Description} עבור ברקודים: {string.Join(", ", barcodesArray)}");
+                
+                // Try first with itemId parameter
+                string xml = await _comaxApiClient.GetCatalogXmlForBarcodesAsync(branch, barcodesArray, true);
+                
+                if (string.IsNullOrEmpty(xml) || !xml.Contains("<ClsItems>"))
+                {
+                    // If first attempt failed, try with barcode parameter
+                    progress?.Report("ניסיון ראשון נכשל, מנסה שוב עם פרמטר ברקוד...");
+                    xml = await _comaxApiClient.GetCatalogXmlForBarcodesAsync(branch, barcodesArray, false);
+                }
+                
+                if (string.IsNullOrEmpty(xml) || !xml.Contains("<ClsItems>"))
+                {
+                    progress?.Report("נכשל בקבלת פריטים מה-API של קומקס.");
+                    return new List<AllItem>();
+                }
+                
+                // Save the XML response to a file
+                await WriteApiResponseToFileAsync(xml, branch, guid);
+                
+                // Deserialize the XML to get the catalog items
+                var allClsItems = DeserializeCatalogItems(xml);
+                
+                if (allClsItems == null || !allClsItems.Any())
+                {
+                    progress?.Report("לא נמצאו פריטים בתגובת ה-XML.");
+                    return new List<AllItem>();
+                }
+                
+                // Filter the items by the specified barcodes if needed
+                // (This might not be necessary if the API already filtered by barcodes)
+                var filteredClsItems = allClsItems.Where(item => 
+                    barcodesArray.Contains(item.Barcode.ToString()) || 
+                    (item.AnotherBarkods != null && barcodesArray.Any(b => item.AnotherBarkods.ToString().Contains(b)))
+                ).ToList();
+                
+                progress?.Report($"נמצאו {filteredClsItems.Count} פריטים עבור הברקודים שצוינו. ממפה...");
+                
+                // Map to AllItems
+                var allItems = await MapToAllItems(filteredClsItems, now, branch, guid);
+                
+                if (allItems.Any())
+                {
+                    progress?.Report($"מופו {allItems.Count} פריטים. מכניס למסד הנתונים...");
+                    await InsertAllItemsAsync(allItems);
+                    progress?.Report($"הוכנסו {allItems.Count} פריטים לטבלת AllItems הזמנית.");
+                }
+                else
+                {
+                    progress?.Report("אין פריטים להכניס אחרי המיפוי.");
+                }
+                
+                return allItems;
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("ALL_ITEMS_SERVICE", "GetItemsForBarcodesAsync", ex);
+                return new List<AllItem>();
+            }
+        }
     }
 }

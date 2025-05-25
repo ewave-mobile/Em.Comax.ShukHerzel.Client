@@ -221,5 +221,52 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             }
             await _context.BulkUpdateAsync(expiredPromotions);
         }
+
+        public async Task<List<Item>> SearchItemsAsync(string barcode = null, long? branchId = null, string name = null)
+        {
+            var query = _context.Items.AsQueryable();
+            
+            if (!string.IsNullOrEmpty(barcode))
+                query = query.Where(i => i.Barcode.Contains(barcode));
+                
+            if (branchId.HasValue)
+                query = query.Where(i => i.BranchId == branchId.Value);
+                
+            if (!string.IsNullOrEmpty(name))
+                query = query.Where(i => i.Name.Contains(name));
+                
+            return await query.ToListAsync();
+        }
+
+        public async Task SetItemNotSentAsync(long itemId)
+        {
+            var item = await _context.Items.FindAsync(itemId);
+            if (item != null)
+            {
+                item.IsSentToEsl = false;
+                await _context.SaveChangesAsync();
+                await _databaseLogger.LogServiceActionAsync($"Item ID {itemId} marked as not sent to ESL.");
+            }
+        }
+
+        public async Task RemovePromotionAsync(long itemId)
+        {
+            var item = await _context.Items.FindAsync(itemId);
+            if (item != null)
+            {
+                item.IsPromotion = false;
+                item.PromotionKod = null;
+                item.PromotionFromDate = null;
+                item.PromotionToDate = null;
+                item.TotalPromotionPrice = null;
+                item.SwAllCustomers = null;
+                item.TextForWeb = null;
+                item.Quantity = null;
+                item.PromotionBarcodes = null;
+                item.IsSentToEsl = false;
+                await _context.SaveChangesAsync();
+                await _databaseLogger.LogServiceActionAsync($"Promotion removed from Item ID {itemId} and marked for resending.");
+            }
+        }
     }
 }

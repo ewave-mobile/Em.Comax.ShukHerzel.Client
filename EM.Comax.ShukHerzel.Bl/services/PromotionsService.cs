@@ -37,9 +37,18 @@ namespace EM.Comax.ShukHerzel.Bl.services
             _outputSettings = outputSettings.Value;
         }
 
-        public Task<List<Promotion>> GetNonTransferredPromotionsAsync()
+        public async Task<List<Promotion>> GetNonTransferredPromotionsAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _databaseLogger.LogServiceActionAsync("Getting non-transferred promotions");
+                return await _promotionsRepository.GetNonTransferredPromotionsAsync();
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("PROMOTIONS_SERVICE", "GetNonTransferredPromotionsAsync", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -68,12 +77,14 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     }
                 }
 
-                progress?.Report($"Fetching promotions for branch {branch.Description} since {lastUpdateDate}...");
-                await _databaseLogger.LogServiceActionAsync($"Fetching promotions for branch {branch.Description} since {lastUpdateDate}...");
+                progress?.Report($"מושך מבצעים עבור סניף {branch.Description} מתאריך {lastUpdateDate}...");
+                await _databaseLogger.LogServiceActionAsync($"מושך מבצעים עבור סניף {branch.Description} מתאריך {lastUpdateDate}...");
 
                 // 1. Get from Comax
                 var promoList = await _comaxApiClient.GetPromotionsAsync(branch, lastUpdateDate ?? DateTime.Now.AddYears(-1), justActive: false, cancellationToken);
-                progress?.Report($"Fetched {promoList.d?.Length ?? 0} promotions. Mapping...");
+                
+                // Only log to database, don't show message box
+                await _databaseLogger.LogServiceActionAsync($"נמשכו {promoList.d?.Length ?? 0} מבצעים. ממפה...");
                
                 var now = DateTime.Now;
                 var operationGuid = Guid.NewGuid();
@@ -118,7 +129,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     }
                 }
 
-                progress?.Report($"Mapped {toInsert.Count} promotions. Inserting into DB...");
+                // Only log to database, don't show message box
+                await _databaseLogger.LogServiceActionAsync($"מופו {toInsert.Count} מבצעים. מכניס למסד הנתונים...");
                 // No longer need to set the property on the branch object directly
                 // branch.LastPromotionTimeStamp = now;
                 await _databaseLogger.LogServiceActionAsync($"Attempting to update LastPromotionTimeStamp for branch {branch.Id} to {now:O} using specific method.");
@@ -134,7 +146,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     await _databaseLogger.LogServiceActionAsync($"No new promotion entries to insert for branch {branch.Id}.");
                 }
 
-                progress?.Report("Promotion processing complete for branch.");
+                progress?.Report($"עיבוד מבצעים הושלם עבור סניף {branch.Description}.");
             }
             catch (Exception ex)
             {
@@ -144,9 +156,142 @@ namespace EM.Comax.ShukHerzel.Bl.services
             }
         }
 
-        public Task MarkAsTransferredAsync(IEnumerable<long> ids, DateTime transferredTime)
+        public async Task MarkAsTransferredAsync(IEnumerable<long> ids, DateTime transferredTime)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _databaseLogger.LogServiceActionAsync($"Marking promotions as transferred: {string.Join(", ", ids)}");
+                await _promotionsRepository.MarkAsTransferredAsync(ids, transferredTime);
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("PROMOTIONS_SERVICE", "MarkAsTransferredAsync", ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Searches for promotions based on the provided criteria
+        /// </summary>
+        public async Task<List<Promotion>> SearchPromotionsAsync(string kod = null, string itemKod = null, long? branchId = null)
+        {
+            try
+            {
+                await _databaseLogger.LogServiceActionAsync($"Searching for promotions with kod: {kod ?? "any"}, itemKod: {itemKod ?? "any"}, branchId: {branchId?.ToString() ?? "any"}");
+                return await _promotionsRepository.SearchPromotionsAsync(kod, itemKod, branchId);
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("PROMOTIONS_SERVICE", "SearchPromotionsAsync", ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Sets a promotion's IsTransferredToOper flag to false so it would replace the current promotion
+        /// </summary>
+        public async Task SetPromotionNotTransferredAsync(long promotionId)
+        {
+            try
+            {
+                await _databaseLogger.LogServiceActionAsync($"Setting promotion ID {promotionId} as not transferred to operative table");
+                await _promotionsRepository.SetPromotionNotTransferredAsync(promotionId);
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("PROMOTIONS_SERVICE", "SetPromotionNotTransferredAsync", ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Gets promotions from Comax API for specific barcodes and adds them to the temp promotion table
+        /// </summary>
+        public async Task<List<Promotion>> GetPromotionsForBarcodesAsync(Branch branch, IEnumerable<string> barcodes, IProgress<string>? progress = null)
+        {
+            try
+            {
+                var barcodesArray = barcodes.ToArray();
+                progress?.Report($"מושך מבצעים עבור סניף {branch.Description} עבור {barcodesArray.Length} ברקודים...");
+                await _databaseLogger.LogServiceActionAsync($"מושך מבצעים עבור סניף {branch.Description} עבור ברקודים: {string.Join(", ", barcodesArray)}");
+
+                // Get all promotions from Comax API
+                var promoList = await _comaxApiClient.GetPromotionsAsync(branch, DateTime.Now.AddYears(-1), justActive: true);
+                
+                // Only log to database, don't show message box
+                await _databaseLogger.LogServiceActionAsync($"נמשכו {promoList.d?.Length ?? 0} מבצעים. מסנן עבור הברקודים שצוינו...");
+
+                // Filter promotions for the specified barcodes
+                var filteredPromos = new List<D>();
+                foreach (var clsPromo in promoList?.d ?? [])
+                {
+                    // Check if the promotion has items and any of them match the specified barcodes
+                    if (clsPromo.Items != null && clsPromo.Items.Any(item => barcodesArray.Contains(item.Kod)))
+                    {
+                        filteredPromos.Add(clsPromo);
+                    }
+                    // Also check if the promotion's Kod matches any of the specified barcodes
+                    else if (barcodesArray.Contains(clsPromo.Kod))
+                    {
+                        filteredPromos.Add(clsPromo);
+                    }
+                }
+
+                // Only log to database, don't show message box
+                await _databaseLogger.LogServiceActionAsync($"נמצאו {filteredPromos.Count} מבצעים עבור הברקודים שצוינו. ממפה...");
+
+                // Map the filtered promotions to Promotion entities
+                var now = DateTime.Now;
+                var operationGuid = Guid.NewGuid();
+                var toInsert = new List<Promotion>();
+
+                foreach (var clsPromo in filteredPromos)
+                {
+                    // If the promotion has items, create a separate row for each matching item
+                    if (clsPromo.Items != null && clsPromo.Items.Any())
+                    {
+                        var matchingItems = clsPromo.Items.Where(item => barcodesArray.Contains(item.Kod)).ToList();
+                        var itemKodsArray = matchingItems.Select(x => x.Kod).ToArray();
+                        var itemKods = string.Join(",", itemKodsArray);
+                        if (itemKods?.Length > 200)
+                        {
+                            itemKods = itemKods.Substring(0, 200);
+                        }
+
+                        foreach (var item in matchingItems)
+                        {
+                            var entity = MapPromotion(clsPromo, branch, now, operationGuid, itemKod: item.Kod, itemKods);
+                            toInsert.Add(entity);
+                        }
+                    }
+                    // If the promotion's Kod matches any of the specified barcodes, create a row for it
+                    else if (barcodesArray.Contains(clsPromo.Kod))
+                    {
+                        var entity = MapPromotion(clsPromo, branch, now, operationGuid, itemKod: clsPromo.Kod, null);
+                        toInsert.Add(entity);
+                    }
+                }
+
+                // Only log to database, don't show message box
+                await _databaseLogger.LogServiceActionAsync($"מופו {toInsert.Count} מבצעים. מכניס למסד הנתונים...");
+
+                if (toInsert.Any())
+                {
+                    await _promotionsRepository.BulkInsertAsync(toInsert);
+                    progress?.Report($"הוכנסו {toInsert.Count} מבצעים לטבלת המבצעים הזמנית.");
+                }
+                else
+                {
+                    progress?.Report("לא נמצאו מבצעים עבור הברקודים שצוינו.");
+                }
+
+                return toInsert;
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("PROMOTIONS_SERVICE", "GetPromotionsForBarcodesAsync", ex);
+                throw;
+            }
         }
 
         /// <summary>
