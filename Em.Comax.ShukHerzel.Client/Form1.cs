@@ -1,5 +1,6 @@
 using EM.Comax.ShukHerzel.Bl.interfaces;
 using EM.Comax.ShukHerzel.Bl.services;
+using EM.Comax.ShukHerzel.Integration.interfaces;
 using EM.Comax.ShukHerzel.Models.Interfaces;
 using EM.Comax.ShukHerzel.Models.Models;
 using EM.Comax.ShukHerzl.Common;
@@ -18,6 +19,10 @@ namespace Em.Comax.ShukHerzel.Client
         private readonly IApiClientService _apiClientService;
         private readonly IPriceUpdateService _priceUpdateService;
         private readonly IPromotionsRepository _promotionsRepository;
+        private readonly IComaxApiClient _comaxApiClient;
+        private readonly IDatabaseLogger _databaseLogger;
+        private System.Windows.Forms.Timer _spinnerTimer;
+        private int _spinnerAngle = 0;
         //private const long SHUK_HERZEL_COMPANY_ID = 1;
 
         public Form1(
@@ -27,7 +32,9 @@ namespace Em.Comax.ShukHerzel.Client
             IOperativeService operativeService, 
             IApiClientService apiClientService, 
             IPriceUpdateService priceUpdateService,
-            IPromotionsRepository promotionsRepository)
+            IPromotionsRepository promotionsRepository,
+            IComaxApiClient comaxApiClient,
+            IDatabaseLogger databaseLogger)
         {
             _branchService = branchService;
             _allItemsService = allItemsService;
@@ -35,6 +42,8 @@ namespace Em.Comax.ShukHerzel.Client
             _operativeService = operativeService;
             _apiClientService = apiClientService;
             _promotionsRepository = promotionsRepository;
+            _comaxApiClient = comaxApiClient;
+            _databaseLogger = databaseLogger;
             InitializeComponent();
             _ = initForm();
             _priceUpdateService = priceUpdateService;
@@ -45,11 +54,20 @@ namespace Em.Comax.ShukHerzel.Client
             loadingSpinner.Size = new Size(100, 100);
             loadingSpinner.Visible = false;
             loadingSpinner.Location = new Point(
-                (operationsTab.Width - loadingSpinner.Width) / 2,
-                (operationsTab.Height - loadingSpinner.Height) / 2);
+                (this.ClientSize.Width - loadingSpinner.Width) / 2,
+                (this.ClientSize.Height - loadingSpinner.Height) / 2);
             loadingSpinner.BackColor = Color.Transparent;
             loadingSpinner.BorderStyle = BorderStyle.None;
-            loadingSpinner.BringToFront();
+            
+            // Set up the spinner animation
+            _spinnerTimer = new System.Windows.Forms.Timer();
+            _spinnerTimer.Interval = 50; // 50ms for smooth animation
+            _spinnerTimer.Tick += SpinnerTimer_Tick;
+            
+            // Set up the spinner to paint itself
+            loadingSpinner.Paint += LoadingSpinner_Paint;
+            
+            // We'll bring it to front when needed in ShowLoadingSpinner
             
             branchList.Enabled = false;
             tempPullDateTime.Enabled = true;
@@ -102,6 +120,7 @@ namespace Em.Comax.ShukHerzel.Client
             promotionsApiApplyFilterButton.Click += PromotionsApiApplyFilterButton_Click;
             promotionsApiAddSelectedButton.Click += PromotionsApiAddSelectedButton_Click;
             promotionsApiAddAllButton.Click += PromotionsApiAddAllButton_Click;
+            itemsApiResultsDataGridView.CellDoubleClick += ItemsApiResultsDataGridView_CellDoubleClick;
             
             // Set up DataGridView columns for items
             itemsDataGridView.AutoGenerateColumns = false;
@@ -858,15 +877,80 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
         
         #region Loading Spinner Methods
         
+        private void LoadingSpinner_Paint(object sender, PaintEventArgs e)
+        {
+            // Get the graphics object
+            Graphics g = e.Graphics;
+            
+            // Set up for high quality drawing
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            
+            // Calculate the center of the control
+            int centerX = loadingSpinner.Width / 2;
+            int centerY = loadingSpinner.Height / 2;
+            
+            // Calculate the radius of the spinner (80% of the control size)
+            int radius = (int)(Math.Min(loadingSpinner.Width, loadingSpinner.Height) * 0.4);
+            
+            // Draw the spinner spokes
+            for (int i = 0; i < 12; i++)
+            {
+                // Calculate the angle for this spoke (in radians)
+                double angle = (i * 30 + _spinnerAngle) * Math.PI / 180;
+                
+                // Calculate the start and end points for this spoke
+                int startX = centerX + (int)(radius * 0.7 * Math.Cos(angle));
+                int startY = centerY + (int)(radius * 0.7 * Math.Sin(angle));
+                int endX = centerX + (int)(radius * Math.Cos(angle));
+                int endY = centerY + (int)(radius * Math.Sin(angle));
+                
+                // Calculate the alpha value for this spoke (fades based on position)
+                int alpha = 255 - ((i * 255) / 12);
+                
+                // Create a pen with the appropriate color and thickness
+                using (Pen pen = new Pen(Color.FromArgb(alpha, 0, 0, 0), 3))
+                {
+                    // Draw the spoke
+                    g.DrawLine(pen, startX, startY, endX, endY);
+                }
+            }
+        }
+        
+        private void SpinnerTimer_Tick(object sender, EventArgs e)
+        {
+            // Increment the angle
+            _spinnerAngle = (_spinnerAngle + 30) % 360;
+            
+            // Force the spinner to redraw
+            loadingSpinner.Invalidate();
+        }
+        
         private void ShowLoadingSpinner()
         {
+            // Ensure the spinner is properly positioned in the center of the form
+            loadingSpinner.Location = new Point(
+                (this.ClientSize.Width - loadingSpinner.Width) / 2,
+                (this.ClientSize.Height - loadingSpinner.Height) / 2);
+                
+            // Make sure it's on top of all other controls
+            loadingSpinner.Parent = this; // Set parent to the form
+            loadingSpinner.BringToFront();
             loadingSpinner.Visible = true;
+            
+            // Start the spinner animation
+            _spinnerTimer.Start();
+            
+            loadingSpinner.Update(); // Force the control to redraw
             Application.DoEvents(); // Force UI update
         }
         
         private void HideLoadingSpinner()
         {
+            // Stop the spinner animation
+            _spinnerTimer.Stop();
+            
             loadingSpinner.Visible = false;
+            loadingSpinner.SendToBack();
             Application.DoEvents(); // Force UI update
         }
         
@@ -915,8 +999,64 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
                     logTextBox.AppendText(s + Environment.NewLine);
                 });
                 
-                // Get items from Comax API
-                _itemsApiResults = await _allItemsService.GetItemsForBarcodesAsync(branch, itemIds, progress);
+                try
+                {
+                    var guid = Guid.NewGuid();
+                    var now = DateTime.Now;
+                    
+                    logTextBox.AppendText($"מושך פריטים עבור סניף {branch.Description} עבור {itemIds.Count} ברקודים...{Environment.NewLine}");
+                    
+                    // Try first with itemId parameter
+                    string xml = await _comaxApiClient.GetCatalogXmlForBarcodesAsync(branch, itemIds.ToArray(), true);
+                    
+                    if (string.IsNullOrEmpty(xml) || !xml.Contains("<ClsItems>"))
+                    {
+                        // If first attempt failed, try with barcode parameter
+                        logTextBox.AppendText($"ניסיון ראשון נכשל, מנסה שוב עם פרמטר ברקוד...{Environment.NewLine}");
+                        xml = await _comaxApiClient.GetCatalogXmlForBarcodesAsync(branch, itemIds.ToArray(), false);
+                    }
+                    
+                    if (string.IsNullOrEmpty(xml) || !xml.Contains("<ClsItems>"))
+                    {
+                        logTextBox.AppendText($"נכשל בקבלת פריטים מה-API של קומקס.{Environment.NewLine}");
+                        _itemsApiResults = new List<AllItem>();
+                    }
+                    else
+                    {
+                        // Save the XML response to a file (optional)
+                        // Skip this step as WriteApiResponseToFileAsync is not accessible
+                        
+                        // Deserialize the XML to get the catalog items
+                        var allClsItems = _allItemsService.DeserializeCatalogItems(xml);
+                        
+                        if (allClsItems == null || !allClsItems.Any())
+                        {
+                            logTextBox.AppendText($"לא נמצאו פריטים בתגובת ה-XML.{Environment.NewLine}");
+                            _itemsApiResults = new List<AllItem>();
+                        }
+                        else
+                        {
+                            // Filter the items by the specified barcodes if needed
+                            var filteredClsItems = allClsItems.Where(item => 
+                                itemIds.Contains(item.Barcode.ToString()) || 
+                                (item.AnotherBarkods != null && itemIds.Any(b => item.AnotherBarkods.ToString().Contains(b)))
+                            ).ToList();
+                            
+                            logTextBox.AppendText($"נמצאו {filteredClsItems.Count} פריטים עבור הברקודים שצוינו. ממפה...{Environment.NewLine}");
+                            
+                            // Map to AllItems but don't insert into database
+                            _itemsApiResults = await _allItemsService.MapToAllItems(filteredClsItems, now, branch, guid);
+                            
+                            logTextBox.AppendText($"מופו {_itemsApiResults.Count} פריטים. מציג בטבלה...{Environment.NewLine}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await _databaseLogger.LogErrorAsync("FORM1", "GetItemsForBarcodesAsync", ex);
+                    _itemsApiResults = new List<AllItem>();
+                    throw; // Re-throw to be caught by the outer catch block
+                }
                 
                 // Display results
                 itemsApiResultsDataGridView.DataSource = _itemsApiResults;
@@ -957,6 +1097,7 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
             
             try
             {
+                ShowLoadingSpinner(); // ADDED
                 itemsApiAddSelectedButton.Enabled = false;
                 
                 // Get selected items
@@ -976,6 +1117,7 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
             }
             finally
             {
+                HideLoadingSpinner(); // ADDED
                 itemsApiAddSelectedButton.Enabled = true;
             }
         }
@@ -990,6 +1132,7 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
             
             try
             {
+                ShowLoadingSpinner(); // ADDED
                 itemsApiAddAllButton.Enabled = false;
                 
                 // Add all items to the AllItems table
@@ -1002,7 +1145,43 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
             }
             finally
             {
+                HideLoadingSpinner(); // ADDED
                 itemsApiAddAllButton.Enabled = true;
+            }
+        }
+
+        private async void ItemsApiResultsDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Ensure the click is on a valid row, not the header
+            if (e.RowIndex < 0) return;
+
+            // Ensure a branch is selected for context if needed by the service
+            if (itemsApiBranchComboBox.SelectedItem == null)
+            {
+                MessageBox.Show("אנא בחר סניף תחילה.", "נדרש סניף", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                ShowLoadingSpinner();
+                
+                var clickedItem = (AllItem)itemsApiResultsDataGridView.Rows[e.RowIndex].DataBoundItem;
+
+                if (clickedItem != null)
+                {
+                    // The InsertAllItemsAsync expects a List<AllItem>
+                    await _allItemsService.InsertAllItemsAsync(new List<AllItem> { clickedItem });
+                    MessageBox.Show($"פריט '{clickedItem.Name}' (ברקוד: {clickedItem.Barcode}) הוסף לטבלת AllItems הזמנית.", "פריט הוסף", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"שגיאה בהוספת פריט: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                HideLoadingSpinner();
             }
         }
         
@@ -1039,15 +1218,12 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
                 // Show start message
                 logTextBox.AppendText($"מתחיל לייבא מבצעים עבור סניף {branch.Description}...{Environment.NewLine}");
                 
-                // Use InsertPromotionsAsync to get promotions from a year ago
-                // This will insert them into the temporary promotions table
-                await _promotionsService.InsertPromotionsAsync(branch, yearAgo, progress);
+                // Use FetchPromotionsWithoutInsertAsync to get promotions from a year ago
+                // This will NOT insert them into the temporary promotions table
+                _promotionsApiResults = await _promotionsService.FetchPromotionsWithoutInsertAsync(branch, yearAgo, progress);
                 
                 // Show end message
-                logTextBox.AppendText($"סיים לייבא מבצעים עבור סניף {branch.Description}.{Environment.NewLine}");
-                
-                // Then retrieve the promotions from the repository
-                _promotionsApiResults = await _promotionsRepository.SearchPromotionsAsync(null, null, branch.Id);
+                logTextBox.AppendText($"סיים לייבא {_promotionsApiResults.Count} מבצעים עבור סניף {branch.Description}.{Environment.NewLine}");
                 
                 // Apply filter if there's a barcode filter
                 ApplyPromotionsFilter();
@@ -1132,6 +1308,7 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
             
             try
             {
+                ShowLoadingSpinner(); // ADDED
                 promotionsApiAddSelectedButton.Enabled = false;
                 
                 // Get selected promotions
@@ -1151,6 +1328,7 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
             }
             finally
             {
+                HideLoadingSpinner(); // ADDED
                 promotionsApiAddSelectedButton.Enabled = true;
             }
         }
@@ -1165,6 +1343,7 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
             
             try
             {
+                ShowLoadingSpinner(); // ADDED
                 promotionsApiAddAllButton.Enabled = false;
                 
                 // Add all filtered promotions to the Promotions table
@@ -1177,6 +1356,7 @@ void ViewItemDetailsButton_Click(object sender, EventArgs e)
             }
             finally
             {
+                HideLoadingSpinner(); // ADDED
                 promotionsApiAddAllButton.Enabled = true;
             }
         }

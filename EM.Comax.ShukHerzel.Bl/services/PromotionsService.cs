@@ -205,6 +205,89 @@ namespace EM.Comax.ShukHerzel.Bl.services
         }
 
         /// <summary>
+        /// Fetches promotions from Comax API without inserting them into the database
+        /// </summary>
+        public async Task<List<Promotion>> FetchPromotionsWithoutInsertAsync(
+            Branch branch,
+            DateTime? lastUpdateDate,
+            IProgress<string>? progress = null,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if(lastUpdateDate == null)
+                {
+                    if (branch.LastPromotionTimeStamp == null)
+                    {
+                        lastUpdateDate = DateTime.Now.AddYears(-1);
+                    }
+                    else
+                    {
+                        lastUpdateDate = branch.LastPromotionTimeStamp;
+                    }
+                }
+
+                progress?.Report($"מושך מבצעים עבור סניף {branch.Description} מתאריך {lastUpdateDate}...");
+                await _databaseLogger.LogServiceActionAsync($"מושך מבצעים עבור סניף {branch.Description} מתאריך {lastUpdateDate}...");
+
+                // 1. Get from Comax
+                var promoList = await _comaxApiClient.GetPromotionsAsync(branch, lastUpdateDate ?? DateTime.Now.AddYears(-1), justActive: false, cancellationToken);
+                
+                // Only log to database, don't show message box
+                await _databaseLogger.LogServiceActionAsync($"נמשכו {promoList.d?.Length ?? 0} מבצעים. ממפה...");
+               
+                var now = DateTime.Now;
+                var operationGuid = Guid.NewGuid();
+                var promotions = new List<Promotion>();
+                var promoListJson = JsonConvert.SerializeObject(promoList, Formatting.Indented);
+                await WriteApiResponseToFileAsync(promoListJson, branch, Guid.NewGuid());
+                
+                foreach (var clsPromo in promoList?.d ?? [])
+                {
+                    // If Comax returned multiple "Items" in the promotion, 
+                    // we create a separate row for each "Kod" in Items
+                    if (clsPromo.Items != null && clsPromo.Items.Any())
+                    {
+                        // create an string of all the item kods in all the item in clspromo.items
+                        var itemKodsArray = clsPromo.Items.Select(x => x.Kod).ToArray();
+                        //now turn the array into a string
+                        var itemKods = string.Join(",", itemKodsArray);
+                        //limit to 200 characters
+                        if (itemKods?.Length  > 200)
+                        {
+                            itemKods = itemKods.Substring(0, 200);
+                        }
+
+                        foreach (var item in clsPromo.Items)
+                        {
+                            var entity = MapPromotion(clsPromo, branch, now, operationGuid, itemKod: item.Kod, itemKods);
+                            promotions.Add(entity);
+                        }
+                    }
+                    else
+                    {
+                        // No child items, just one row
+                        var entity = MapPromotion(clsPromo, branch, now, operationGuid, itemKod: null, null);
+                        promotions.Add(entity);
+                    }
+                }
+
+                // Only log to database, don't show message box
+                await _databaseLogger.LogServiceActionAsync($"מופו {promotions.Count} מבצעים.");
+                
+                progress?.Report($"עיבוד מבצעים הושלם עבור סניף {branch.Description}.");
+                
+                return promotions;
+            }
+            catch (Exception ex)
+            {
+                // Log and rethrow
+                await _databaseLogger.LogErrorAsync("PROMOTIONS_SERVICE", "FetchPromotionsWithoutInsertAsync", ex);
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Gets promotions from Comax API for specific barcodes and adds them to the temp promotion table
         /// </summary>
         public async Task<List<Promotion>> GetPromotionsForBarcodesAsync(Branch branch, IEnumerable<string> barcodes, IProgress<string>? progress = null)

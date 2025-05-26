@@ -143,7 +143,6 @@
             // 
             // operationsTab
             // 
-            operationsTab.Controls.Add(loadingSpinner);
             operationsTab.Controls.Add(PriceUpdatesButton);
             operationsTab.Controls.Add(logTextBox);
             operationsTab.Controls.Add(eslTransferJob);
@@ -966,6 +965,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(902, 578);
+            Controls.Add(loadingSpinner);
             Controls.Add(mainTabControl);
             Margin = new Padding(2);
             Name = "Form1";

@@ -43,5 +43,15 @@ namespace EM.Comax.ShukHerzel.Bl.interfaces
         /// Gets promotions from Comax API for specific barcodes and adds them to the temp promotion table
         /// </summary>
         Task<List<Promotion>> GetPromotionsForBarcodesAsync(Branch branch, IEnumerable<string> barcodes, IProgress<string>? progress = null);
+        
+        /// <summary>
+        /// Fetches promotions from Comax API without inserting them into the database
+        /// </summary>
+        Task<List<Promotion>> FetchPromotionsWithoutInsertAsync(
+         Branch branch,
+         DateTime? lastUpdateDate,
+         IProgress<string>? progress = null,
+         CancellationToken cancellationToken = default
+        );
     }
 }
