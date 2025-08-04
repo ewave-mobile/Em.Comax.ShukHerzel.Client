@@ -486,6 +486,10 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.CreateDateTime)
                 .HasPrecision(3)
                 .HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.GetCmt).HasMaxLength(50);
+            entity.Property(e => e.GetDiscountPrecent).HasMaxLength(50);
+            entity.Property(e => e.GetDiscountTotal).HasMaxLength(50);
+            entity.Property(e => e.GetTotal).HasMaxLength(50);
             entity.Property(e => e.IsSentToEsl).HasDefaultValue(false);
             entity.Property(e => e.ManufacturingCountry).HasMaxLength(100);
             entity.Property(e => e.Name).HasMaxLength(200);
@@ -496,11 +500,16 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.PromotionKod)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.PromotionMaxQty).HasMaxLength(50);
+            entity.Property(e => e.PromotionMinQty).HasMaxLength(50);
+            entity.Property(e => e.PromotionQuantity).HasMaxLength(50);
             entity.Property(e => e.PromotionToDate).HasPrecision(3);
             entity.Property(e => e.Quantity).HasColumnType("decimal(18, 3)");
+            entity.Property(e => e.Rating).HasMaxLength(50);
             entity.Property(e => e.SentToEslDate).HasPrecision(3);
             entity.Property(e => e.Size).HasMaxLength(50);
             entity.Property(e => e.TextForWeb).HasMaxLength(500);
+            entity.Property(e => e.TotalForActivate).HasMaxLength(50);
             entity.Property(e => e.TotalPromotionPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TrailingItem).HasMaxLength(50);
         });

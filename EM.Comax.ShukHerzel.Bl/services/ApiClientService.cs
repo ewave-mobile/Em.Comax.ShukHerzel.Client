@@ -193,7 +193,16 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     Size = item.Size?.ToString() ?? string.Empty,
                     IsPromotion = item.IsPromotion.ToString() ?? "False",
                     SwPikadon = item.SwPikadon?.ToString() ?? "False",
-                    TrailingItem = item.TrailingItem?.ToString() ?? ""
+                    TrailingItem = item.TrailingItem?.ToString() ?? "",
+                    TotalForActivate = item.TotalForActivate?.ToString() ?? string.Empty,
+                    PromotionQuantity = item.PromotionQuantity?.ToString() ?? string.Empty,
+                    GetDiscountTotal = item.GetDiscountTotal?.ToString() ?? string.Empty,
+                    GetCmt = item.GetCmt?.Trim() ?? string.Empty,
+                    GetDiscountPrecent = item.GetDiscountPrecent?.ToString() ?? string.Empty,
+                    GetTotal = item.GetTotal?.ToString() ?? string.Empty,
+                    PromotionMinQty = item.PromotionMinQty?.ToString() ?? string.Empty,
+                    PromotionMaxQty = item.PromotionMaxQty?.ToString() ?? string.Empty
+
                 }
             };
         }

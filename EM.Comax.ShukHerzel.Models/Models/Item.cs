@@ -55,6 +55,24 @@ public partial class Item
 
     public string PromotionKod { get; set; }
 
+    public string TotalForActivate { get; set; }
+
+    public string PromotionQuantity { get; set; }
+
+    public string GetDiscountTotal { get; set; }
+
+    public string GetCmt { get; set; }
+
+    public string GetDiscountPrecent { get; set; }
+
+    public string GetTotal { get; set; }
+
+    public string PromotionMinQty { get; set; }
+
+    public string PromotionMaxQty { get; set; }
+
+    public string Rating { get; set; }
+
     public bool? SwAllCustomers { get; set; }
 
     public string TextForWeb { get; set; }

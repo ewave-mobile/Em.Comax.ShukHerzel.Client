@@ -188,6 +188,15 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                     item.PromotionBarcodes = null;
                                     item.IsPromotion = false;
                                     item.IsSentToEsl = false;
+                                    item.TotalForActivate = null;
+                                    item.PromotionQuantity = null;
+                                    item.GetDiscountTotal = null;
+                                    item.GetCmt = null;
+                                    item.GetDiscountPrecent = null;
+                                    item.GetTotal = null;
+                                    item.PromotionMinQty = null;
+                                    item.PromotionMaxQty = null;
+
                                 }
                                 else
                                 {
@@ -203,6 +212,15 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                     item.IsPromotion = true;
                                     item.IsSentToEsl = false;
                                     item.OperationGuid = promo.OperationGuid;
+                                    item.TotalForActivate = promo.TotalForActivate;
+                                    item.PromotionQuantity = promo.Quantity;
+                                    item.GetDiscountTotal = promo.GetDiscountTotal;
+                                    item.GetCmt = promo.GetCmt;
+                                    item.GetDiscountPrecent = promo.GetDiscountPrecent;
+                                    item.GetTotal = promo.GetTotal;
+                                    item.PromotionMinQty = promo.MinQty;
+                                    item.PromotionMaxQty = promo.MaxQty;
+                                    item.Rating = promo.Rating;
                                 }
                                 itemsToUpdate.Add(item);
                                 promoIdsToMark.Add(promo.Id);

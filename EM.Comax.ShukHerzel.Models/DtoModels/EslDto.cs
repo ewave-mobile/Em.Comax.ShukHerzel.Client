@@ -35,6 +35,15 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
         public string IsPromotion { get; set; }
         public string SwPikadon { get; set; }
         public string TrailingItem { get; set; }
+        public string TotalForActivate { get; set; }
+        public string PromotionQuantity { get; set; }
+        public string GetDiscountTotal { get; set; }
+        public string GetCmt { get; set; }
+        public string GetDiscountPrecent { get; set; }
+        public string GetTotal { get; set; }
+        public string PromotionMinQty { get; set; }
+        public string PromotionMaxQty { get; set; }
+
 
     }
 }
