@@ -102,6 +102,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     PropertiesToInclude = new List<string>
     {
         "Name",
+        "XmlId",
         "Price",
         "CreateDateTime",
         "OperationGuid",
