@@ -173,7 +173,21 @@ namespace EM.Comax.ShukHerzel.Bl.services
                         try
                         {
                             var key = (promo.ItemKod, promo.BranchId);
-                            if (itemDict.TryGetValue(key, out var item))
+                            Models.Models.Item item = null;
+                            
+                            // First try barcode lookup
+                            if (itemDict.TryGetValue(key, out item))
+                            {
+                                // Found by barcode - proceed with existing logic
+                            }
+                            else
+                            {
+                                // Fallback: try finding by XmlId if barcode didn't match
+                                item = matchingItems.FirstOrDefault(i => 
+                                    i.XmlId == promo.ItemKod && i.BranchId == promo.BranchId);
+                            }
+                            
+                            if (item != null)
                             {
                                 if (promo.SwActive?.ToLower() != "true")
                                 {
@@ -232,7 +246,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                             }
                             else
                             {
-                                progress.Report($"No matching Item found for Promotion ID {promo.Id} with Barcode {promo.ItemKod} and BranchId {promo.BranchId}.");
+                                progress.Report($"No matching Item found for Promotion ID {promo.Id} with ItemKod/XmlId {promo.ItemKod} and BranchId {promo.BranchId}.");
                                 // Optionally log as a bad item
                             }
                         }
@@ -394,6 +408,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
             {
                 CompanyId = tempItem.CompanyId,
                 BranchId = tempItem.BranchId,
+                XmlId = tempItem.XmlId ?? "",
                 Barcode = tempItem.Barcode ?? "",
                 Name = tempItem.Name ?? "",
                 Price = price,

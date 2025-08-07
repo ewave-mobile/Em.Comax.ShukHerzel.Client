@@ -73,8 +73,20 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 }
 
                 // 2. Map items to EslDto
-                var eslDtos = items.Select(MapToDto).ToList();
-                progress.Report($"Mapped {eslDtos.Count} items to ESL DTOs.");
+                var eslDtos = new List<EslDto>();
+                foreach (var item in items)
+                {
+                    // Always create DTO with Barcode as id
+                    eslDtos.Add(MapToDto(item, useXmlIdAsId: false));
+                    
+                    // If XmlId is different from Barcode, create another DTO with XmlId as id
+                    if (!string.IsNullOrEmpty(item.Item.XmlId) && 
+                        item.Item.XmlId != item.Item.Barcode)
+                    {
+                        eslDtos.Add(MapToDto(item, useXmlIdAsId: true));
+                    }
+                }
+                progress.Report($"Mapped {eslDtos.Count} items to ESL DTOs (including XmlId variants).");
 
                 // 3. Group items by StoreId
                 var groupedItems = eslDtos.GroupBy(dto => dto.custom.StoreId);
@@ -163,14 +175,15 @@ namespace EM.Comax.ShukHerzel.Bl.services
         /// Maps an ItemWithBranch entity to an EslDto.
         /// </summary>
         /// <param name="itemWithBranch">The item with branch information to map.</param>
+        /// <param name="useXmlIdAsId">If true, use XmlId as id; otherwise use Barcode.</param>
         /// <returns>The mapped EslDto.</returns>
-        private EslDto MapToDto(ItemWithBranch itemWithBranch)
+        private EslDto MapToDto(ItemWithBranch itemWithBranch, bool useXmlIdAsId = false)
         {
             var item = itemWithBranch.Item;
             return new EslDto
             {
                 brand = string.Empty, // Adjust as necessary
-                id = item.Barcode?.Trim() ?? string.Empty,
+                id = useXmlIdAsId ? (item.XmlId?.Trim() ?? string.Empty) : (item.Barcode?.Trim() ?? string.Empty),
                 name = item.Name?.Trim() ?? string.Empty,
                 price = item.Price,
                 
