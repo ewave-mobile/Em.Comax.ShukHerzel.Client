@@ -22,39 +22,61 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
         }
 
         public async Task DeleteExpiredPromotionsAsync()
-{
-    // Get today's date (time set to midnight)
-    var today = DateTime.Today;
-
-    // Filter promotions where ToDate is not null or whitespace
-    var promotions = await _context.Promotions
-        .Where(x => !string.IsNullOrWhiteSpace(x.ToDate))
-        .ToListAsync();
-
-    // Parse and filter the expired promotions by comparing only the date portion
-    var expiredPromotionsToDelete = promotions
-        .Where(promotion =>
         {
-            if (DateTime.TryParseExact(
-                    promotion.ToDate.Trim(),
-                    "dd/MM/yyyy HH:mm:ss",
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.None,
-                    out DateTime parsedDate))
-            {
-                // Compare only the date parts: if parsed date is before today, mark for deletion
-                return parsedDate.Date < today;
-            }
-            return false;
-        })
-        .ToList();
+            // Get today's date (time set to midnight)
+            var today = DateTime.Today;
 
-    // Bulk delete expired promotions if any exist
-    if (expiredPromotionsToDelete.Any())
-    {
-        await _context.BulkDeleteAsync(expiredPromotionsToDelete);
-    }
-}
+            // Filter promotions where ToDate is not null or whitespace
+            var promotions = await _context.Promotions
+                .Where(x => !string.IsNullOrWhiteSpace(x.ToDate))
+                .ToListAsync();
+
+            // Parse and filter the expired promotions by comparing only the date portion
+            // Also exclude future promotions from deletion (those that haven't started yet)
+            var expiredPromotionsToDelete = promotions
+                .Where(promotion =>
+                {
+                    // Check if promotion has expired (ToDate is before today)
+                    bool isExpired = false;
+                    if (DateTime.TryParseExact(
+                            promotion.ToDate.Trim(),
+                            new[] { "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy" },
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.None,
+                            out DateTime toDate))
+                    {
+                        isExpired = toDate.Date < today;
+                    }
+                    
+                    // Don't delete if expired but is a future promotion (hasn't started yet)
+                    if (isExpired && !string.IsNullOrWhiteSpace(promotion.FromDate))
+                    {
+                        if (DateTime.TryParseExact(
+                                promotion.FromDate.Trim(),
+                                new[] { "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy" },
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.None,
+                                out DateTime fromDate))
+                        {
+                            // If it's a future promotion (hasn't started), preserve it
+                            if (fromDate.Date > today)
+                            {
+                                return false; // Don't delete future promotions even if they appear "expired"
+                            }
+                        }
+                    }
+                    
+                    return isExpired;
+                })
+                .ToList();
+
+            // Bulk delete expired promotions if any exist
+            if (expiredPromotionsToDelete.Any())
+            {
+                await _context.BulkDeleteAsync(expiredPromotionsToDelete);
+                await _databaseLogger.LogServiceActionAsync($"Deleted {expiredPromotionsToDelete.Count} expired promotions (preserved future promotions).");
+            }
+        }
 
 
         public async Task DeleteTransferredItemsOlderThanAsync(int retentionDays)
@@ -122,7 +144,44 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
 
         public async Task<List<Promotion>> GetNonTransferredPromotionsAsync()
         {
-            return await _context.Promotions.Where(x => x.IsTransferredToOper == false).ToListAsync();
+            // Get current date without time component
+            var today = DateTime.Today;
+            
+            // Get all non-transferred promotions
+            var allPromotions = await _context.Promotions
+                .Where(x => x.IsTransferredToOper == false)
+                .ToListAsync();
+            
+            // Filter out future promotions (those that haven't started yet)
+            var validPromotions = allPromotions.Where(promo =>
+            {
+                // If FromDate is null or empty, consider it valid (no start date restriction)
+                if (string.IsNullOrWhiteSpace(promo.FromDate))
+                    return true;
+                
+                // Try to parse the FromDate
+                if (DateTime.TryParseExact(
+                    promo.FromDate.Trim(),
+                    new[] { "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy" },
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out DateTime fromDate))
+                {
+                    // Only include promotions that have started (fromDate.Date <= today)
+                    return fromDate.Date <= today;
+                }
+                
+                // If we can't parse the date, include it to avoid losing data
+                return true;
+            }).ToList();
+            
+            var filteredCount = allPromotions.Count - validPromotions.Count;
+            if (filteredCount > 0)
+            {
+                await _databaseLogger.LogServiceActionAsync($"Filtered out {filteredCount} future promotions that haven't started yet.");
+            }
+            
+            return validPromotions;
         }
 
         public async Task MarkAsTransferredAsync(IEnumerable<long> ids, DateTime transferredTime)
