@@ -214,7 +214,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     GetDiscountPrecent = item.GetDiscountPrecent?.ToString() ?? string.Empty,
                     GetTotal = item.GetTotal?.ToString() ?? string.Empty,
                     PromotionMinQty = item.PromotionMinQty?.ToString() ?? string.Empty,
-                    PromotionMaxQty = item.PromotionMaxQty?.ToString() ?? string.Empty
+                    PromotionMaxQty = FormatPromotionMaxQty(item.PromotionMaxQty)
 
                 }
             };
@@ -229,6 +229,41 @@ namespace EM.Comax.ShukHerzel.Bl.services
         private string ParseDate(DateTime? date)
         {
             return date.HasValue ? date.Value.ToString("yyyy-MM-dd") : string.Empty;
+        }
+
+        /// <summary>
+        /// Formats PromotionMaxQty with special rounding logic:
+        /// - If decimal part < 0.5: round down to the unit (e.g., 3.4 → "3")
+        /// - If decimal part >= 0.5: make it X.5 (e.g., 3.6 → "3.5", 3.5 → "3.5")
+        /// </summary>
+        /// <param name="maxQty">The MaxQty string value from the promotion.</param>
+        /// <returns>Formatted MaxQty string for ESL API.</returns>
+        private string FormatPromotionMaxQty(string maxQty)
+        {
+            if (string.IsNullOrWhiteSpace(maxQty))
+                return string.Empty;
+
+            // Try to parse the MaxQty as a decimal
+            if (decimal.TryParse(maxQty.Trim(), out decimal value))
+            {
+                // Get the integer part and decimal part
+                decimal integerPart = Math.Floor(value);
+                decimal decimalPart = value - integerPart;
+
+                if (decimalPart < 0.5m)
+                {
+                    // Round down to the unit (remove decimal part)
+                    return integerPart.ToString("0");
+                }
+                else
+                {
+                    // Set to X.5 (integer part + 0.5)
+                    return (integerPart + 0.5m).ToString("0.0");
+                }
+            }
+
+            // If parsing fails, return original value
+            return maxQty.Trim();
         }
 
         /// <summary>
