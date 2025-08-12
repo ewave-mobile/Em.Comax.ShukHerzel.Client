@@ -168,12 +168,43 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     var itemsToUpdate = new List<Models.Models.Item>();
                     var promoIdsToMark = new List<long>();
                     int promoCount = 0;
-                    foreach (var promo in promos)
+                    
+                    // Group promotions by (ItemKod, BranchId) to handle multiple promotions for same item
+                    var groupedPromos = promos.GroupBy(p => new { p.ItemKod, p.BranchId }).ToList();
+                    progress.Report($"Found {groupedPromos.Count} unique item-branch combinations for promotions...");
+                    
+                    foreach (var promoGroup in groupedPromos)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         try
                         {
-                            var key = (promo.ItemKod, promo.BranchId);
+                            // Select the promotion with highest rating, then lowest price as tiebreaker
+                            var selectedPromo = promoGroup
+                                .OrderByDescending(p => 
+                                {
+                                    if (decimal.TryParse(p.Rating, out var rating))
+                                        return rating;
+                                    return 0m;
+                                })
+                                .ThenBy(p => 
+                                {
+                                    if (decimal.TryParse(p.Total, out var total))
+                                        return total;
+                                    return decimal.MaxValue; // If can't parse, put at end
+                                })
+                                .First();
+                            
+                            // Mark all other promotions in this group as transferred since we're only using the selected one
+                            var otherPromosInGroup = promoGroup.Where(p => p.Id != selectedPromo.Id).ToList();
+                            if (otherPromosInGroup.Any())
+                            {
+                                progress.Report($"Skipping {otherPromosInGroup.Count} lower-rated/higher-priced promotions for ItemKod: {selectedPromo.ItemKod}, BranchId: {selectedPromo.BranchId}");
+                                promoIdsToMark.AddRange(otherPromosInGroup.Select(p => p.Id));
+                            }
+                            
+                            progress.Report($"Selected promotion for ItemKod: {selectedPromo.ItemKod}, BranchId: {selectedPromo.BranchId} - Rating: {selectedPromo.Rating ?? "0"}, Price: {selectedPromo.Total ?? "N/A"}");
+                            
+                            var key = (selectedPromo.ItemKod, selectedPromo.BranchId);
                             Models.Models.Item item = null;
                             
                             // First try barcode lookup
@@ -185,60 +216,110 @@ namespace EM.Comax.ShukHerzel.Bl.services
                             {
                                 // Fallback: try finding by XmlId if barcode didn't match
                                 item = matchingItems.FirstOrDefault(i => 
-                                    i.XmlId == promo.ItemKod && i.BranchId == promo.BranchId);
+                                    i.XmlId == selectedPromo.ItemKod && i.BranchId == selectedPromo.BranchId);
                             }
                             
                             if (item != null)
                             {
-                                if (promo.SwActive?.ToLower() != "true")
+                                if (selectedPromo.SwActive?.ToLower() != "true")
                                 {
-                                    // Remove promotion details
-                                    item.PromotionKod = null;
-                                    item.PromotionFromDate = null;
-                                    item.PromotionToDate = null;
-                                    item.TotalPromotionPrice = null;
-                                    item.SwAllCustomers = null;
-                                    item.TextForWeb = null;
-                                    item.Quantity = null;
-                                    item.PromotionBarcodes = null;
-                                    item.IsPromotion = false;
-                                    item.IsSentToEsl = false;
-                                    item.TotalForActivate = null;
-                                    item.PromotionQuantity = null;
-                                    item.GetDiscountTotal = null;
-                                    item.GetCmt = null;
-                                    item.GetDiscountPrecent = null;
-                                    item.GetTotal = null;
-                                    item.PromotionMinQty = null;
-                                    item.PromotionMaxQty = null;
-
+                                    // Only remove promotion details if the item has the same promotion code
+                                    if (item.PromotionKod == selectedPromo.Kod)
+                                    {
+                                        // Remove promotion details
+                                        item.PromotionKod = null;
+                                        item.PromotionFromDate = null;
+                                        item.PromotionToDate = null;
+                                        item.TotalPromotionPrice = null;
+                                        item.SwAllCustomers = null;
+                                        item.TextForWeb = null;
+                                        item.Quantity = null;
+                                        item.PromotionBarcodes = null;
+                                        item.IsPromotion = false;
+                                        item.IsSentToEsl = false;
+                                        item.TotalForActivate = null;
+                                        item.PromotionQuantity = null;
+                                        item.GetDiscountTotal = null;
+                                        item.GetCmt = null;
+                                        item.GetDiscountPrecent = null;
+                                        item.GetTotal = null;
+                                        item.PromotionMinQty = null;
+                                        item.PromotionMaxQty = null;
+                                        item.Rating = null;
+                                        progress.Report($"Cancelled promotion {selectedPromo.Kod} for ItemKod: {selectedPromo.ItemKod}");
+                                    }
+                                    else
+                                    {
+                                        progress.Report($"Skipping cancellation for ItemKod: {selectedPromo.ItemKod} - item has different promotion code ({item.PromotionKod}) than the one being cancelled ({selectedPromo.Kod})");
+                                    }
                                 }
                                 else
                                 {
-                                    // Update Item with Promotion details
-                                    item.PromotionKod = promo.Kod ?? "";
-                                    item.PromotionFromDate = ParseDate(promo.FromDate);
-                                    item.PromotionToDate = ParseDate(promo.ToDate);
-                                    item.TotalPromotionPrice = TryParseDecimal(promo.Total);
-                                    item.SwAllCustomers = promo.SwAllCustomers?.ToLower() == "true";
-                                    item.TextForWeb = promo.TextForWeb;
-                                    item.Quantity = TryParseDecimal(promo.Quantity);
-                                    item.PromotionBarcodes = promo.AnotherBarcodes;
-                                    item.IsPromotion = true;
-                                    item.IsSentToEsl = false;
-                                    item.OperationGuid = promo.OperationGuid;
-                                    item.TotalForActivate = promo.TotalForActivate;
-                                    item.PromotionQuantity = promo.Quantity;
-                                    item.GetDiscountTotal = promo.GetDiscountTotal;
-                                    item.GetCmt = promo.GetCmt;
-                                    item.GetDiscountPrecent = promo.GetDiscountPrecent;
-                                    item.GetTotal = promo.GetTotal;
-                                    item.PromotionMinQty = promo.MinQty;
-                                    item.PromotionMaxQty = promo.MaxQty;
-                                    item.Rating = promo.Rating;
+                                    // Check if item already has a promotion and compare ratings/prices
+                                    bool shouldUpdatePromotion = true;
+                                    
+                                    if (item.IsPromotion == true && !string.IsNullOrEmpty(item.Rating))
+                                    {
+                                        // Item already has a promotion, compare with the new one
+                                        decimal existingRating = decimal.TryParse(item.Rating, out var eRating) ? eRating : 0m;
+                                        decimal newRating = decimal.TryParse(selectedPromo.Rating, out var nRating) ? nRating : 0m;
+                                        
+                                        if (newRating < existingRating)
+                                        {
+                                            // New promotion has lower rating, keep existing
+                                            shouldUpdatePromotion = false;
+                                            progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (existing rating: {existingRating} > new rating: {newRating})");
+                                        }
+                                        else if (newRating == existingRating)
+                                        {
+                                            // Same rating, compare prices
+                                            decimal existingPrice = item.TotalPromotionPrice ?? decimal.MaxValue;
+                                            decimal newPrice = TryParseDecimal(selectedPromo.Total) ?? decimal.MaxValue;
+                                            
+                                            if (newPrice >= existingPrice)
+                                            {
+                                                // New promotion has higher or equal price, keep existing
+                                                shouldUpdatePromotion = false;
+                                                progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, existing price: {existingPrice} <= new price: {newPrice})");
+                                            }
+                                            else
+                                            {
+                                                progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, new price: {newPrice} < existing price: {existingPrice})");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (new rating: {newRating} > existing rating: {existingRating})");
+                                        }
+                                    }
+                                    
+                                    if (shouldUpdatePromotion)
+                                    {
+                                        // Update Item with Promotion details
+                                        item.PromotionKod = selectedPromo.Kod ?? "";
+                                        item.PromotionFromDate = ParseDate(selectedPromo.FromDate);
+                                        item.PromotionToDate = ParseDate(selectedPromo.ToDate);
+                                        item.TotalPromotionPrice = TryParseDecimal(selectedPromo.Total);
+                                        item.SwAllCustomers = selectedPromo.SwAllCustomers?.ToLower() == "true";
+                                        item.TextForWeb = selectedPromo.TextForWeb;
+                                        item.Quantity = TryParseDecimal(selectedPromo.Quantity);
+                                        item.PromotionBarcodes = selectedPromo.AnotherBarcodes;
+                                        item.IsPromotion = true;
+                                        item.IsSentToEsl = false;
+                                        item.OperationGuid = selectedPromo.OperationGuid;
+                                        item.TotalForActivate = selectedPromo.TotalForActivate;
+                                        item.PromotionQuantity = selectedPromo.Quantity;
+                                        item.GetDiscountTotal = selectedPromo.GetDiscountTotal;
+                                        item.GetCmt = selectedPromo.GetCmt;
+                                        item.GetDiscountPrecent = selectedPromo.GetDiscountPrecent;
+                                        item.GetTotal = selectedPromo.GetTotal;
+                                        item.PromotionMinQty = selectedPromo.MinQty;
+                                        item.PromotionMaxQty = selectedPromo.MaxQty;
+                                        item.Rating = selectedPromo.Rating;
+                                    }
                                 }
                                 itemsToUpdate.Add(item);
-                                promoIdsToMark.Add(promo.Id);
+                                promoIdsToMark.Add(selectedPromo.Id);
                                 promoCount++;
                                 if (promoCount % 100 == 0)
                                 {
@@ -247,13 +328,13 @@ namespace EM.Comax.ShukHerzel.Bl.services
                             }
                             else
                             {
-                                progress.Report($"No matching Item found for Promotion ID {promo.Id} with ItemKod/XmlId {promo.ItemKod} and BranchId {promo.BranchId}.");
+                                progress.Report($"No matching Item found for Promotion ID {selectedPromo.Id} with ItemKod/XmlId {selectedPromo.ItemKod} and BranchId {selectedPromo.BranchId}.");
                                 // Optionally log as a bad item
                             }
                         }
                         catch (Exception ex)
                         {
-                            progress.Report($"Error mapping Promotion ID {promo.Id}: {ex.Message}");
+                            progress.Report($"Error mapping Promotion group for ItemKod {promoGroup.Key.ItemKod}: {ex.Message}");
                             await _databaseLogger.LogErrorAsync("OPERATIVE_SERVICE", "Mapping Promotion to Item", ex);
                             continue;
                         }
