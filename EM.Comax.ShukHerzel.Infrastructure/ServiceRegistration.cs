@@ -84,6 +84,7 @@ namespace EM.Comax.ShukHerzl.Infrastructure
             services.AddScoped<IBadItemLogRepository, BadItemLogRepository>();
             services.AddScoped<IPriceUpdateService, PriceUpdateService>();
             services.AddScoped<IPriceUpdateRepository, PriceUpdateRepository>();
+            services.AddScoped<ITrailingItemRepository, TrailingItemRepository>();
             // Possibly register Quartz only if we're in the service
             if (isService)
             {

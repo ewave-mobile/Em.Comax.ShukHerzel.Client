@@ -258,39 +258,87 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                 {
                                     // Check if item already has a promotion and compare ratings/prices
                                     bool shouldUpdatePromotion = true;
+                                    var today = DateTime.Today; // Date-only comparison, includes current day
                                     
                                     if (item.IsPromotion == true && !string.IsNullOrEmpty(item.Rating))
                                     {
-                                        // Item already has a promotion, compare with the new one
-                                        decimal existingRating = decimal.TryParse(item.Rating, out var eRating) ? eRating : 0m;
-                                        decimal newRating = decimal.TryParse(selectedPromo.Rating, out var nRating) ? nRating : 0m;
+                                        // First check if existing promotion is still valid (date validation)
+                                        bool existingPromotionValid = true;
                                         
-                                        if (newRating < existingRating)
+                                        if (item.PromotionFromDate.HasValue && item.PromotionFromDate.Value.Date > today)
                                         {
-                                            // New promotion has lower rating, keep existing
-                                            shouldUpdatePromotion = false;
-                                            progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (existing rating: {existingRating} > new rating: {newRating})");
+                                            existingPromotionValid = false;
+                                            progress.Report($"Existing promotion for ItemKod: {selectedPromo.ItemKod} not yet started (starts: {item.PromotionFromDate.Value.Date:dd/MM/yyyy})");
                                         }
-                                        else if (newRating == existingRating)
+                                        else if (item.PromotionToDate.HasValue && item.PromotionToDate.Value.Date < today)
                                         {
-                                            // Same rating, compare prices
-                                            decimal existingPrice = item.TotalPromotionPrice ?? decimal.MaxValue;
-                                            decimal newPrice = TryParseDecimal(selectedPromo.Total) ?? decimal.MaxValue;
+                                            existingPromotionValid = false;
+                                            progress.Report($"Existing promotion for ItemKod: {selectedPromo.ItemKod} has expired (ended: {item.PromotionToDate.Value.Date:dd/MM/yyyy})");
+                                        }
+                                        
+                                        if (existingPromotionValid)
+                                        {
+                                            // Item already has a valid promotion, compare with the new one
+                                            decimal existingRating = decimal.TryParse(item.Rating, out var eRating) ? eRating : 0m;
+                                            decimal newRating = decimal.TryParse(selectedPromo.Rating, out var nRating) ? nRating : 0m;
                                             
-                                            if (newPrice >= existingPrice)
+                                            if (newRating < existingRating)
                                             {
-                                                // New promotion has higher or equal price, keep existing
+                                                // New promotion has lower rating, keep existing
                                                 shouldUpdatePromotion = false;
-                                                progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, existing price: {existingPrice} <= new price: {newPrice})");
+                                                progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (existing rating: {existingRating} > new rating: {newRating})");
+                                            }
+                                            else if (newRating == existingRating)
+                                            {
+                                                // Same rating, compare prices
+                                                decimal existingPrice = item.TotalPromotionPrice ?? decimal.MaxValue;
+                                                decimal newPrice = TryParseDecimal(selectedPromo.Total) ?? decimal.MaxValue;
+                                                
+                                                if (newPrice >= existingPrice)
+                                                {
+                                                    // New promotion has higher or equal price, keep existing
+                                                    shouldUpdatePromotion = false;
+                                                    progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, existing price: {existingPrice} <= new price: {newPrice})");
+                                                }
+                                                else
+                                                {
+                                                    progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, new price: {newPrice} < existing price: {existingPrice})");
+                                                }
                                             }
                                             else
                                             {
-                                                progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, new price: {newPrice} < existing price: {existingPrice})");
+                                                progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (new rating: {newRating} > existing rating: {existingRating})");
                                             }
                                         }
                                         else
                                         {
-                                            progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (new rating: {newRating} > existing rating: {existingRating})");
+                                            // Existing promotion is expired/invalid, update with new promotion
+                                            progress.Report($"Replacing expired/invalid promotion for ItemKod: {selectedPromo.ItemKod} with new promotion");
+                                        }
+                                    }
+                                    
+                                    // Also validate the new promotion dates before applying
+                                    if (shouldUpdatePromotion)
+                                    {
+                                        // Check if the new promotion is currently valid (date validation)
+                                        var newPromotionFromDate = ParseDate(selectedPromo.FromDate);
+                                        var newPromotionToDate = ParseDate(selectedPromo.ToDate);
+                                        
+                                        bool newPromotionValid = true;
+                                        if (newPromotionFromDate.HasValue && newPromotionFromDate.Value.Date > today)
+                                        {
+                                            newPromotionValid = false;
+                                            progress.Report($"New promotion for ItemKod: {selectedPromo.ItemKod} not yet started (starts: {newPromotionFromDate.Value.Date:dd/MM/yyyy}), skipping");
+                                        }
+                                        else if (newPromotionToDate.HasValue && newPromotionToDate.Value.Date < today)
+                                        {
+                                            newPromotionValid = false;
+                                            progress.Report($"New promotion for ItemKod: {selectedPromo.ItemKod} has expired (ended: {newPromotionToDate.Value.Date:dd/MM/yyyy}), skipping");
+                                        }
+                                        
+                                        if (!newPromotionValid)
+                                        {
+                                            shouldUpdatePromotion = false;
                                         }
                                     }
                                     
