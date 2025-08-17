@@ -179,13 +179,6 @@ namespace EM.Comax.ShukHerzel.Bl.services
                         cancellationToken.ThrowIfCancellationRequested();
                         try
                         {
-                            // Log all ratings in this group for debugging
-                            foreach (var promo in promoGroup)
-                            {
-                                var standardParsed = decimal.TryParse(promo.Rating, out var debugRating) ? debugRating.ToString() : "PARSE_FAILED";
-                                var invariantParsed = TryParseDecimalInvariant(promo.Rating).ToString();
-                                await _databaseLogger.LogServiceActionAsync($"DEBUG: Promotion ID {promo.Id}, ItemKod {promo.ItemKod}, Rating string: '{promo.Rating}', Standard parsed: {standardParsed}, Invariant parsed: {invariantParsed}");
-                            }
                             
                             // Select the promotion with highest rating, then lowest price as tiebreaker
                             var selectedPromo = promoGroup
@@ -285,8 +278,6 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                             decimal existingRating = TryParseDecimalInvariant(item.Rating);
                                             decimal newRating = TryParseDecimalInvariant(selectedPromo.Rating);
                                             
-                                            // Debug logging for rating comparison
-                                            await _databaseLogger.LogServiceActionAsync($"DEBUG RATING COMPARISON: ItemKod {selectedPromo.ItemKod}, Existing rating string: '{item.Rating}' -> parsed: {existingRating}, New rating string: '{selectedPromo.Rating}' -> parsed: {newRating}");
                                             
                                             if (newRating < existingRating)
                                             {
