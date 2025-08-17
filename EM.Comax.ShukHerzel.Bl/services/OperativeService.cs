@@ -179,14 +179,17 @@ namespace EM.Comax.ShukHerzel.Bl.services
                         cancellationToken.ThrowIfCancellationRequested();
                         try
                         {
+                            // Log all ratings in this group for debugging
+                            foreach (var promo in promoGroup)
+                            {
+                                var standardParsed = decimal.TryParse(promo.Rating, out var debugRating) ? debugRating.ToString() : "PARSE_FAILED";
+                                var invariantParsed = TryParseDecimalInvariant(promo.Rating).ToString();
+                                await _databaseLogger.LogServiceActionAsync($"DEBUG: Promotion ID {promo.Id}, ItemKod {promo.ItemKod}, Rating string: '{promo.Rating}', Standard parsed: {standardParsed}, Invariant parsed: {invariantParsed}");
+                            }
+                            
                             // Select the promotion with highest rating, then lowest price as tiebreaker
                             var selectedPromo = promoGroup
-                                .OrderByDescending(p => 
-                                {
-                                    if (decimal.TryParse(p.Rating, out var rating))
-                                        return rating;
-                                    return 0m;
-                                })
+                                .OrderByDescending(p => TryParseDecimalInvariant(p.Rating))
                                 .ThenBy(p => 
                                 {
                                     if (decimal.TryParse(p.Total, out var total))
@@ -279,8 +282,11 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         if (existingPromotionValid)
                                         {
                                             // Item already has a valid promotion, compare with the new one
-                                            decimal existingRating = decimal.TryParse(item.Rating, out var eRating) ? eRating : 0m;
-                                            decimal newRating = decimal.TryParse(selectedPromo.Rating, out var nRating) ? nRating : 0m;
+                                            decimal existingRating = TryParseDecimalInvariant(item.Rating);
+                                            decimal newRating = TryParseDecimalInvariant(selectedPromo.Rating);
+                                            
+                                            // Debug logging for rating comparison
+                                            await _databaseLogger.LogServiceActionAsync($"DEBUG RATING COMPARISON: ItemKod {selectedPromo.ItemKod}, Existing rating string: '{item.Rating}' -> parsed: {existingRating}, New rating string: '{selectedPromo.Rating}' -> parsed: {newRating}");
                                             
                                             if (newRating < existingRating)
                                             {
@@ -613,6 +619,30 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 return val;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Tries to parse a string to decimal with culture-invariant parsing.
+        /// </summary>
+        private decimal TryParseDecimalInvariant(string? decimalString)
+        {
+            if (string.IsNullOrWhiteSpace(decimalString))
+                return 0m;
+
+            // Try standard parsing first
+            if (decimal.TryParse(decimalString, out var result))
+                return result;
+
+            // Try with invariant culture (uses dot as decimal separator)
+            if (decimal.TryParse(decimalString, NumberStyles.Number, CultureInfo.InvariantCulture, out result))
+                return result;
+
+            // Try replacing comma with dot for European formats
+            var normalizedString = decimalString.Replace(',', '.');
+            if (decimal.TryParse(normalizedString, NumberStyles.Number, CultureInfo.InvariantCulture, out result))
+                return result;
+
+            return 0m;
         }
 
         /// <summary>
