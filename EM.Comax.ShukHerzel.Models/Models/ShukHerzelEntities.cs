@@ -37,6 +37,8 @@ public partial class ShukHerzelEntities : DbContext
 
     public virtual DbSet<TraceLog> TraceLogs { get; set; }
 
+    public virtual DbSet<TrailingItem> TrailingItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AllItem>(entity =>
@@ -512,6 +514,7 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.TotalForActivate).HasMaxLength(50);
             entity.Property(e => e.TotalPromotionPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TrailingItem).HasMaxLength(50);
+            entity.Property(e => e.XmlId).HasMaxLength(50);
         });
 
         modelBuilder.Entity<PriceUpdate>(entity =>
@@ -752,6 +755,12 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.Response).HasMaxLength(2500);
             entity.Property(e => e.ResponseStatus).HasMaxLength(50);
             entity.Property(e => e.Url).HasMaxLength(2000);
+        });
+
+        modelBuilder.Entity<TrailingItem>(entity =>
+        {
+            entity.Property(e => e.Kod).HasMaxLength(50);
+            entity.Property(e => e.Price).HasColumnType("money");
         });
 
         OnModelCreatingPartial(modelBuilder);

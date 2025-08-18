@@ -21,8 +21,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EM.Comax.ShukHerzel.Integra
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Em.Comax.ShukHerzel.installer", "Em.Comax.ShukHerzel.installer\Em.Comax.ShukHerzel.installer.vdproj", "{47DB4762-5CF3-4DFB-BE5A-4737351959C5}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Em.Comax.ShukHerzel.WixInstaller", "Em.Comax.ShukHerzel.WixInstaller\Em.Comax.ShukHerzel.WixInstaller.wixproj", "{F2EC9A37-9E0C-4993-B87A-466F6595E109}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,14 +99,6 @@ Global
 		{47DB4762-5CF3-4DFB-BE5A-4737351959C5}.Release|Any CPU.ActiveCfg = Release
 		{47DB4762-5CF3-4DFB-BE5A-4737351959C5}.Release|x86.ActiveCfg = Release
 		{47DB4762-5CF3-4DFB-BE5A-4737351959C5}.Release|x86.Build.0 = Release
-		{F2EC9A37-9E0C-4993-B87A-466F6595E109}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{F2EC9A37-9E0C-4993-B87A-466F6595E109}.Debug|Any CPU.Build.0 = Debug|x86
-		{F2EC9A37-9E0C-4993-B87A-466F6595E109}.Debug|x86.ActiveCfg = Debug|x86
-		{F2EC9A37-9E0C-4993-B87A-466F6595E109}.Debug|x86.Build.0 = Debug|x86
-		{F2EC9A37-9E0C-4993-B87A-466F6595E109}.Release|Any CPU.ActiveCfg = Release|x86
-		{F2EC9A37-9E0C-4993-B87A-466F6595E109}.Release|Any CPU.Build.0 = Release|x86
-		{F2EC9A37-9E0C-4993-B87A-466F6595E109}.Release|x86.ActiveCfg = Release|x86
-		{F2EC9A37-9E0C-4993-B87A-466F6595E109}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

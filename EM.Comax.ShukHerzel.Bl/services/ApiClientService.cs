@@ -24,6 +24,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
         private readonly IDatabaseLogger _databaseLogger;
         private readonly ILogger<ApiClientService> _logger;
         private readonly IApiConfigService _apiConfigService;
+        private readonly ITrailingItemRepository _trailingItemRepository;
         private readonly int _batchSize;
 
         public ApiClientService(
@@ -31,7 +32,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
             IEslApiClient eslApiClient,
             IDatabaseLogger databaseLogger,
             ILogger<ApiClientService> logger,
-            IApiConfigService apiConfigService
+            IApiConfigService apiConfigService,
+            ITrailingItemRepository trailingItemRepository
             )
         {
             _itemRepository = itemRepository;
@@ -39,6 +41,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
             _databaseLogger = databaseLogger;
             _logger = logger;
             _apiConfigService = apiConfigService;
+            _trailingItemRepository = trailingItemRepository;
 
             // Retrieve batch size from configuration with a default value
             _batchSize = Constants.ESL_BATCH_SIZE;
@@ -72,9 +75,36 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     return;
                 }
 
-                // 2. Map items to EslDto
-                var eslDtos = items.Select(MapToDto).ToList();
-                progress.Report($"Mapped {eslDtos.Count} items to ESL DTOs.");
+                // 2. Fetch trailing items for items that have trailing item references
+                var trailingItemKods = items
+                    .Where(item => !string.IsNullOrWhiteSpace(item.Item.TrailingItem) && item.Item.TrailingItem != "0")
+                    .Select(item => item.Item.TrailingItem)
+                    .Distinct()
+                    .ToList();
+
+                Dictionary<string, TrailingItem> trailingItems = new Dictionary<string, TrailingItem>();
+                if (trailingItemKods.Any())
+                {
+                    trailingItems = await _trailingItemRepository.GetByKodsAsync(trailingItemKods);
+                    progress.Report($"Fetched {trailingItems.Count} trailing items from database.");
+                    await _databaseLogger.LogServiceActionAsync($"ApiClientService: Fetched {trailingItems.Count} trailing items for {trailingItemKods.Count} requested Kods.");
+                }
+
+                // 3. Map items to EslDto
+                var eslDtos = new List<EslDto>();
+                foreach (var item in items)
+                {
+                    // Always create DTO with Barcode as id
+                    eslDtos.Add(MapToDto(item, trailingItems, useXmlIdAsId: false));
+                    
+                    // If XmlId is different from Barcode, create another DTO with XmlId as id
+                    if (!string.IsNullOrEmpty(item.Item.XmlId) && 
+                        item.Item.XmlId != item.Item.Barcode)
+                    {
+                        eslDtos.Add(MapToDto(item, trailingItems, useXmlIdAsId: true));
+                    }
+                }
+                progress.Report($"Mapped {eslDtos.Count} items to ESL DTOs (including XmlId variants).");
 
                 // 3. Group items by StoreId
                 var groupedItems = eslDtos.GroupBy(dto => dto.custom.StoreId);
@@ -163,14 +193,21 @@ namespace EM.Comax.ShukHerzel.Bl.services
         /// Maps an ItemWithBranch entity to an EslDto.
         /// </summary>
         /// <param name="itemWithBranch">The item with branch information to map.</param>
+        /// <param name="trailingItems">Dictionary of trailing items by Kod.</param>
+        /// <param name="useXmlIdAsId">If true, use XmlId as id; otherwise use Barcode.</param>
         /// <returns>The mapped EslDto.</returns>
-        private EslDto MapToDto(ItemWithBranch itemWithBranch)
+        private EslDto MapToDto(ItemWithBranch itemWithBranch, Dictionary<string, TrailingItem> trailingItems, bool useXmlIdAsId = false)
         {
             var item = itemWithBranch.Item;
+            
+            // Calculate trailing item prices
+            var trailingItemPrice = CalculateTrailingItemPrice(item, trailingItems);
+            var trailingItemPromotionPrice = CalculateTrailingItemPromotionPrice(item, trailingItems);
+            
             return new EslDto
             {
                 brand = string.Empty, // Adjust as necessary
-                id = item.Barcode?.Trim() ?? string.Empty,
+                id = useXmlIdAsId ? (item.XmlId?.Trim() ?? string.Empty) : (item.Barcode?.Trim() ?? string.Empty),
                 name = item.Name?.Trim() ?? string.Empty,
                 price = item.Price,
                 
@@ -201,7 +238,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     GetDiscountPrecent = item.GetDiscountPrecent?.ToString() ?? string.Empty,
                     GetTotal = item.GetTotal?.ToString() ?? string.Empty,
                     PromotionMinQty = item.PromotionMinQty?.ToString() ?? string.Empty,
-                    PromotionMaxQty = item.PromotionMaxQty?.ToString() ?? string.Empty
+                    PromotionMaxQty = FormatPromotionMaxQty(item.PromotionMaxQty),
+                    TrailingItemPrice = trailingItemPrice,
+                    TrailingItemPromotionPrice = trailingItemPromotionPrice
 
                 }
             };
@@ -216,6 +255,100 @@ namespace EM.Comax.ShukHerzel.Bl.services
         private string ParseDate(DateTime? date)
         {
             return date.HasValue ? date.Value.ToString("yyyy-MM-dd") : string.Empty;
+        }
+
+        /// <summary>
+        /// Formats PromotionMaxQty with special rounding logic:
+        /// - If decimal part < 0.5: round down to the unit (e.g., 3.4 → "3")
+        /// - If decimal part >= 0.5: make it X.5 (e.g., 3.6 → "3.5", 3.5 → "3.5")
+        /// </summary>
+        /// <param name="maxQty">The MaxQty string value from the promotion.</param>
+        /// <returns>Formatted MaxQty string for ESL API.</returns>
+        private string FormatPromotionMaxQty(string maxQty)
+        {
+            if (string.IsNullOrWhiteSpace(maxQty))
+                return string.Empty;
+
+            // Try to parse the MaxQty as a decimal
+            if (decimal.TryParse(maxQty.Trim(), out decimal value))
+            {
+                // Get the integer part and decimal part
+                decimal integerPart = Math.Floor(value);
+                decimal decimalPart = value - integerPart;
+
+                if (decimalPart < 0.5m)
+                {
+                    // Round down to the unit (remove decimal part)
+                    return integerPart.ToString("0");
+                }
+                else
+                {
+                    // Set to X.5 (integer part + 0.5)
+                    return (integerPart + 0.5m).ToString("0.0");
+                }
+            }
+
+            // If parsing fails, return original value
+            return maxQty.Trim();
+        }
+
+        /// <summary>
+        /// Calculates the trailing item price based on the item's TrailingItem reference.
+        /// </summary>
+        /// <param name="item">The item to calculate trailing price for.</param>
+        /// <param name="trailingItems">Dictionary of trailing items by Kod.</param>
+        /// <returns>Trailing item price as string, or empty string if not applicable.</returns>
+        private string CalculateTrailingItemPrice(Models.Models.Item item, Dictionary<string, TrailingItem> trailingItems)
+        {
+            // If item has no trailing item reference or it's "0", return empty
+            if (string.IsNullOrWhiteSpace(item.TrailingItem) || item.TrailingItem == "0")
+                return string.Empty;
+
+            // Look up the trailing item in the dictionary
+            if (trailingItems.TryGetValue(item.TrailingItem, out var trailingItem))
+            {
+                // Return the price from the trailing item table
+                return trailingItem.Price?.ToString() ?? string.Empty;
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Calculates the trailing item promotion price by multiplying the trailing item price 
+        /// with the promotion quantity if the item has a promotion.
+        /// </summary>
+        /// <param name="item">The item to calculate trailing promotion price for.</param>
+        /// <param name="trailingItems">Dictionary of trailing items by Kod.</param>
+        /// <returns>Trailing item promotion price as string, or empty string if not applicable.</returns>
+        private string CalculateTrailingItemPromotionPrice(Models.Models.Item item, Dictionary<string, TrailingItem> trailingItems)
+        {
+            // If item has no promotion, return empty
+            if (!item.IsPromotion.HasValue || !item.IsPromotion.Value)
+                return string.Empty;
+
+            // If item has no trailing item reference or it's "0", return empty
+            if (string.IsNullOrWhiteSpace(item.TrailingItem) || item.TrailingItem == "0")
+                return string.Empty;
+
+            // Look up the trailing item in the dictionary
+            if (trailingItems.TryGetValue(item.TrailingItem, out var trailingItem))
+            {
+                // Get the trailing item price
+                var trailingPrice = trailingItem.Price;
+                if (!trailingPrice.HasValue)
+                    return string.Empty;
+
+                // Get the promotion quantity
+                if (decimal.TryParse(item.PromotionQuantity, out var promotionQty) && promotionQty > 0)
+                {
+                    // Multiply trailing item price by promotion quantity
+                    var result = trailingPrice.Value * promotionQty;
+                    return result.ToString();
+                }
+            }
+
+            return string.Empty;
         }
 
         /// <summary>

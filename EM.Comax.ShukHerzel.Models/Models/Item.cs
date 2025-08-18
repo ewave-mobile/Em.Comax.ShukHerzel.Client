@@ -23,6 +23,8 @@ public partial class Item
 
     public string Barcode { get; set; }
 
+    public string XmlId { get; set; }
+
     public string Name { get; set; }
 
     public decimal? Price { get; set; }

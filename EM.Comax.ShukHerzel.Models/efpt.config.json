@@ -19,6 +19,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[TrailingItems]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[Log].[BadItemLog]",
          "ObjectType": 0
       },
