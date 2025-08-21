@@ -9,10 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="appsettings.json">
+    <Content Include="appsettingsPrd.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="appsettingsTST.json">
+    <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="appsettingsDev.json">

@@ -291,9 +291,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                                 decimal existingPrice = item.TotalPromotionPrice ?? decimal.MaxValue;
                                                 decimal newPrice = TryParseDecimal(selectedPromo.Total) ?? decimal.MaxValue;
                                                 
-                                                if (newPrice >= existingPrice)
+                                                if (newPrice > existingPrice)
                                                 {
-                                                    // New promotion has higher or equal price, keep existing
+                                                    // New promotion has higher price, keep existing
                                                     shouldUpdatePromotion = false;
                                                     progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, existing price: {existingPrice} <= new price: {newPrice})");
                                                 }
