@@ -256,7 +256,13 @@ namespace Em.Comax.ShukHerzel.Client
                 HeaderText = "הועבר לאופרטיבי",
                 Width = 120
             });
-            
+            promotionsDataGridView.Columns.Add(new DataGridViewCheckBoxColumn
+            {
+                DataPropertyName = "SwNotForShelfSignage",
+                HeaderText = "האם להצגת שילוט דיגיטלי",
+                Width = 80
+            });
+
             // Set up DataGridView columns for promotionsApiResultsDataGridView
             promotionsApiResultsDataGridView.AutoGenerateColumns = false;
             promotionsApiResultsDataGridView.Columns.Add(new DataGridViewTextBoxColumn

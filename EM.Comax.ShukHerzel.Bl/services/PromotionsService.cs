@@ -511,7 +511,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
 
                     ClassifiedNm = src.ClassifiedNm ?? "",
                     CounterGetInSale = src.CounterGet_InSale ?? "",
-                    SameGetAndBuy = SafeSerializeToJson(src.SameGetAndBuy)
+                    SameGetAndBuy = SafeSerializeToJson(src.SameGetAndBuy),
+                    SwNotForShelfSignage = src.SwNotForShelfSignage ?? ""
                 };
             }
             catch (Exception ex)

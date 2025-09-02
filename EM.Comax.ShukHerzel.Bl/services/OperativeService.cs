@@ -141,6 +141,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 // ---------------------------
                 await _promoRepo.DeleteExpiredPromotionsAsync();
                 var promos = await _promoRepo.GetNonTransferredPromotionsAsync();
+                promos = promos.Where(p => p.SwNotForShelfSignage != "True").ToList();
                 progress.Report($"Found {promos.Count} active promotions (future promotions excluded until start date).");
                 if (promos.Any())
                 {
@@ -215,7 +216,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                 item = matchingItems.FirstOrDefault(i => 
                                     i.XmlId == selectedPromo.ItemKod && i.BranchId == selectedPromo.BranchId);
                             }
-                            
+
                             if (item != null)
                             {
                                 if (selectedPromo.SwActive?.ToLower() != "true")
@@ -255,12 +256,12 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                     // Check if item already has a promotion and compare ratings/prices
                                     bool shouldUpdatePromotion = true;
                                     var today = DateTime.Today; // Date-only comparison, includes current day
-                                    
+
                                     if (item.IsPromotion == true && !string.IsNullOrEmpty(item.Rating))
                                     {
                                         // First check if existing promotion is still valid (date validation)
                                         bool existingPromotionValid = true;
-                                        
+
                                         if (item.PromotionFromDate.HasValue && item.PromotionFromDate.Value.Date > today)
                                         {
                                             existingPromotionValid = false;
@@ -271,14 +272,14 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                             existingPromotionValid = false;
                                             progress.Report($"Existing promotion for ItemKod: {selectedPromo.ItemKod} has expired (ended: {item.PromotionToDate.Value.Date:dd/MM/yyyy})");
                                         }
-                                        
+
                                         if (existingPromotionValid)
                                         {
                                             // Item already has a valid promotion, compare with the new one
                                             decimal existingRating = TryParseDecimalInvariant(item.Rating);
                                             decimal newRating = TryParseDecimalInvariant(selectedPromo.Rating);
-                                            
-                                            
+
+
                                             if (newRating < existingRating)
                                             {
                                                 // New promotion has lower rating, keep existing
@@ -290,7 +291,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                                 // Same rating, compare prices
                                                 decimal existingPrice = item.TotalPromotionPrice ?? decimal.MaxValue;
                                                 decimal newPrice = TryParseDecimal(selectedPromo.Total) ?? decimal.MaxValue;
-                                                
+
                                                 if (newPrice > existingPrice)
                                                 {
                                                     // New promotion has higher price, keep existing
@@ -313,14 +314,14 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                             progress.Report($"Replacing expired/invalid promotion for ItemKod: {selectedPromo.ItemKod} with new promotion");
                                         }
                                     }
-                                    
+
                                     // Also validate the new promotion dates before applying
                                     if (shouldUpdatePromotion)
                                     {
                                         // Check if the new promotion is currently valid (date validation)
                                         var newPromotionFromDate = ParseDate(selectedPromo.FromDate);
                                         var newPromotionToDate = ParseDate(selectedPromo.ToDate);
-                                        
+
                                         bool newPromotionValid = true;
                                         if (newPromotionFromDate.HasValue && newPromotionFromDate.Value.Date > today)
                                         {
@@ -332,13 +333,13 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                             newPromotionValid = false;
                                             progress.Report($"New promotion for ItemKod: {selectedPromo.ItemKod} has expired (ended: {newPromotionToDate.Value.Date:dd/MM/yyyy}), skipping");
                                         }
-                                        
+
                                         if (!newPromotionValid)
                                         {
                                             shouldUpdatePromotion = false;
                                         }
                                     }
-                                    
+
                                     if (shouldUpdatePromotion)
                                     {
                                         // Update Item with Promotion details

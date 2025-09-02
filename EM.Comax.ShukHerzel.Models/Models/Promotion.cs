@@ -250,4 +250,6 @@ public partial class Promotion
     public string CounterGetInSale { get; set; }
 
     public string SameGetAndBuy { get; set; }
+
+    public string SwNotForShelfSignage { get; set; }
 }

@@ -127,6 +127,7 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
         public string? ClassifiedNm { get; set; }
         public string? CounterGet_InSale { get; set; }
         public object SameGetAndBuy { get; set; }
+        public string? SwNotForShelfSignage { get; set; }
     }
 
     public class Store
