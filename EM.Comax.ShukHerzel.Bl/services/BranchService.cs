@@ -22,5 +22,11 @@ namespace EM.Comax.ShukHerzel.Bl.services
             var branches = await _branchRepository.GetAllBranchesByCompanyIdAsync(companyId);
             return branches.ToList();
         }
+
+        public async Task<List<Branch>> GetAllBranches()
+        {
+            var branches = await _branchRepository.GetAllAsync();
+            return branches.ToList();
+        }
     }
 }

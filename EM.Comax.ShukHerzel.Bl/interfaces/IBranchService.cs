@@ -11,5 +11,6 @@ namespace EM.Comax.ShukHerzel.Bl.interfaces
     public interface IBranchService
     {
         Task<List<Branch>> GetAllBranchesByCompany(long companyId);
+        Task<List<Branch>> GetAllBranches();
     }
 }

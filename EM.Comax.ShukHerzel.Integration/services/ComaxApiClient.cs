@@ -56,7 +56,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
         {
             try
             {
-                var config = await _configService.getCompanyConfig(Constants.SHUK_HERZEL_COMPANY_ID);
+                var config = await _configService.getCompanyConfig(branch.CompanyId??Constants.SHUK_HERZEL_COMPANY_ID);
                 var barcodesArray = barcodes.ToArray();
                 
                 // Build the URL with the barcodes as a comma-separated list in the ItemID parameter
@@ -115,7 +115,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
         {
             try
             {
-                var config = await _configService.getCompanyConfig(Constants.SHUK_HERZEL_COMPANY_ID);
+                var config = await _configService.getCompanyConfig(branch.CompanyId??Constants.SHUK_HERZEL_COMPANY_ID);
                 var barcodesArray = barcodes.ToArray();
                 var barcodesString = string.Join(",", barcodesArray);
                 var lastUpdateDate = DateTime.Now.AddYears(-1); // Use a date far in the past to ensure we get all items
@@ -200,7 +200,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
 
                 // Add headers if API key is provided
                 // 1. Get your config row (assuming there's only one row or you're picking by CompanyID, etc.)
-                var config = await _configService.getCompanyConfig(Constants.SHUK_HERZEL_COMPANY_ID);
+                var config = await _configService.getCompanyConfig(branch.CompanyId??Constants.SHUK_HERZEL_COMPANY_ID);
                 // or query from DB directly
 
                 // 2. Build the full GET URL
@@ -230,7 +230,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
             return JsonConvert.DeserializeObject<List<PromotionDto>>(json);
         }
         // Suppose we have a method that builds the query string
-       
+
 
         public string BuildComaxCatalogUrl(Configuration config, Branch branch, DateTime LastUpdateDate)
         {
@@ -239,7 +239,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
             // We'll append query params from the config object
             // Note: You might need to handle null or empty strings carefully, or pass them as blank.
 
-           // var baseUrl = config.ComaxApiUrl; // e.g. "https://ws.comax.co.il/Comax_WebServices/Items_Service.asmx/Get_AllItemsDetailsBySearch"
+            // var baseUrl = config.ComaxApiUrl; // e.g. "https://ws.comax.co.il/Comax_WebServices/Items_Service.asmx/Get_AllItemsDetailsBySearch"
             var endpoint = ComaxConstants.CATALOG_METHOD_URL; // or whatever your endpoint is
             // Build the query string with each param
             // (In real code, use UriBuilder or HttpUtility to URL-encode your parameters properly)
@@ -258,10 +258,14 @@ namespace EM.Comax.ShukHerzel.Integration.services
                         $"&LastUpdatedFromDate={LastUpdateDate.ToString("dd/MM/yyyy HH:mm:ss")}" +
                         // or config.PromotionLastUpdatedDate if that’s your last update date?
                         $"&LoginID={config.LoginId}" +
-                        $"&LoginPassword={config.LoginPassword}" +
-                        $"&ShowInWeb={config.ShowInWeb?.ToString() ?? "False"}" +
-                        $"&WithOutArchive={config.WithOutArchive?.ToString() ?? "False"}" +
-                        $"&SelByPriceList={config.SelByPriceList?.ToString() ?? "False"}";
+                        $"&LoginPassword={config.LoginPassword}";
+            if (config.ShowInWeb?.ToString() != null )
+            {
+                query += $"&ShowInWeb={config.ShowInWeb?.ToString() ?? "False"}";
+            }
+           
+            query += $"&WithOutArchive={config.WithOutArchive?.ToString() ?? "False"}" +
+                $"&SelByPriceList={config.SelByPriceList?.ToString() ?? "False"}";
 
             // Combine
            // return baseUrl + query;
@@ -282,7 +286,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
               //  _httpClient.BaseAddress = new Uri(configComax.ComaxBaseUrl ?? "http://ws.comax.co.il/Comax_WebServices/");
                 // 1. Build request body (based on your sample)
                 //    We assume Comax expects JSON with "Params", "LoginID", "LoginPassword"
-                var config = await _configService.getCompanyConfig(Constants.SHUK_HERZEL_COMPANY_ID);
+                var config = await _configService.getCompanyConfig(branch.CompanyId ?? Constants.SHUK_HERZEL_COMPANY_ID);
                 // e.g. config.LoginId, config.LoginPassword, etc.
 
                 var body = new
@@ -318,7 +322,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
         public async Task<List<ItemSalePriceDto>> GetNewPricesAsync(Branch branch, DateTime fromDate, CancellationToken cancellationToken = default)
         {
             // Assume you have fetched your configuration from _configService
-            var config = await _configService.getCompanyConfig(Constants.SHUK_HERZEL_COMPANY_ID);
+            var config = await _configService.getCompanyConfig(branch.CompanyId??Constants.SHUK_HERZEL_COMPANY_ID);
 
             // Build the SOAP envelope
             var soapEnvelope = $@"<?xml version=""1.0"" encoding=""utf-8""?>

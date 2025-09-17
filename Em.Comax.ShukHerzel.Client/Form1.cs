@@ -71,8 +71,10 @@ namespace Em.Comax.ShukHerzel.Client
             
             branchList.Enabled = false;
             tempPullDateTime.Enabled = true;
-            _branches = await _branchService.GetAllBranchesByCompany(Constants.SHUK_HERZEL_COMPANY_ID);
-            branchList.DataSource = _branches;
+            //Remove 17-09-2025
+            //  _branches = await _branchService.GetAllBranchesByCompany(Constants.SHUK_HERZEL_COMPANY_ID);
+            _branches = await _branchService.GetAllBranches();
+             branchList.DataSource = _branches;
             branchList.DisplayMember = "BranchName";
             branchList.ValueMember = "Id";
             
