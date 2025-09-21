@@ -64,7 +64,7 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
         public ItemModel? ItemModel { get; set; }
         public ItemColor? ItemColor { get; set; }
         public ItemSize? ItemSize { get; set; }
-        public string? ItemsTree { get; set; }
+        public ItemsTree? ItemsTree { get; set; }
         public string Attribute1 { get; set; } = string.Empty;
         public string Attribute1Code { get; set; } = string.Empty;
         public string? Attribute2 { get; set; }
@@ -151,5 +151,21 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
     {
         public string? Name { get; set; }
         public string? ID { get; set; }
+    }     
+    
+    public class ItemsTree
+    {
+        [XmlElement("ClsItemTree")]
+        public List<ClsItemTree> ClsItemTree { get; set; }
+         
+    }
+
+    public class ClsItemTree
+    {
+        [XmlElement("Name")]
+        public string Name { get; set; }
+
+        [XmlElement("ID")]
+        public string ID { get; set; }
     }
 }
