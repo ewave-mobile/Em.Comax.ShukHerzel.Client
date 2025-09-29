@@ -244,6 +244,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         item.PromotionMinQty = null;
                                         item.PromotionMaxQty = null;
                                         item.Rating = null;
+                                        item.RemarkForPrint = null;
                                         progress.Report($"Cancelled promotion {selectedPromo.Kod} for ItemKod: {selectedPromo.ItemKod}");
                                     }
                                     else
@@ -363,6 +364,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         item.PromotionMinQty = selectedPromo.MinQty;
                                         item.PromotionMaxQty = selectedPromo.MaxQty;
                                         item.Rating = selectedPromo.Rating;
+                                        item.RemarkForPrint = selectedPromo.RemarkForPrint;
                                     }
                                 }
                                 itemsToUpdate.Add(item);

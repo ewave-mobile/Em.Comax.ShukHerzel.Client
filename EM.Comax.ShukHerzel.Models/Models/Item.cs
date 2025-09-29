@@ -82,4 +82,6 @@ public partial class Item
     public bool? SwWeighable { get; set; }
 
     public string PromotionBarcodes { get; set; }
+
+    public string RemarkForPrint { get; set; }
 }
