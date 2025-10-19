@@ -147,7 +147,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
                             $"&ItemSizeID={config.ItemSizeId}" +
                             $"&Barcode={barcodesString}";
                 }
-                
+
                 // Add common parameters
                 query += $"&StoreID={branch.ComaxStoreId}" +
                          $"&PriceListID={branch.ComaxPriceListId}" +
@@ -156,9 +156,13 @@ namespace EM.Comax.ShukHerzel.Integration.services
                          $"&CustomerID={config.CustomerId}" +
                          $"&LastUpdatedFromDate={lastUpdateDate.ToString("dd/MM/yyyy HH:mm:ss")}" +
                          $"&LoginID={config.LoginId}" +
-                         $"&LoginPassword={config.LoginPassword}" +
-                         $"&ShowInWeb={config.ShowInWeb?.ToString() ?? "False"}" +
-                         $"&WithOutArchive={config.WithOutArchive?.ToString() ?? "False"}" +
+                         $"&LoginPassword={config.LoginPassword}";
+                if(config.ShowInWeb != null)
+                {
+                    query += $"&ShowInWeb={config.ShowInWeb?.ToString() ?? "False"}";
+                }
+
+                 query += $"&WithOutArchive={config.WithOutArchive?.ToString() ?? "False"}" +
                          $"&SelByPriceList={config.SelByPriceList?.ToString() ?? "False"}";
                 
                 var url = endpoint + query;
