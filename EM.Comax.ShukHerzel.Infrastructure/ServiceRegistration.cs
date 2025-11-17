@@ -73,6 +73,7 @@ namespace EM.Comax.ShukHerzl.Infrastructure
             services.AddScoped<IBranchRepository, BranchRepository>();
             services.AddScoped<IBranchService, BranchService>();
             services.AddScoped<IAllItemsService, AllItemsService>();
+            services.AddScoped<IAllItemsNewService, AllItemsNewService>();
             services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
             services.AddScoped<IAllItemsRepository, AllItemsRepository>();
             services.AddScoped<IDatabaseLogger, DatabaseLogger>();
@@ -85,6 +86,7 @@ namespace EM.Comax.ShukHerzl.Infrastructure
             services.AddScoped<IPriceUpdateService, PriceUpdateService>();
             services.AddScoped<IPriceUpdateRepository, PriceUpdateRepository>();
             services.AddScoped<ITrailingItemRepository, TrailingItemRepository>();
+            services.AddScoped<IAllItemsNewRepository, AllItemsNewRepository>();
             // Possibly register Quartz only if we're in the service
             if (isService)
             {

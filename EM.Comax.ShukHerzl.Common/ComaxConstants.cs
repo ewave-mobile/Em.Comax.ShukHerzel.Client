@@ -10,6 +10,7 @@ namespace EM.Comax.ShukHerzl.Common
     {
         public const string PROMOTION_METHOD_URL = "Promotions_Service.asmx/GetPromotionsDef";
         public const string CATALOG_METHOD_URL = "Items_Service.asmx/Get_AllItemsDetailsBySearch";
+        public const string CATALOG_METHOD_URL_NEW = "Items_Service.asmx";
         public const string PRICE_METHOD_URL = "Items_Service.asmx";
 
         // SOAP envelope constants

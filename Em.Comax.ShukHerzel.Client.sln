@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EM.Comax.ShukHerzel.Integra
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Em.Comax.ShukHerzel.installer", "Em.Comax.ShukHerzel.installer\Em.Comax.ShukHerzel.installer.vdproj", "{47DB4762-5CF3-4DFB-BE5A-4737351959C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EM.Comax.New.Service", "EM.Comax.New\EM.Comax.New.Service.csproj", "{6F13831F-90C0-40C0-8AAC-16C17324318A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,8 +101,19 @@ Global
 		{47DB4762-5CF3-4DFB-BE5A-4737351959C5}.Release|Any CPU.ActiveCfg = Release
 		{47DB4762-5CF3-4DFB-BE5A-4737351959C5}.Release|x86.ActiveCfg = Release
 		{47DB4762-5CF3-4DFB-BE5A-4737351959C5}.Release|x86.Build.0 = Release
+		{6F13831F-90C0-40C0-8AAC-16C17324318A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F13831F-90C0-40C0-8AAC-16C17324318A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F13831F-90C0-40C0-8AAC-16C17324318A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6F13831F-90C0-40C0-8AAC-16C17324318A}.Debug|x86.Build.0 = Debug|Any CPU
+		{6F13831F-90C0-40C0-8AAC-16C17324318A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F13831F-90C0-40C0-8AAC-16C17324318A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F13831F-90C0-40C0-8AAC-16C17324318A}.Release|x86.ActiveCfg = Release|Any CPU
+		{6F13831F-90C0-40C0-8AAC-16C17324318A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0A503CCA-1100-49AE-B929-CA8297291FD4}
 	EndGlobalSection
 EndGlobal

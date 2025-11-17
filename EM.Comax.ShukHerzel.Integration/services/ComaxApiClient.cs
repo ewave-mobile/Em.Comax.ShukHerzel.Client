@@ -7,8 +7,11 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 
 namespace EM.Comax.ShukHerzel.Integration.services
@@ -226,6 +229,59 @@ namespace EM.Comax.ShukHerzel.Integration.services
             }
         }
 
+
+        public async Task<string> GetCatalogNewXmlAsync(Branch branch, DateTime lastUpdateDate, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                //   var configComax = _apiConfigService.GetApiConfig("COMAX"); // Fetch configuration within the scoped context
+
+                // Configure HttpClient based on fetched configuration
+                //      _httpClient.BaseAddress = new Uri(configComax.ComaxBaseUrl ?? "http://ws.comax.co.il/Comax_WebServices/");
+
+                // Add headers if API key is provided
+                // 1. Get your config row (assuming there's only one row or you're picking by CompanyID, etc.)
+                var config = await _configService.getCompanyConfig(branch.CompanyId ?? Constants.SHUK_HERZEL_COMPANY_ID);
+                // or query from DB directly
+
+                //2. Get URL Getting catalogItems
+               // var prevEndPoint = ComaxConstants.CATALOG_METHOD_URL_NEW;
+               // var response2 = await _httpClient.PostAsync(prevEndPoint,null);
+               // var url = response2.re
+
+                // 2. Build the full GET URL XML
+                var  res = await BuildComaxNewCatalogUrl(config, branch, lastUpdateDate);
+
+
+                XDocument doc = XDocument.Parse(res);
+                XNamespace ns = "http://ws.comax.co.il/Comax_WebServices/";
+
+                var resultElement = doc
+                    ?.Root
+                    ?.Element("{http://schemas.xmlsoap.org/soap/envelope/}Body")
+                    ?.Element(ns + "Get_AllItems_WithoutSupplierDetailsResponse")
+                    ?.Element(ns + "Get_AllItems_WithoutSupplierDetailsResult");
+
+                string url1 = resultElement?.Value?.Trim();
+
+                //var url = ComaxConstants.CATALOG_METHOD_URL;
+
+                // 4. Make the GET request
+                var response = await _httpClient.GetAsync(url1);
+                await _databaseLogger.LogTraceAsync(_httpClient.BaseAddress?.ToString(), url1, "", response.StatusCode.ToString());
+                response.EnsureSuccessStatusCode();
+
+                // 5. Read the raw XML string
+                var xml = await response.Content.ReadAsStringAsync();
+                return xml;
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("COMAX_API_CLIENT", "GetCatalogXmlAsync", ex);
+                return "";
+            }
+        }
+
         public async Task<IList<PromotionDto>> GetPromotionsAsync(CancellationToken cancellationToken = default)
         {
             var response = await _httpClient.GetAsync("promotions", cancellationToken);
@@ -274,6 +330,73 @@ namespace EM.Comax.ShukHerzel.Integration.services
             // Combine
            // return baseUrl + query;
            return endpoint + query;
+        }
+
+        public async Task<string> BuildComaxNewCatalogUrl(Configuration config, Branch branch, DateTime LastUpdateDate)
+        {
+            var endpoint = ComaxConstants.COMAX_WS_NAMESPACE + ComaxConstants.CATALOG_METHOD_URL_NEW;
+            try
+            {
+
+                var xml = $@"<?xml version=""1.0"" encoding=""utf-8""?>
+                <soap:Envelope xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance""
+
+                               xmlns:xsd=""http://www.w3.org/2001/XMLSchema""
+
+                               xmlns:soap=""http://schemas.xmlsoap.org/soap/envelope/"">
+                <soap:Body>
+                <Get_AllItems_WithoutSupplierDetails xmlns=""http://ws.comax.co.il/Comax_WebServices/"">
+                <Params>
+                <Department>{config.DepartmentId}</Department>
+                <Group>{config.GroupId}</Group>
+                <Sub_Group></Sub_Group>
+                <StoreID>{branch.ComaxStoreId}</StoreID>
+                <PriceListID>{branch.ComaxPriceListId}</PriceListID>
+                <LastUpdatedFromDate>{LastUpdateDate.ToString("dd/MM/yyyy HH:mm:ss")}</LastUpdatedFromDate>
+                </Params>
+                <LoginID>{config.LoginId}</LoginID>
+                <LoginPassword>{config.LoginPassword}</LoginPassword>
+                </Get_AllItems_WithoutSupplierDetails>
+                </soap:Body>
+                </soap:Envelope>";
+                ////var xml = $@"<?xml version=""1.0"" encoding=""utf-8""?>
+                ////<soap:Envelope xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance""
+                ////               xmlns:xsd=""http://www.w3.org/2001/XMLSchema""
+                ////               xmlns:soap=""http://schemas.xmlsoap.org/soap/envelope/"">
+                ////  <soap:Body>
+                ////    <Get_AllItems_WithoutSupplierDetails xmlns=""http://ws.comax.co.il/Comax_WebServices/"">
+                ////      <Params>
+                ////        <Department></Department>
+                ////        <Group></Group>
+                ////        <Sub_Group></Sub_Group>
+                ////        <StoreID>2</StoreID>
+                ////        <PriceListID>1</PriceListID>
+                ////        <LastUpdatedFromDate>01/09/2025 08:00</LastUpdatedFromDate>
+                ////      </Params>
+                ////      <LoginID>digital123</LoginID>
+                ////      <LoginPassword>digital2027</LoginPassword>
+                ////    </Get_AllItems_WithoutSupplierDetails>
+                ////  </soap:Body>
+                ////</soap:Envelope>";
+
+                using var client = new HttpClient();
+
+                var content = new StringContent(xml, Encoding.UTF8, "text/xml");
+
+                var response = await client.PostAsync(endpoint, content);
+
+                var result = await response.Content.ReadAsStringAsync();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string m = ex.Message;
+                // throw;
+                return null;
+            }
+
+
         }
 
         public async Task<PromotionDto> GetPromotionsAsync(

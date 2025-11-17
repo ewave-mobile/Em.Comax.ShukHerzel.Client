@@ -39,7 +39,12 @@ namespace EM.Comax.ShukHerzel.Integration.interfaces
         /// Gets the catalog XML from Comax API
         /// </summary>
         Task<string> GetCatalogXmlAsync(Branch branch, DateTime lastUpdateDate, CancellationToken cancellationToken = default);
-        
+
+        /// <summary>
+        /// Gets the catalog XML from Comax API
+        /// </summary>
+        Task<string> GetCatalogNewXmlAsync(Branch branch, DateTime lastUpdateDate, CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Gets new prices from Comax API
         /// </summary>

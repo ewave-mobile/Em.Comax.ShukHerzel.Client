@@ -15,6 +15,8 @@ public partial class ShukHerzelEntities : DbContext
 
     public virtual DbSet<AllItem> AllItems { get; set; }
 
+    public virtual DbSet<AllItemComax> AllItemComax { get; set; }
+
     public virtual DbSet<BadItemLog> BadItemLogs { get; set; }
 
     public virtual DbSet<Branch> Branches { get; set; }
@@ -300,6 +302,312 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.SupplierPriceNet).HasMaxLength(50);
             entity.Property(e => e.SupplierShekelPrice).HasMaxLength(50);
             entity.Property(e => e.SupplierShekelPriceNet).HasMaxLength(50);
+            entity.Property(e => e.SuppliersOrders).HasMaxLength(50);
+            entity.Property(e => e.SwAlcohol).HasMaxLength(50);
+            entity.Property(e => e.SwBonos).HasMaxLength(10);
+            entity.Property(e => e.SwMustCmtInKupa).HasMaxLength(50);
+            entity.Property(e => e.SwPikadon).HasMaxLength(50);
+            entity.Property(e => e.SwSerialy).HasMaxLength(10);
+            entity.Property(e => e.SwWeighable).HasMaxLength(10);
+            entity.Property(e => e.Thickness).HasMaxLength(50);
+            entity.Property(e => e.TotalSum).HasMaxLength(50);
+            entity.Property(e => e.TrailingItem).HasMaxLength(50);
+            entity.Property(e => e.TransferredDateTime)
+                .HasPrecision(3)
+                .HasColumnName("transferredDateTime");
+            entity.Property(e => e.UnitsQuantity).HasMaxLength(50);
+            entity.Property(e => e.Volume).HasMaxLength(50);
+            entity.Property(e => e.VolumeSize).HasMaxLength(50);
+            entity.Property(e => e.WarrantyMonths).HasMaxLength(50);
+            entity.Property(e => e.WarrantyRemark).HasMaxLength(200);
+            entity.Property(e => e.WarrantySupplier).HasMaxLength(50);
+            entity.Property(e => e.WebCategory).HasMaxLength(200);
+            entity.Property(e => e.WebCategoryNm).HasMaxLength(200);
+            entity.Property(e => e.WebColor).HasMaxLength(50);
+            entity.Property(e => e.WebColorNm).HasMaxLength(200);
+            entity.Property(e => e.WebDelvDesc).HasMaxLength(200);
+            entity.Property(e => e.WebDep).HasMaxLength(50);
+            entity.Property(e => e.WebDepNm).HasMaxLength(200);
+            entity.Property(e => e.WebDesc).HasMaxLength(200);
+            entity.Property(e => e.WebDesc2).HasMaxLength(200);
+            entity.Property(e => e.WebGrp).HasMaxLength(50);
+            entity.Property(e => e.WebGrpNm).HasMaxLength(200);
+            entity.Property(e => e.WebInstruction).HasMaxLength(200);
+            entity.Property(e => e.WebManufacturer).HasMaxLength(200);
+            entity.Property(e => e.WebManufacturerCode).HasMaxLength(50);
+            entity.Property(e => e.WebNosafKod2)
+                .HasMaxLength(50)
+                .HasColumnName("WebNosafKod_2");
+            entity.Property(e => e.WebNosafNm2)
+                .HasMaxLength(200)
+                .HasColumnName("WebNosafNm_2");
+            entity.Property(e => e.WebRating).HasMaxLength(50);
+            entity.Property(e => e.WebShortName).HasMaxLength(200);
+            entity.Property(e => e.WebSubGroup)
+                .HasMaxLength(50)
+                .HasColumnName("WebSub_Group");
+            entity.Property(e => e.WebSubGroupNm)
+                .HasMaxLength(200)
+                .HasColumnName("WebSub_GroupNm");
+            entity.Property(e => e.Weight).HasMaxLength(50);
+            entity.Property(e => e.WeightSize).HasMaxLength(50);
+            entity.Property(e => e.Width).HasMaxLength(50);
+            entity.Property(e => e.WidthSize).HasMaxLength(50);
+            entity.Property(e => e.WorkByAlternateId)
+                .HasMaxLength(10)
+                .HasColumnName("WorkByAlternateID");
+            entity.Property(e => e.XmlId)
+                .HasMaxLength(50)
+                .HasColumnName("Xml_ID");
+        });
+
+        modelBuilder.Entity<AllItemComax>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__allItems__3214EC27F35E7269");
+
+            entity.ToTable("AllItemsComax", "Temp");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.AdditionalConversion).HasMaxLength(50);
+            entity.Property(e => e.AlternateId)
+                .HasMaxLength(50)
+                .HasColumnName("AlternateID");
+            entity.Property(e => e.AmaraBy).HasMaxLength(200);
+            entity.Property(e => e.AnotherBarkods).HasMaxLength(200);
+            entity.Property(e => e.ArchiveDate).HasMaxLength(50);
+            entity.Property(e => e.AtarDescription).HasMaxLength(200);
+            entity.Property(e => e.Attribute1).HasMaxLength(200);
+            entity.Property(e => e.Attribute1Code).HasMaxLength(50);
+            entity.Property(e => e.Attribute2).HasMaxLength(200);
+            entity.Property(e => e.Attribute2Code).HasMaxLength(50);
+            entity.Property(e => e.Attribute3).HasMaxLength(200);
+            entity.Property(e => e.Attribute3Code).HasMaxLength(50);
+            entity.Property(e => e.Attribute4).HasMaxLength(200);
+            entity.Property(e => e.Attribute4Code).HasMaxLength(50);
+            entity.Property(e => e.Attribute5).HasMaxLength(200);
+            entity.Property(e => e.Attribute5Code).HasMaxLength(50);
+            entity.Property(e => e.Barcode).HasMaxLength(50);
+            entity.Property(e => e.BaseDocNumber).HasMaxLength(50);
+            entity.Property(e => e.BaseLine).HasMaxLength(50);
+            entity.Property(e => e.BaseReference).HasMaxLength(50);
+            entity.Property(e => e.BaseYear).HasMaxLength(50);
+            entity.Property(e => e.BlockPurchaseDate).HasMaxLength(50);
+            entity.Property(e => e.BlockSalesDate).HasMaxLength(50);
+            entity.Property(e => e.BonosFline).HasMaxLength(50);
+            entity.Property(e => e.BonosTline).HasMaxLength(50);
+            entity.Property(e => e.BranchId).HasColumnName("BranchID");
+            entity.Property(e => e.CmtAmara).HasMaxLength(50);
+            entity.Property(e => e.CmtAmara2).HasMaxLength(50);
+            entity.Property(e => e.CmtAmr3).HasMaxLength(50);
+            entity.Property(e => e.Colestrol).HasMaxLength(50);
+            entity.Property(e => e.CompanyId).HasColumnName("CompanyID");
+            entity.Property(e => e.Content).HasMaxLength(50);
+            entity.Property(e => e.ContentMeasure).HasMaxLength(50);
+            entity.Property(e => e.ContentUnit).HasMaxLength(50);
+            entity.Property(e => e.Conversion).HasMaxLength(50);
+            entity.Property(e => e.ConversionQuantity).HasMaxLength(50);
+            entity.Property(e => e.CorrectionDiscountPercent).HasMaxLength(50);
+            entity.Property(e => e.CorrectionPrice).HasMaxLength(50);
+            entity.Property(e => e.CorrectionQuantity).HasMaxLength(50);
+            entity.Property(e => e.CreatedDateTime)
+                .HasPrecision(3)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasColumnName("createdDateTime");
+            entity.Property(e => e.CurrentStoreId)
+                .HasMaxLength(50)
+                .HasColumnName("CurrentStoreID");
+            entity.Property(e => e.CustomerMakat).HasMaxLength(50);
+            entity.Property(e => e.CustomersOrders).HasMaxLength(50);
+            entity.Property(e => e.Department).HasMaxLength(200);
+            entity.Property(e => e.DepartmentCode).HasMaxLength(50);
+            entity.Property(e => e.DepartmentEnglishName).HasMaxLength(200);
+            entity.Property(e => e.DiagonalOptic).HasMaxLength(50);
+            entity.Property(e => e.DiscountPercent).HasMaxLength(50);
+            entity.Property(e => e.DiscountTotal).HasMaxLength(50);
+            entity.Property(e => e.DownloadPriceTransparencyAfter48Hours).HasMaxLength(50);
+            entity.Property(e => e.Energia).HasMaxLength(50);
+            entity.Property(e => e.EnglishName).HasMaxLength(200);
+            entity.Property(e => e.FullIngredientsReplace).HasMaxLength(10);
+            entity.Property(e => e.GroupCode).HasMaxLength(50);
+            entity.Property(e => e.GroupEnglishName).HasMaxLength(200);
+            entity.Property(e => e.GroupName).HasMaxLength(200);
+            entity.Property(e => e.Height).HasMaxLength(50);
+            entity.Property(e => e.HeightOptic).HasMaxLength(50);
+            entity.Property(e => e.HeightSize).HasMaxLength(50);
+            entity.Property(e => e.Helbonim).HasMaxLength(50);
+            entity.Property(e => e.HierarchyUpdate).HasMaxLength(10);
+            entity.Property(e => e.Ingredients).HasMaxLength(200);
+            entity.Property(e => e.InternalAmara).HasMaxLength(50);
+            entity.Property(e => e.IsBad).HasColumnName("isBad");
+            entity.Property(e => e.IsControlledItem).HasMaxLength(50);
+            entity.Property(e => e.IsGiftCardPurchase).HasMaxLength(10);
+            entity.Property(e => e.IsTransferredToOper).HasColumnName("isTransferredToOper");
+            entity.Property(e => e.ItemColorId)
+                .HasMaxLength(50)
+                .HasColumnName("ItemColor_ID");
+            entity.Property(e => e.ItemColorName)
+                .HasMaxLength(200)
+                .HasColumnName("ItemColor_Name");
+            entity.Property(e => e.ItemData).HasMaxLength(200);
+            entity.Property(e => e.ItemModelId)
+                .HasMaxLength(50)
+                .HasColumnName("ItemModel_ID");
+            entity.Property(e => e.ItemModelName)
+                .HasMaxLength(200)
+                .HasColumnName("ItemModel_Name");
+            entity.Property(e => e.ItemSizeId)
+                .HasMaxLength(50)
+                .HasColumnName("ItemSize_ID");
+            entity.Property(e => e.ItemSizeName)
+                .HasMaxLength(200)
+                .HasColumnName("ItemSize_Name");
+            entity.Property(e => e.KodSet).HasMaxLength(50);
+            entity.Property(e => e.Length).HasMaxLength(50);
+            entity.Property(e => e.LengthOptic).HasMaxLength(50);
+            entity.Property(e => e.LengthSize).HasMaxLength(50);
+            entity.Property(e => e.LimitAge).HasMaxLength(50);
+            entity.Property(e => e.Line).HasMaxLength(50);
+            entity.Property(e => e.LinkWebSite).HasMaxLength(200);
+            entity.Property(e => e.Manufacturer).HasMaxLength(200);
+            entity.Property(e => e.ManufacturerCode).HasMaxLength(50);
+            entity.Property(e => e.ManufacturingCountry).HasMaxLength(200);
+            entity.Property(e => e.MatchingItemId)
+                .HasMaxLength(50)
+                .HasColumnName("MatchingItemID");
+            entity.Property(e => e.MatchingItemQuantity).HasMaxLength(50);
+            entity.Property(e => e.MaxQtyForSale).HasMaxLength(50);
+            entity.Property(e => e.MaxQuantityInOrder).HasMaxLength(50);
+            entity.Property(e => e.MaxStock).HasMaxLength(50);
+            entity.Property(e => e.MaximumStock).HasMaxLength(50);
+            entity.Property(e => e.MhrMivza).HasMaxLength(50);
+            entity.Property(e => e.MidaAmr3).HasMaxLength(200);
+            entity.Property(e => e.MinQtyForSale).HasMaxLength(50);
+            entity.Property(e => e.MinStock).HasMaxLength(50);
+            entity.Property(e => e.MinimumStock).HasMaxLength(50);
+            entity.Property(e => e.MirshamPhrmaSoft)
+                .HasMaxLength(50)
+                .HasColumnName("Mirsham_PhrmaSoft");
+            entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.NameInWeb).HasMaxLength(200);
+            entity.Property(e => e.Nava).HasMaxLength(50);
+            entity.Property(e => e.NetPrice).HasMaxLength(50);
+            entity.Property(e => e.NmMashlim)
+                .HasMaxLength(200)
+                .HasColumnName("Nm_Mashlim");
+            entity.Property(e => e.NoDiscount).HasMaxLength(50);
+            entity.Property(e => e.NosafKod10)
+                .HasMaxLength(50)
+                .HasColumnName("NosafKod_10");
+            entity.Property(e => e.NosafKod2)
+                .HasMaxLength(50)
+                .HasColumnName("NosafKod_2");
+            entity.Property(e => e.NosafKod3)
+                .HasMaxLength(50)
+                .HasColumnName("NosafKod_3");
+            entity.Property(e => e.NosafKod4)
+                .HasMaxLength(50)
+                .HasColumnName("NosafKod_4");
+            entity.Property(e => e.NosafKod5)
+                .HasMaxLength(50)
+                .HasColumnName("NosafKod_5");
+            entity.Property(e => e.NosafKod6)
+                .HasMaxLength(50)
+                .HasColumnName("NosafKod_6");
+            entity.Property(e => e.NosafKod7)
+                .HasMaxLength(50)
+                .HasColumnName("NosafKod_7");
+            entity.Property(e => e.NosafKod8)
+                .HasMaxLength(50)
+                .HasColumnName("NosafKod_8");
+            entity.Property(e => e.NosafKod9)
+                .HasMaxLength(50)
+                .HasColumnName("NosafKod_9");
+            entity.Property(e => e.NosafNm10)
+                .HasMaxLength(200)
+                .HasColumnName("NosafNm_10");
+            entity.Property(e => e.NosafNm2)
+                .HasMaxLength(200)
+                .HasColumnName("NosafNm_2");
+            entity.Property(e => e.NosafNm3)
+                .HasMaxLength(200)
+                .HasColumnName("NosafNm_3");
+            entity.Property(e => e.NosafNm4)
+                .HasMaxLength(200)
+                .HasColumnName("NosafNm_4");
+            entity.Property(e => e.NosafNm5)
+                .HasMaxLength(200)
+                .HasColumnName("NosafNm_5");
+            entity.Property(e => e.NosafNm6)
+                .HasMaxLength(200)
+                .HasColumnName("NosafNm_6");
+            entity.Property(e => e.NosafNm7)
+                .HasMaxLength(200)
+                .HasColumnName("NosafNm_7");
+            entity.Property(e => e.NosafNm8)
+                .HasMaxLength(200)
+                .HasColumnName("NosafNm_8");
+            entity.Property(e => e.NosafNm9)
+                .HasMaxLength(200)
+                .HasColumnName("NosafNm_9");
+            entity.Property(e => e.NotShowInWeb).HasMaxLength(10);
+            entity.Property(e => e.OldId)
+                .HasMaxLength(50)
+                .HasColumnName("OldID");
+            entity.Property(e => e.OpenDate).HasMaxLength(50);
+            entity.Property(e => e.OperationGuid)
+                .HasDefaultValueSql("(newid())")
+                .HasColumnName("operationGuid");
+            entity.Property(e => e.Pahmemot).HasMaxLength(50);
+            entity.Property(e => e.PikadonCmt).HasMaxLength(200);
+            entity.Property(e => e.Price).HasMaxLength(50);
+            entity.Property(e => e.PriceNis)
+                .HasMaxLength(50)
+                .HasColumnName("PriceNIS");
+            entity.Property(e => e.PriceUsd)
+                .HasMaxLength(50)
+                .HasColumnName("PriceUSD");
+            entity.Property(e => e.PromoId)
+                .HasMaxLength(50)
+                .HasColumnName("PromoID");
+            entity.Property(e => e.PromoRank).HasMaxLength(50);
+            entity.Property(e => e.PurchasingAccountId)
+                .HasMaxLength(50)
+                .HasColumnName("PurchasingAccountID");
+            entity.Property(e => e.QtyType).HasMaxLength(50);
+            entity.Property(e => e.Quantity).HasMaxLength(50);
+            entity.Property(e => e.Radius).HasMaxLength(50);
+            entity.Property(e => e.RejectTypeId)
+                .HasMaxLength(50)
+                .HasColumnName("RejectTypeID");
+            entity.Property(e => e.SalesAccountId)
+                .HasMaxLength(50)
+                .HasColumnName("SalesAccountID");
+            entity.Property(e => e.SerialNo).HasMaxLength(50);
+            entity.Property(e => e.SetId).HasMaxLength(50);
+            entity.Property(e => e.SetModelProperties).HasMaxLength(10);
+            entity.Property(e => e.Shumanim).HasMaxLength(50);
+            entity.Property(e => e.Size).HasMaxLength(50);
+            entity.Property(e => e.StiaAm)
+                .HasMaxLength(50)
+                .HasColumnName("StiaAM");
+            entity.Property(e => e.StoreId)
+                .HasMaxLength(50)
+                .HasColumnName("StoreID");
+            entity.Property(e => e.SubGroup)
+                .HasMaxLength(200)
+                .HasColumnName("Sub_Group");
+            entity.Property(e => e.SubGroupCode)
+                .HasMaxLength(50)
+                .HasColumnName("Sub_GroupCode");
+            entity.Property(e => e.SubGroupEnglishName)
+                .HasMaxLength(200)
+                .HasColumnName("Sub_GroupEnglishName");
+            entity.Property(e => e.SuperDepartment).HasMaxLength(200);
+            entity.Property(e => e.SuperDepartmentCode).HasMaxLength(50);
+            entity.Property(e => e.SupplierId)
+                .HasMaxLength(50)
+                .HasColumnName("SupplierID");
+            entity.Property(e => e.SupplierName).HasMaxLength(200);
             entity.Property(e => e.SuppliersOrders).HasMaxLength(50);
             entity.Property(e => e.SwAlcohol).HasMaxLength(50);
             entity.Property(e => e.SwBonos).HasMaxLength(10);
