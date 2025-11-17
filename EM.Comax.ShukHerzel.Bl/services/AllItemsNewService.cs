@@ -108,27 +108,36 @@ public AllItemsNewService(
                 await _databaseLogger.LogServiceActionAsync($"Getting catalog items from Comax API for branch {branch.Description}...");
                 progress?.Report($"Getting catalog items from Comax API for branch {branch.Description}, since {lastUpdateDate ?? DateTime.Now.AddYears(-1)}...");
                 var items = await _comaxApiClient.GetCatalogNewXmlAsync(branch, lastUpdateDate ?? DateTime.Now.AddYears(-1), cancellationToken);
-                progress?.Report("Deserializing catalog items...");
-                await WriteApiResponseToFileAsync(items, branch, guid);
-                var clsItems = DeserializeCatalogItemsNew(items);
-                progress?.Report($"recieved {clsItems.Count} items, Mapping catalog items...");
-                var allItems = await MapToAllItems(clsItems, now, branch, guid);
-                progress?.Report("Inserting catalog items to DB...");
-                if (allItems.Count > 0)
+                if(items != null)
                 {
-                    await InsertAllItemsAsync(allItems);
-                    await _databaseLogger.LogServiceActionAsync($"Finished inserting {allItems.Count} catalog items for branch {branch.Id}.");
-                } else {
-                     await _databaseLogger.LogServiceActionAsync($"No new catalog items to insert for branch {branch.Id}.");
+                    progress?.Report("Deserializing catalog items...");
+                    await WriteApiResponseToFileAsync(items, branch, guid);
+                    var clsItems = DeserializeCatalogItemsNew(items);
+                    progress?.Report($"recieved {clsItems.Count} items, Mapping catalog items...");
+                    var allItems = await MapToAllItems(clsItems, now, branch, guid);
+                    progress?.Report("Inserting catalog items to DB...");
+                    if (allItems.Count > 0)
+                    {
+                        await InsertAllItemsAsync(allItems);
+                        await _databaseLogger.LogServiceActionAsync($"Finished inserting {allItems.Count} catalog items for branch {branch.Id}.");
+                    }
+                    else
+                    {
+                        await _databaseLogger.LogServiceActionAsync($"No new catalog items to insert for branch {branch.Id}.");
+                    }
+
+                    // No longer need to set the property on the branch object directly
+                    // branch.LastCatalogTimeStamp = now;
+                    await _databaseLogger.LogServiceActionAsync($"Attempting to update LastCatalogTimeStamp for branch {branch.Id} to {now:O} using specific method.");
+                    await _branchRepository.UpdateLastCatalogTimestampAsync(branch.Id, now); // Call the specific update method
+                    await _databaseLogger.LogServiceActionAsync($"Successfully called UpdateLastCatalogTimestampAsync for branch {branch.Id}."); // Log completion of the call
+                    progress?.Report("Catalog processing complete for branch.");
+
                 }
-
-                // No longer need to set the property on the branch object directly
-                // branch.LastCatalogTimeStamp = now;
-                await _databaseLogger.LogServiceActionAsync($"Attempting to update LastCatalogTimeStamp for branch {branch.Id} to {now:O} using specific method.");
-                await _branchRepository.UpdateLastCatalogTimestampAsync(branch.Id, now); // Call the specific update method
-                await _databaseLogger.LogServiceActionAsync($"Successfully called UpdateLastCatalogTimestampAsync for branch {branch.Id}."); // Log completion of the call
-                progress?.Report("Catalog processing complete for branch.");
-
+                else
+                {
+                    await _databaseLogger.LogServiceActionAsync($"No new catalog items to insert for branch {branch.Id}.");
+                }
             }
             catch (Exception ex) {
                 await _databaseLogger.LogErrorAsync("ALL_ITEMS_SERVICE", "InsertCatalogAsync", ex);

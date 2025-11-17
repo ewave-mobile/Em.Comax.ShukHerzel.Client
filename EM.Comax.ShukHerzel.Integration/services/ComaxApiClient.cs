@@ -242,12 +242,6 @@ namespace EM.Comax.ShukHerzel.Integration.services
                 // Add headers if API key is provided
                 // 1. Get your config row (assuming there's only one row or you're picking by CompanyID, etc.)
                 var config = await _configService.getCompanyConfig(branch.CompanyId ?? Constants.SHUK_HERZEL_COMPANY_ID);
-                // or query from DB directly
-
-                //2. Get URL Getting catalogItems
-               // var prevEndPoint = ComaxConstants.CATALOG_METHOD_URL_NEW;
-               // var response2 = await _httpClient.PostAsync(prevEndPoint,null);
-               // var url = response2.re
 
                 // 2. Build the full GET URL XML
                 var  res = await BuildComaxNewCatalogUrl(config, branch, lastUpdateDate);
@@ -262,18 +256,22 @@ namespace EM.Comax.ShukHerzel.Integration.services
                     ?.Element(ns + "Get_AllItems_WithoutSupplierDetailsResponse")
                     ?.Element(ns + "Get_AllItems_WithoutSupplierDetailsResult");
 
-                string url1 = resultElement?.Value?.Trim();
+                string url = resultElement?.Value?.Trim();
 
                 //var url = ComaxConstants.CATALOG_METHOD_URL;
 
                 // 4. Make the GET request
-                var response = await _httpClient.GetAsync(url1);
-                await _databaseLogger.LogTraceAsync(_httpClient.BaseAddress?.ToString(), url1, "", response.StatusCode.ToString());
-                response.EnsureSuccessStatusCode();
+                if(url != null)
+                {
+                    var response = await _httpClient.GetAsync(url);
+                    await _databaseLogger.LogTraceAsync(_httpClient.BaseAddress?.ToString(), url, "", response.StatusCode.ToString());
+                    response.EnsureSuccessStatusCode();
 
-                // 5. Read the raw XML string
-                var xml = await response.Content.ReadAsStringAsync();
-                return xml;
+                    // 5. Read the raw XML string
+                    var xml = await response.Content.ReadAsStringAsync();
+                    return xml;
+                }
+                else return null;
             }
             catch (Exception ex)
             {

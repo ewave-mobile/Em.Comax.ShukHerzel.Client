@@ -1,4 +1,4 @@
-namespace EM.Comax.New
+namespace EM.Comax.New.Service
 {
     public class Worker : BackgroundService
     {

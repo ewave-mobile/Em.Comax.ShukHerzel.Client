@@ -15,9 +15,9 @@ namespace EM.Comax.New.WorkerService
     public class Program
     {
         // Define constants for service name and target installation directory
-        private const string ServiceName = "EM.Comax.ShukHerzel.Service";
-        private const string TargetDirectory = @"C:\Program Files (x86)\EwaveMobile\Em.Comax.ShukHerzel.installer1\";
-        private const string ExecutableName = "EM.Comax.ShukHerzel.Service.exe";
+        private const string ServiceName = "EM.Comax.New.Service";
+        private const string TargetDirectory = @"C:\Program Files (x86)\EwaveMobile\Em.Comax.New.installer1\";
+        private const string ExecutableName = "EM.Comax.New.Service.exe";
         private static readonly string ExecutablePath = Path.Combine(TargetDirectory, ExecutableName);
 
         public static async Task Main(string[] args)

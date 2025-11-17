@@ -24,8 +24,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EM.Comax.ShukHerzel.Bl\EM.Comax.ShukHerzel.Bl.csproj" />
+    <ProjectReference Include="..\EM.Comax.ShukHerzel.Dal\EM.Comax.ShukHerzel.Dal.csproj" />
     <ProjectReference Include="..\EM.Comax.ShukHerzel.Infrastructure\EM.Comax.ShukHerzel.Infrastructure.csproj" />
     <ProjectReference Include="..\EM.Comax.ShukHerzel.Integration\EM.Comax.ShukHerzel.Integration.csproj" />
     <ProjectReference Include="..\EM.Comax.ShukHerzel.Models\EM.Comax.ShukHerzel.Models.csproj" />
+    <ProjectReference Include="..\EM.Comax.ShukHerzl.Common\EM.Comax.ShukHerzl.Common.csproj" />
   </ItemGroup>
 </Project>

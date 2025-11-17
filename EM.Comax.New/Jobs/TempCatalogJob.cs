@@ -13,15 +13,13 @@ namespace EM.Comax.New.Service.Jobs
     [DisallowConcurrentExecution]
     public class TempCatalogJob : IJob
     {
-        private readonly IAllItemsService _allItemsService;
         private readonly IAllItemsNewService _allItemsNewService;
         private readonly IDatabaseLogger _databaseLogger;
         private readonly IConfiguration _configuration;
         private readonly IBranchRepository _branchRepository;
 
-        public TempCatalogJob(IAllItemsService allItemsService, IDatabaseLogger databaseLogger, IConfiguration configuration, IBranchRepository branchRepository, IAllItemsNewService allItemsNewService)
+        public TempCatalogJob( IDatabaseLogger databaseLogger, IConfiguration configuration, IBranchRepository branchRepository, IAllItemsNewService allItemsNewService)
         {
-            _allItemsService = allItemsService;
             _databaseLogger = databaseLogger;
             _configuration = configuration;
             _branchRepository = branchRepository;
