@@ -8,16 +8,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CliWrap" Version="3.9.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.1" />
     <PackageReference Include="Quartz" Version="3.15.1" />
     <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.15.1" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.15.1" />
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EM.Comax.ShukHerzel.Bl\EM.Comax.ShukHerzel.Bl.csproj" />
+    <ProjectReference Include="..\EM.Comax.ShukHerzel.Infrastructure\EM.Comax.ShukHerzel.Infrastructure.csproj" />
+    <ProjectReference Include="..\EM.Comax.ShukHerzel.Integration\EM.Comax.ShukHerzel.Integration.csproj" />
     <ProjectReference Include="..\EM.Comax.ShukHerzel.Models\EM.Comax.ShukHerzel.Models.csproj" />
   </ItemGroup>
 </Project>

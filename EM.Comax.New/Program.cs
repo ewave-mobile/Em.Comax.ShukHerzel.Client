@@ -1,7 +1,4 @@
-//using EM.Comax.ShukHerzel;
-//using EM.Comax.ShukHerzel.Service;
-//using EM.Comax.ShukHerzel.WorkerService.Services;
-//using EM.Comax.ShukHerzl.Infrastructure;
+using EM.Comax.ShukHerzl.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
@@ -9,9 +6,9 @@ using Serilog;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-//using CliWrap;
 using System.Diagnostics;
 using EM.Comax.New.WorkerService.Services;
+using CliWrap;
 
 namespace EM.Comax.New.WorkerService
 {
