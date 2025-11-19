@@ -61,23 +61,23 @@ namespace EM.Comax.New.WorkerService
                     {
                         // Register project services
                         services.AddProjectServices(hostContext.Configuration, isService: true);
-                        //services.AddScoped<Service.Jobs.SyncItemsJob>();
+                        services.AddScoped<Service.Jobs.SyncItemsJob>();
                         services.AddScoped<Service.Jobs.TempCatalogJob>();
-                       // services.AddScoped<Service.Jobs.PromotionJob>();
-                        //services.AddScoped<Service.Jobs.OperativeJob>();
-                        //services.AddScoped<Service.Jobs.MaintenanceJob>();
-                        //services.AddScoped<Service.Jobs.PriceUpdateJob>();
+                        services.AddScoped<Service.Jobs.PromotionJob>();
+                        services.AddScoped<Service.Jobs.OperativeJob>();
+                        services.AddScoped<Service.Jobs.MaintenanceJob>();
+                        services.AddScoped<Service.Jobs.PriceUpdateJob>();
 
                         // Register Quartz services
                         services.AddQuartz(q =>
                         {
                             q.UseMicrosoftDependencyInjectionJobFactory();
-                            //q.AddJobAndTrigger<Service.Jobs.SyncItemsJob>(hostContext.Configuration);
+                            q.AddJobAndTrigger<Service.Jobs.SyncItemsJob>(hostContext.Configuration);
                             q.AddJobAndTrigger<Service.Jobs.TempCatalogJob>(hostContext.Configuration);
-                            //q.AddJobAndTrigger<Service.Jobs.PromotionJob>(hostContext.Configuration);
-                            //q.AddJobAndTrigger<Service.Jobs.OperativeJob>(hostContext.Configuration);
-                           // q.AddJobAndTrigger<Service.Jobs.MaintenanceJob>(hostContext.Configuration);
-                           // q.AddJobAndTrigger<Service.Jobs.PriceUpdateJob>(hostContext.Configuration);
+                            q.AddJobAndTrigger<Service.Jobs.PromotionJob>(hostContext.Configuration);
+                            q.AddJobAndTrigger<Service.Jobs.OperativeJob>(hostContext.Configuration);
+                            q.AddJobAndTrigger<Service.Jobs.MaintenanceJob>(hostContext.Configuration);
+                            q.AddJobAndTrigger<Service.Jobs.PriceUpdateJob>(hostContext.Configuration);
                         });
 
                         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

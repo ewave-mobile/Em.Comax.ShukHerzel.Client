@@ -34,11 +34,11 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                 Id,
                 ROW_NUMBER() OVER (PARTITION BY Barcode, BranchId ORDER BY CreatedDateTime DESC) AS rn
             FROM 
-                temp.AllItems
+                temp.AllItemComax
             WHERE 
                 IsTransferredToOper = 0
         )
-        DELETE FROM temp.AllItems
+        DELETE FROM temp.AllItemComax
         WHERE Id IN (SELECT Id FROM CTE WHERE rn > 1);
     ";
 
@@ -46,7 +46,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             try
             {
                 await _context.Database.ExecuteSqlRawAsync(sql);
-                await _databaseLogger.LogServiceActionAsync("Duplicate operative AllItems removed successfully.");
+                await _databaseLogger.LogServiceActionAsync("Duplicate operative AllItemComax removed successfully.");
             }
             catch (Exception ex)
             {
@@ -70,7 +70,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             {
                 var batchIds = idList.Skip(i).Take(batchSize).ToList();
 
-                var itemsToUpdate = batchIds.Select(id => new AllItem
+                var itemsToUpdate = batchIds.Select(id => new AllItemComax
                 {
                     Id = id,
                     IsTransferredToOper = true,
@@ -105,7 +105,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             const int batchSize = 1000; // Define batch size internally
             var cutoffDate = DateTime.UtcNow.AddDays(-days); // Use UtcNow for consistency
             int totalDeleted = 0;
-            await _databaseLogger.LogServiceActionAsync($"Starting batch deletion of AllItems entries older than {cutoffDate:yyyy-MM-dd} with batch size {batchSize}...");
+            await _databaseLogger.LogServiceActionAsync($"Starting batch deletion of AllItemComax entries older than {cutoffDate:yyyy-MM-dd} with batch size {batchSize}...");
 
             try
             {
@@ -114,7 +114,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                     // Find a batch of IDs to delete:
                     // Items that ARE transferred AND their transfer date is old
                     // OR items (regardless of transfer status) whose creation date is old
-                    var idsToDelete = await _context.AllItems
+                    var idsToDelete = await _context.AllItemComax
                         .Where(item => (item.IsTransferredToOper == true && item.TransferredDateTime < cutoffDate)
                                     || item.CreatedDateTime < cutoffDate)
                         .Select(item => item.Id) // Select only the IDs
@@ -123,7 +123,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
 
                     if (!idsToDelete.Any())
                     {
-                        await _databaseLogger.LogServiceActionAsync("No more old AllItems entries found to delete in this pass.");
+                        await _databaseLogger.LogServiceActionAsync("No more old AllItemComax entries found to delete in this pass.");
                         break; // Exit the loop if no records are found
                     }
 
@@ -131,18 +131,18 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                     int deletedInBatch = 0;
                     try
                     {
-                        deletedInBatch = await _context.AllItems
+                        deletedInBatch = await _context.AllItemComax
                                                .Where(item => idsToDelete.Contains(item.Id))
                                                .ExecuteDeleteAsync(); // Perform the batch delete
                     }
                     catch (Exception batchEx)
                     {
-                        await _databaseLogger.LogErrorAsync("ALLITEMS_REPOSITORY", $"Error deleting batch of {idsToDelete.Count} AllItems entries. IDs: {string.Join(",", idsToDelete)}", batchEx);
+                        await _databaseLogger.LogErrorAsync("ALLITEMS_REPOSITORY", $"Error deleting batch of {idsToDelete.Count} AllItemComax entries. IDs: {string.Join(",", idsToDelete)}", batchEx);
                         throw; // Re-throw to halt the process on batch failure
                     }
 
                     totalDeleted += deletedInBatch;
-                    await _databaseLogger.LogServiceActionAsync($"Deleted batch of {deletedInBatch} old AllItems entries. Total deleted so far: {totalDeleted}.");
+                    await _databaseLogger.LogServiceActionAsync($"Deleted batch of {deletedInBatch} old AllItemComax entries. Total deleted so far: {totalDeleted}.");
 
                     // If we deleted fewer records than the batch size, it implies we might be done.
                     if (deletedInBatch == 0 || deletedInBatch < batchSize)
@@ -153,7 +153,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                     // Optional: await Task.Delay(100);
                 }
 
-                await _databaseLogger.LogServiceActionAsync($"Finished batch deletion. Total old AllItems entries removed: {totalDeleted}.");
+                await _databaseLogger.LogServiceActionAsync($"Finished batch deletion. Total old AllItemComax entries removed: {totalDeleted}.");
             }
             catch (Exception ex)
             {
@@ -178,7 +178,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             {
                 var batchIds = idList.Skip(i).Take(batchSize).ToList();
 
-                var itemsToUpdate = batchIds.Select(id => new AllItem
+                var itemsToUpdate = batchIds.Select(id => new AllItemComax
                 {
                     Id = id,
                     IsBad = true
