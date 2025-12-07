@@ -141,7 +141,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 // ---------------------------
                 await _promoRepo.DeleteExpiredPromotionsAsync();
                 var promos = await _promoRepo.GetNonTransferredPromotionsAsync();
-                promos = promos.Where(p => p.SwNotForShelfSignage != "True").ToList();
+                //promos = promos.Where(p => p.SwNotForShelfSignage != "True").ToList();
                 progress.Report($"Found {promos.Count} active promotions (future promotions excluded until start date).");
                 if (promos.Any())
                 {
