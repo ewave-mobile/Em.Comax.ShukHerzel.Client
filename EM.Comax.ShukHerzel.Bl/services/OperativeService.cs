@@ -279,34 +279,39 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                             // Item already has a valid promotion, compare with the new one
                                             decimal existingRating = TryParseDecimalInvariant(item.Rating);
                                             decimal newRating = TryParseDecimalInvariant(selectedPromo.Rating);
-
-
-                                            if (newRating < existingRating)
+                                            if (selectedPromo.Kod == item.PromotionKod)
                                             {
-                                                // New promotion has lower rating, keep existing
-                                                shouldUpdatePromotion = false;
-                                                progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (existing rating: {existingRating} > new rating: {newRating})");
-                                            }
-                                            else if (newRating == existingRating)
-                                            {
-                                                // Same rating, compare prices
-                                                decimal existingPrice = item.TotalPromotionPrice ?? decimal.MaxValue;
-                                                decimal newPrice = TryParseDecimal(selectedPromo.Total) ?? decimal.MaxValue;
-
-                                                if (newPrice > existingPrice)
-                                                {
-                                                    // New promotion has higher price, keep existing
-                                                    shouldUpdatePromotion = false;
-                                                    progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, existing price: {existingPrice} <= new price: {newPrice})");
-                                                }
-                                                else
-                                                {
-                                                    progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, new price: {newPrice} < existing price: {existingPrice})");
-                                                }
+                                                shouldUpdatePromotion = true;
                                             }
                                             else
                                             {
-                                                progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (new rating: {newRating} > existing rating: {existingRating})");
+                                                if (newRating < existingRating)
+                                                {
+                                                    // New promotion has lower rating, keep existing
+                                                    shouldUpdatePromotion = false;
+                                                    progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (existing rating: {existingRating} > new rating: {newRating})");
+                                                }
+                                                else if (newRating == existingRating)
+                                                {
+                                                    // Same rating, compare prices
+                                                    decimal existingPrice = item.TotalPromotionPrice ?? decimal.MaxValue;
+                                                    decimal newPrice = TryParseDecimal(selectedPromo.Total) ?? decimal.MaxValue;
+
+                                                    if (newPrice > existingPrice)
+                                                    {
+                                                        // New promotion has higher price, keep existing
+                                                        shouldUpdatePromotion = false;
+                                                        progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, existing price: {existingPrice} <= new price: {newPrice})");
+                                                    }
+                                                    else
+                                                    {
+                                                        progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, new price: {newPrice} < existing price: {existingPrice})");
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (new rating: {newRating} > existing rating: {existingRating})");
+                                                }
                                             }
                                         }
                                         else
