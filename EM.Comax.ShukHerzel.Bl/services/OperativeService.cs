@@ -126,7 +126,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     BatchSize = Constants.OPERATIVE_BATCH_SIZE,
                     NotifyAfter = 1000,
                     UpdateByProperties = new List<string> { "Barcode", "BranchId" },
-                    
+
                 };
 
                 progress.Report("Starting bulk upsert of Items from Catalog...");
@@ -170,28 +170,28 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     var itemsToUpdate = new List<Models.Models.Item>();
                     var promoIdsToMark = new List<long>();
                     int promoCount = 0;
-                    
+
                     // Group promotions by (ItemKod, BranchId) to handle multiple promotions for same item
                     var groupedPromos = promos.GroupBy(p => new { p.ItemKod, p.BranchId }).ToList();
                     progress.Report($"Found {groupedPromos.Count} unique item-branch combinations for promotions...");
-                    
+
                     foreach (var promoGroup in groupedPromos)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         try
                         {
-                            
+
                             // Select the promotion with highest rating, then lowest price as tiebreaker
                             var selectedPromo = promoGroup
                                 .OrderByDescending(p => TryParseDecimalInvariant(p.Rating))
-                                .ThenBy(p => 
+                                .ThenBy(p =>
                                 {
                                     if (decimal.TryParse(p.Total, out var total))
                                         return total;
                                     return decimal.MaxValue; // If can't parse, put at end
                                 })
                                 .First();
-                            
+
                             // Mark all other promotions in this group as transferred since we're only using the selected one
                             var otherPromosInGroup = promoGroup.Where(p => p.Id != selectedPromo.Id).ToList();
                             if (otherPromosInGroup.Any())
@@ -199,12 +199,12 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                 progress.Report($"Skipping {otherPromosInGroup.Count} lower-rated/higher-priced promotions for ItemKod: {selectedPromo.ItemKod}, BranchId: {selectedPromo.BranchId}");
                                 promoIdsToMark.AddRange(otherPromosInGroup.Select(p => p.Id));
                             }
-                            
+
                             progress.Report($"Selected promotion for ItemKod: {selectedPromo.ItemKod}, BranchId: {selectedPromo.BranchId} - Rating: {selectedPromo.Rating ?? "0"}, Price: {selectedPromo.Total ?? "N/A"}");
-                            
+
                             var key = (selectedPromo.ItemKod, selectedPromo.BranchId);
                             Models.Models.Item item = null;
-                            
+
                             // First try barcode lookup
                             if (itemDict.TryGetValue(key, out item))
                             {
@@ -213,7 +213,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                             else
                             {
                                 // Fallback: try finding by XmlId if barcode didn't match
-                                item = matchingItems.FirstOrDefault(i => 
+                                item = matchingItems.FirstOrDefault(i =>
                                     i.XmlId == selectedPromo.ItemKod && i.BranchId == selectedPromo.BranchId);
                             }
 
@@ -279,19 +279,20 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                             // Item already has a valid promotion, compare with the new one
                                             decimal existingRating = TryParseDecimalInvariant(item.Rating);
                                             decimal newRating = TryParseDecimalInvariant(selectedPromo.Rating);
-                                            if (selectedPromo.Kod == item.PromotionKod)
+
+                                            if (newRating < existingRating)
                                             {
-                                                shouldUpdatePromotion = true;
+                                                // New promotion has lower rating, keep existing
+                                                shouldUpdatePromotion = false;
+                                                progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (existing rating: {existingRating} > new rating: {newRating})");
                                             }
-                                            else
+                                            else if (newRating == existingRating)
                                             {
-                                                if (newRating < existingRating)
+                                                if (selectedPromo.Kod == item.PromotionKod)
                                                 {
-                                                    // New promotion has lower rating, keep existing
-                                                    shouldUpdatePromotion = false;
-                                                    progress.Report($"Keeping existing promotion for ItemKod: {selectedPromo.ItemKod} (existing rating: {existingRating} > new rating: {newRating})");
+                                                    shouldUpdatePromotion = true;
                                                 }
-                                                else if (newRating == existingRating)
+                                                else
                                                 {
                                                     // Same rating, compare prices
                                                     decimal existingPrice = item.TotalPromotionPrice ?? decimal.MaxValue;
@@ -308,10 +309,10 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                                         progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (same rating: {existingRating}, new price: {newPrice} < existing price: {existingPrice})");
                                                     }
                                                 }
-                                                else
-                                                {
-                                                    progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (new rating: {newRating} > existing rating: {existingRating})");
-                                                }
+                                            }
+                                            else
+                                            {
+                                                progress.Report($"Replacing existing promotion for ItemKod: {selectedPromo.ItemKod} (new rating: {newRating} > existing rating: {existingRating})");
                                             }
                                         }
                                         else
@@ -443,8 +444,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     {
                         if (group.Count() > 1)
                         {
-                             await _databaseLogger.LogServiceActionAsync($"Warning: Duplicate key ({group.Key.Barcode}, {group.Key.BranchId}) found in Items table during price update processing. Using the first occurrence.");
-                             progress.Report($"Warning: Duplicate key ({group.Key.Barcode}, {group.Key.BranchId}) found in Items table. Check data integrity.");
+                            await _databaseLogger.LogServiceActionAsync($"Warning: Duplicate key ({group.Key.Barcode}, {group.Key.BranchId}) found in Items table during price update processing. Using the first occurrence.");
+                            progress.Report($"Warning: Duplicate key ({group.Key.Barcode}, {group.Key.BranchId}) found in Items table. Check data integrity.");
                         }
                     }
 
@@ -483,7 +484,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                         progress.Report("Marked Price Updates as transferred.");
                     }
                 }
-            
+
                 else
                 {
                     progress.Report("No Price Updates to process.");
