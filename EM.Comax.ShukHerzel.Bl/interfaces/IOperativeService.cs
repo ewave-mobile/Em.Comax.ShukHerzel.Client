@@ -13,7 +13,8 @@ namespace EM.Comax.ShukHerzel.Bl.interfaces
         /// Synchronizes temp AllItems + Promotions to the final Item table
         /// </summary>
         Task SyncAllItemsAndPromotionsAsync(IProgress<string> progress, CancellationToken cancellationToken = default);
-        
+        Task SyncAllItemsNewAndPromotionsAsync(IProgress<string> progress, CancellationToken cancellationToken = default);
+  
         /// <summary>
         /// Searches for items in the operative table based on the provided criteria
         /// </summary>

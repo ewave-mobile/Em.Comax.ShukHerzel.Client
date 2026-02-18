@@ -34,11 +34,11 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                 Id,
                 ROW_NUMBER() OVER (PARTITION BY Barcode, BranchId ORDER BY CreatedDateTime DESC) AS rn
             FROM 
-                temp.AllItemComax
+                temp.AllItemsComax
             WHERE 
                 IsTransferredToOper = 0
         )
-        DELETE FROM temp.AllItemComax
+        DELETE FROM temp.AllItemsComax
         WHERE Id IN (SELECT Id FROM CTE WHERE rn > 1);
     ";
 

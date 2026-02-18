@@ -32,7 +32,7 @@ namespace EM.Comax.New.Service.Jobs
 
             try
             {
-                await _operativeService.SyncAllItemsAndPromotionsAsync(progress, CancellationToken.None);
+                await _operativeService.SyncAllItemsNewAndPromotionsAsync(progress, CancellationToken.None);
             }
             catch (Exception ex)
             {

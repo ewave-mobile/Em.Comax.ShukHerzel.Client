@@ -471,6 +471,26 @@ namespace Em.Comax.ShukHerzel.Client
             }
         }
 
+        private async void operTableJobNew_Click(object sender, EventArgs e)
+        {
+            logTextBox.Clear();
+            operTableJob.Enabled = false;
+
+            var progress = new Progress<string>(s => logTextBox.AppendText(s + Environment.NewLine));
+            try
+            {
+                await _operativeService.SyncAllItemsNewAndPromotionsAsync(progress, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                logTextBox.AppendText($"Error: {ex.Message}{Environment.NewLine}{ex.StackTrace}");
+            }
+            finally
+            {
+                operTableJob.Enabled = true;
+            }
+        }
+
         private async void eslTransferJob_Click(object sender, EventArgs e)
         {
             // Clear previous logs
