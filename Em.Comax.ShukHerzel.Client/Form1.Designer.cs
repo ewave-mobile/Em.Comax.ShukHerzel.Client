@@ -84,6 +84,16 @@
             itemsApiResultsDataGridView = new DataGridView();
             itemsApiAddSelectedButton = new Button();
             itemsApiAddAllButton = new Button();
+            tabPage1 = new TabPage();
+            itemsApiAddSelectedButtonNew = new Button();
+            itemsApiAddAllButtonNew = new Button();
+            itemsApiResultsNewDataGridView = new DataGridView();
+            panel1 = new Panel();
+            itemsApiBranchNewComboBox = new ComboBox();
+            label1 = new Label();
+            itemsApiItemIdNewTextBox = new TextBox();
+            label2 = new Label();
+            itemsApiGetItemNewButton = new Button();
             promotionsApiTab = new TabPage();
             promotionsApiPanel = new Panel();
             promotionsApiBranchComboBox = new ComboBox();
@@ -123,6 +133,9 @@
             itemsApiTab.SuspendLayout();
             itemsApiPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)itemsApiResultsDataGridView).BeginInit();
+            tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)itemsApiResultsNewDataGridView).BeginInit();
+            panel1.SuspendLayout();
             promotionsApiTab.SuspendLayout();
             promotionsApiPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)promotionsApiResultsDataGridView).BeginInit();
@@ -326,6 +339,7 @@
             dataManagementTabControl.Controls.Add(itemsTab);
             dataManagementTabControl.Controls.Add(promotionsTab);
             dataManagementTabControl.Controls.Add(itemsApiTab);
+            dataManagementTabControl.Controls.Add(tabPage1);
             dataManagementTabControl.Controls.Add(promotionsApiTab);
             dataManagementTabControl.Dock = DockStyle.Fill;
             dataManagementTabControl.Location = new Point(2, 2);
@@ -773,6 +787,118 @@
             itemsApiAddAllButton.Text = "הוסף הכל";
             itemsApiAddAllButton.UseVisualStyleBackColor = true;
             // 
+            // tabPage1
+            // 
+            tabPage1.Controls.Add(itemsApiAddSelectedButtonNew);
+            tabPage1.Controls.Add(itemsApiAddAllButtonNew);
+            tabPage1.Controls.Add(itemsApiResultsNewDataGridView);
+            tabPage1.Controls.Add(panel1);
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Size = new Size(882, 518);
+            tabPage1.TabIndex = 4;
+            tabPage1.Text = "ממשק API פריטים קומקס";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // itemsApiAddSelectedButtonNew
+            // 
+            itemsApiAddSelectedButtonNew.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            itemsApiAddSelectedButtonNew.Location = new Point(777, 496);
+            itemsApiAddSelectedButtonNew.Margin = new Padding(2);
+            itemsApiAddSelectedButtonNew.Name = "itemsApiAddSelectedButtonNew";
+            itemsApiAddSelectedButtonNew.Size = new Size(105, 20);
+            itemsApiAddSelectedButtonNew.TabIndex = 4;
+            itemsApiAddSelectedButtonNew.Text = "הוסף נבחרים";
+            itemsApiAddSelectedButtonNew.UseVisualStyleBackColor = true;
+            // 
+            // itemsApiAddAllButtonNew
+            // 
+            itemsApiAddAllButtonNew.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            itemsApiAddAllButtonNew.Location = new Point(672, 496);
+            itemsApiAddAllButtonNew.Margin = new Padding(2);
+            itemsApiAddAllButtonNew.Name = "itemsApiAddAllButtonNew";
+            itemsApiAddAllButtonNew.Size = new Size(105, 20);
+            itemsApiAddAllButtonNew.TabIndex = 5;
+            itemsApiAddAllButtonNew.Text = "הוסף הכל";
+            itemsApiAddAllButtonNew.UseVisualStyleBackColor = true;
+            // 
+            // itemsApiResultsNewDataGridView
+            // 
+            itemsApiResultsNewDataGridView.AllowUserToAddRows = false;
+            itemsApiResultsNewDataGridView.AllowUserToDeleteRows = false;
+            itemsApiResultsNewDataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            itemsApiResultsNewDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            itemsApiResultsNewDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            itemsApiResultsNewDataGridView.Location = new Point(2, 62);
+            itemsApiResultsNewDataGridView.Margin = new Padding(2);
+            itemsApiResultsNewDataGridView.Name = "itemsApiResultsNewDataGridView";
+            itemsApiResultsNewDataGridView.ReadOnly = true;
+            itemsApiResultsNewDataGridView.RowHeadersWidth = 62;
+            itemsApiResultsNewDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            itemsApiResultsNewDataGridView.Size = new Size(876, 413);
+            itemsApiResultsNewDataGridView.TabIndex = 2;
+            // 
+            // panel1
+            // 
+            panel1.Controls.Add(itemsApiBranchNewComboBox);
+            panel1.Controls.Add(label1);
+            panel1.Controls.Add(itemsApiItemIdNewTextBox);
+            panel1.Controls.Add(label2);
+            panel1.Controls.Add(itemsApiGetItemNewButton);
+            panel1.Dock = DockStyle.Top;
+            panel1.Location = new Point(0, 0);
+            panel1.Margin = new Padding(2);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(882, 60);
+            panel1.TabIndex = 1;
+            // 
+            // itemsApiBranchNewComboBox
+            // 
+            itemsApiBranchNewComboBox.FormattingEnabled = true;
+            itemsApiBranchNewComboBox.Location = new Point(350, 6);
+            itemsApiBranchNewComboBox.Margin = new Padding(2);
+            itemsApiBranchNewComboBox.Name = "itemsApiBranchNewComboBox";
+            itemsApiBranchNewComboBox.Size = new Size(141, 23);
+            itemsApiBranchNewComboBox.TabIndex = 0;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(517, 9);
+            label1.Margin = new Padding(2, 0, 2, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(30, 15);
+            label1.TabIndex = 1;
+            label1.Text = "סניף";
+            // 
+            // itemsApiItemIdNewTextBox
+            // 
+            itemsApiItemIdNewTextBox.Location = new Point(210, 33);
+            itemsApiItemIdNewTextBox.Margin = new Padding(2);
+            itemsApiItemIdNewTextBox.Name = "itemsApiItemIdNewTextBox";
+            itemsApiItemIdNewTextBox.Size = new Size(281, 23);
+            itemsApiItemIdNewTextBox.TabIndex = 2;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(497, 38);
+            label2.Margin = new Padding(2, 0, 2, 0);
+            label2.Name = "label2";
+            label2.Size = new Size(169, 15);
+            label2.TabIndex = 3;
+            label2.Text = "ברקוד פריט (מופרדים בפסיקים)";
+            // 
+            // itemsApiGetItemNewButton
+            // 
+            itemsApiGetItemNewButton.Location = new Point(119, 32);
+            itemsApiGetItemNewButton.Margin = new Padding(2);
+            itemsApiGetItemNewButton.Name = "itemsApiGetItemNewButton";
+            itemsApiGetItemNewButton.Size = new Size(75, 26);
+            itemsApiGetItemNewButton.TabIndex = 4;
+            itemsApiGetItemNewButton.Text = "משוך פריטים";
+            itemsApiGetItemNewButton.UseVisualStyleBackColor = true;
+            // 
             // promotionsApiTab
             // 
             promotionsApiTab.Controls.Add(promotionsApiPanel);
@@ -1022,6 +1148,10 @@
             itemsApiPanel.ResumeLayout(false);
             itemsApiPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)itemsApiResultsDataGridView).EndInit();
+            tabPage1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)itemsApiResultsNewDataGridView).EndInit();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             promotionsApiTab.ResumeLayout(false);
             promotionsApiPanel.ResumeLayout(false);
             promotionsApiPanel.PerformLayout();
@@ -1118,5 +1248,17 @@
         private Button promotionsApiAddAllButton;
         private Button catalogNewTempJob;
         private Button button1;
+        private Button itemsApiAddSelectedButtonNew;
+        private Button button2;
+        private Button itemsApiAddAllButtonNew;
+        private TabPage tabPage1;
+        private DataGridView dataGridView1;
+        private Panel panel1;
+        private ComboBox itemsApiBranchNewComboBox;
+        private Label label1;
+        private TextBox itemsApiItemIdNewTextBox;
+        private Label label2;
+        private Button itemsApiGetItemNewButton;
+        private DataGridView itemsApiResultsNewDataGridView;
     }
 }

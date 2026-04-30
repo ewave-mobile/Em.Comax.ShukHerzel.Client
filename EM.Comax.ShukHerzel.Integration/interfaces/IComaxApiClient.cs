@@ -24,7 +24,8 @@ namespace EM.Comax.ShukHerzel.Integration.interfaces
         /// Gets catalog XML for specific barcodes from Comax API, handling barcode input in different ways
         /// </summary>
         Task<string> GetCatalogXmlForBarcodesAsync(Branch branch, IEnumerable<string> barcodes, bool useItemId = true, CancellationToken cancellationToken = default);
-        
+         Task<string> GetCatalogXmlForBarcodesNewAsync(Branch branch, IEnumerable<string> barcodes, bool useItemId = true, CancellationToken cancellationToken = default);
+  
         /// <summary>
         /// Gets promotions from Comax API
         /// </summary>

@@ -98,6 +98,10 @@ namespace Em.Comax.ShukHerzel.Client
             itemsApiBranchComboBox.DisplayMember = "BranchName";
             itemsApiBranchComboBox.ValueMember = "Id";
 
+            itemsApiBranchNewComboBox.DataSource = new List<Branch>(_branches);
+            itemsApiBranchNewComboBox.DisplayMember = "BranchName";
+            itemsApiBranchNewComboBox.ValueMember = "Id";
+
             promotionsApiBranchComboBox.DataSource = new List<Branch>(_branches);
             promotionsApiBranchComboBox.DisplayMember = "BranchName";
             promotionsApiBranchComboBox.ValueMember = "Id";
@@ -118,8 +122,11 @@ namespace Em.Comax.ShukHerzel.Client
 
             // Set up event handlers for the new API tabs
             itemsApiGetItemButton.Click += ItemsApiGetItemButton_Click;
+            itemsApiGetItemNewButton.Click += ItemsApiGetItemNewButton_Click;
             itemsApiAddSelectedButton.Click += ItemsApiAddSelectedButton_Click;
             itemsApiAddAllButton.Click += ItemsApiAddAllButton_Click;
+            itemsApiAddSelectedButtonNew.Click += ItemsApiAddSelectedNewButton_Click;
+            itemsApiAddAllButtonNew.Click += ItemsApiAddAllNewButton_Click;
 
             promotionsApiGetPromotionsButton.Click += PromotionsApiGetPromotionsButton_Click;
             promotionsApiApplyFilterButton.Click += PromotionsApiApplyFilterButton_Click;
@@ -205,6 +212,50 @@ namespace Em.Comax.ShukHerzel.Client
                 Width = 120
             });
             itemsApiResultsDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "SubGroup",
+                HeaderText = "תת-קבוצה",
+                Width = 120
+            });
+
+            itemsApiResultsNewDataGridView.AutoGenerateColumns = false;
+            itemsApiResultsNewDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Id",
+                HeaderText = "מזהה",
+                Width = 70
+            });
+            itemsApiResultsNewDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Barcode",
+                HeaderText = "ברקוד",
+                Width = 120
+            });
+            itemsApiResultsNewDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Name",
+                HeaderText = "שם",
+                Width = 200
+            });
+            itemsApiResultsNewDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Price",
+                HeaderText = "מחיר",
+                Width = 80
+            });
+            itemsApiResultsNewDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Department",
+                HeaderText = "מחלקה",
+                Width = 120
+            });
+            itemsApiResultsNewDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "GroupName",
+                HeaderText = "קבוצה",
+                Width = 120
+            });
+            itemsApiResultsNewDataGridView.Columns.Add(new DataGridViewTextBoxColumn
             {
                 DataPropertyName = "SubGroup",
                 HeaderText = "תת-קבוצה",
@@ -902,7 +953,8 @@ namespace Em.Comax.ShukHerzel.Client
         #endregion
 
         // For the new API tabs
-        private List<AllItem> _itemsApiResults = new List<AllItem>();
+        private List<AllItem> _itemsApiResults = new List<AllItem>();  
+        private List<AllItemComax> _itemsComaxApiResults = new List<AllItemComax>();
         private List<Promotion> _promotionsApiResults = new List<Promotion>();
         private List<Promotion> _filteredPromotionsApiResults = new List<Promotion>();
 
@@ -1118,6 +1170,136 @@ namespace Em.Comax.ShukHerzel.Client
                 itemsApiGetItemButton.Enabled = true;
             }
         }
+        
+        private async void ItemsApiGetItemNewButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Validate branch selection
+                if (itemsApiBranchNewComboBox.SelectedItem == null)
+                {
+                    MessageBox.Show("אנא בחר סניף תחילה.", "נדרש סניף", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                itemsApiGetItemNewButton.Enabled = false;
+                ShowLoadingSpinner(); // Show loading spinner
+
+                // Get branch and item IDs
+                var branch = (Branch)itemsApiBranchNewComboBox.SelectedItem;
+                var itemIdsText = itemsApiItemIdNewTextBox.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(itemIdsText))
+                {
+                    HideLoadingSpinner(); // Hide loading spinner
+                    MessageBox.Show("אנא הזן לפחות מזהה פריט אחד.", "קלט חסר", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Parse item IDs
+                var itemIds = itemIdsText.Split(',').Select(id => id.Trim()).Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+
+                if (itemIds.Count == 0)
+                {
+                    HideLoadingSpinner(); // Hide loading spinner
+                    MessageBox.Show("אנא הזן לפחות מזהה פריט אחד תקין.", "קלט לא תקין", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Create a progress reporter that doesn't show message boxes for every item
+                var progress = new Progress<string>(s =>
+                {
+                    // Only log to console or update status bar, don't show message boxes
+                    logTextBox.AppendText(s + Environment.NewLine);
+                });
+
+                try
+                {
+                    var guid = Guid.NewGuid();
+                    var now = DateTime.Now;
+
+                    logTextBox.AppendText($"מושך פריטים עבור סניף {branch.Description} עבור {itemIds.Count} ברקודים...{Environment.NewLine}");
+
+                    // Try first with itemId parameter
+                    string xml = await _comaxApiClient.GetCatalogXmlForBarcodesNewAsync(branch, itemIds.ToArray(), true);
+
+                    /*if (string.IsNullOrEmpty(xml) || !xml.Contains("<ClsItems>"))
+                    {
+                        // If first attempt failed, try with barcode parameter
+                        logTextBox.AppendText($"ניסיון ראשון נכשל, מנסה שוב עם פרמטר ברקוד...{Environment.NewLine}");
+                         xml = await _comaxApiClient.GetCatalogXmlForBarcodesNewAsync(branch, itemIds.ToArray(), false);
+                    }
+
+                    if (string.IsNullOrEmpty(xml) || !xml.Contains("<ClsItems>"))
+                    {
+                        logTextBox.AppendText($"נכשל בקבלת פריטים מה-API של קומקס.{Environment.NewLine}");
+                        _itemsComaxApiResults = new List<AllItemComax>();
+                    }
+                    else
+                    {*/
+                        // Save the XML response to a file (optional)
+                        // Skip this step as WriteApiResponseToFileAsync is not accessible
+
+                        // Deserialize the XML to get the catalog items
+                        var allClsItems = _allItemsNewService.DeserializeCatalogItemsNew(xml);
+
+                        if (allClsItems == null || !allClsItems.Any())
+                        {
+                            logTextBox.AppendText($"לא נמצאו פריטים בתגובת ה-XML.{Environment.NewLine}");
+                            _itemsComaxApiResults = new List<AllItemComax>();
+                        }
+                        else
+                        {
+                            // Filter the items by the specified barcodes if needed
+                            var filteredClsItems = allClsItems.Where(item =>
+                                itemIds.Contains(item.Barcode.ToString()) ||
+                                (item.AnotherBarkods != null && itemIds.Any(b => item.AnotherBarkods.ToString().Contains(b)))
+                            ).ToList();
+
+                            logTextBox.AppendText($"נמצאו {filteredClsItems.Count} פריטים עבור הברקודים שצוינו. ממפה...{Environment.NewLine}");
+
+                            // Map to AllItems but don't insert into database
+                            _itemsComaxApiResults = await _allItemsNewService.MapToAllItems(filteredClsItems, now, branch, guid);
+
+                            logTextBox.AppendText($"מופו {_itemsComaxApiResults.Count} פריטים. מציג בטבלה...{Environment.NewLine}");
+                        }
+                   /* }*/
+                }
+                catch (Exception ex)
+                {
+                    await _databaseLogger.LogErrorAsync("FORM1", "GetItemsForBarcodesAsync", ex);
+                    _itemsApiResults = new List<AllItem>();
+                    throw; // Re-throw to be caught by the outer catch block
+                }
+
+                // Display results
+                itemsApiResultsNewDataGridView .DataSource = _itemsComaxApiResults ;
+
+                // Enable/disable action buttons based on results
+                bool hasResults = _itemsComaxApiResults != null && _itemsComaxApiResults.Count > 0;
+                itemsApiAddSelectedButtonNew.Enabled = hasResults;
+                itemsApiAddAllButtonNew.Enabled = hasResults;
+
+                // Show summary message
+                if (hasResults)
+                {
+                    MessageBox.Show($"נמצאו {_itemsComaxApiResults?.Count} פריטים.", "תוצאות חיפוש", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("לא נמצאו פריטים.", "תוצאות חיפוש", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"שגיאה בקבלת פריטים מה-API: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                HideLoadingSpinner(); // Hide loading spinner
+                itemsApiGetItemNewButton.Enabled = true;
+            }
+        }
 
         private async void ItemsApiAddSelectedButton_Click(object sender, EventArgs e)
         {
@@ -1154,6 +1336,41 @@ namespace Em.Comax.ShukHerzel.Client
             }
         }
 
+        private async void ItemsApiAddSelectedNewButton_Click(object sender, EventArgs e)
+        {
+            if (itemsApiResultsNewDataGridView.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Please select at least one item first.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                ShowLoadingSpinner(); // ADDED
+                itemsApiAddSelectedButtonNew.Enabled = false;
+
+                // Get selected items
+                var selectedItems = new List<AllItemComax>();
+                foreach (DataGridViewRow row in itemsApiResultsNewDataGridView.SelectedRows)
+                {
+                    selectedItems.Add((AllItemComax)row.DataBoundItem);
+                }
+
+                // Add selected items to the AllItems table
+                await _allItemsNewService.InsertAllItemsAsync(selectedItems);
+                MessageBox.Show($"Added {selectedItems.Count} items to the temporary AllItems table.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error adding selected items: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                HideLoadingSpinner(); // ADDED
+                itemsApiAddSelectedButtonNew.Enabled = true;
+            }
+        }
+
         private async void ItemsApiAddAllButton_Click(object sender, EventArgs e)
         {
             if (_itemsApiResults == null || _itemsApiResults.Count == 0)
@@ -1181,6 +1398,34 @@ namespace Em.Comax.ShukHerzel.Client
                 itemsApiAddAllButton.Enabled = true;
             }
         }
+
+        private async void ItemsApiAddAllNewButton_Click(object sender, EventArgs e)
+        {
+            if (_itemsComaxApiResults == null || _itemsComaxApiResults.Count == 0)
+            {
+                MessageBox.Show("No items to add.", "No Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                ShowLoadingSpinner(); // ADDED
+                itemsApiAddAllButtonNew.Enabled = false;
+
+                // Add all items to the AllItems table
+                await _allItemsNewService.InsertAllItemsAsync(_itemsComaxApiResults);
+                MessageBox.Show($"Added {_itemsComaxApiResults.Count} items to the temporary AllItems table.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error adding all items: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                HideLoadingSpinner(); // ADDED
+                itemsApiAddAllButtonNew.Enabled = true;
+            }
+        }   
 
         private async void ItemsApiResultsDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {

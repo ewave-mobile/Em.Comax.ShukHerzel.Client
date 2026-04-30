@@ -185,7 +185,99 @@ namespace EM.Comax.ShukHerzel.Integration.services
                 return "";
             }
         }
-        
+
+        public async Task<string> GetCatalogXmlForBarcodesNewAsync(Branch branch, IEnumerable<string> barcodes, bool useItemId = true, CancellationToken cancellationToken = default)
+        {
+            try
+            {                  
+                 var lastUpdateDate =/*branch.LastCatalogTimeStamp??*/ DateTime.Now.AddYears(-1);
+
+                var config = await _configService.getCompanyConfig(branch.CompanyId ?? Constants.SHUK_HERZEL_COMPANY_ID);
+ 
+                // 2. Build the full GET URL XML
+                var res = await BuildComaxNewCatalogUrl(config, branch, lastUpdateDate);
+
+                XDocument doc = XDocument.Parse(res);
+                XNamespace ns = "http://ws.comax.co.il/Comax_WebServices/";
+
+                var resultElement = doc
+                    ?.Root
+                    ?.Element("{http://schemas.xmlsoap.org/soap/envelope/}Body")
+                    ?.Element(ns + "Get_AllItems_WithoutSupplierDetailsResponse")
+                    ?.Element(ns + "Get_AllItems_WithoutSupplierDetailsResult");
+
+                string url = resultElement?.Value?.Trim();
+
+                var barcodesArray = barcodes.ToArray();
+                var barcodesString = string.Join(",", barcodesArray);
+                //var lastUpdateDate = DateTime.Now.AddYears(-1); // Use a date far in the past to ensure we get all items
+
+                // Modify the URL to include the barcodes
+                //var endpoint = ComaxConstants.CATALOG_METHOD_URL;
+                var query = "";
+
+                if (useItemId)
+                {
+                    // Put barcodes in ItemID parameter
+                    query = $"?ItemID={barcodesString}" +
+                            $"&DepartmentID={config.DepartmentId}" +
+                            $"&GroupID={config.GroupId}" +
+                            $"&Sub_GroupID={config.SubGroupId}" +
+                            $"&ItemModelID={config.ItemModelId}" +
+                            $"&ItemColorID={config.ItemColorId}" +
+                            $"&ItemSizeID={config.ItemSizeId}";
+                }
+                else
+                {
+                    // Put barcodes in config object
+                    query = $"?ItemID={config.ItemId}" +
+                            $"&DepartmentID={config.DepartmentId}" +
+                            $"&GroupID={config.GroupId}" +
+                            $"&Sub_GroupID={config.SubGroupId}" +
+                            $"&ItemModelID={config.ItemModelId}" +
+                            $"&ItemColorID={config.ItemColorId}" +
+                            $"&ItemSizeID={config.ItemSizeId}" +
+                            $"&Barcode={barcodesString}";
+                }
+
+                // Add common parameters
+                query += $"&StoreID={branch.ComaxStoreId}" +
+                         $"&PriceListID={branch.ComaxPriceListId}" +
+                         $"&StoreIDForOpenOrdersOffset={config.StoreIdforOpenOrdersOffset}" +
+                         $"&SupplierID={config.SupplierId}" +
+                         $"&CustomerID={config.CustomerId}" +
+                         $"&LastUpdatedFromDate={lastUpdateDate.ToString("dd/MM/yyyy HH:mm:ss")}" +
+                         $"&LoginID={config.LoginId}" +
+                         $"&LoginPassword={config.LoginPassword}";
+                if (config.ShowInWeb != null)
+                {
+                    query += $"&ShowInWeb={config.ShowInWeb?.ToString() ?? "False"}";
+                }
+
+                query += $"&WithOutArchive={config.WithOutArchive?.ToString() ?? "False"}" +
+                        $"&SelByPriceList={config.SelByPriceList?.ToString() ?? "False"}";
+
+                url = url + query;
+
+                if (url != null)
+                {
+                    var response = await _httpClient.GetAsync(url);
+                    await _databaseLogger.LogTraceAsync(_httpClient.BaseAddress?.ToString(), url, "", response.StatusCode.ToString());
+                    response.EnsureSuccessStatusCode();
+
+                    // 5. Read the raw XML string
+                    var xml = await response.Content.ReadAsStringAsync();
+                    return xml;
+                }
+                else return null;
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync("COMAX_API_CLIENT", "GetCatalogXmlForBarcodesNewAsync", ex);
+                return "";
+            }
+        }
+
         /// <summary>
         /// Parses catalog items from XML response
         /// </summary>
@@ -330,7 +422,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
            return endpoint + query;
         }
 
-        public async Task<string> BuildComaxNewCatalogUrl(Configuration config, Branch branch, DateTime LastUpdateDate)
+        public async Task<string> BuildComaxNewCatalogUrl(Configuration config, Branch branch, DateTime? LastUpdateDate)
         {
             var endpoint = ComaxConstants.COMAX_WS_NAMESPACE + ComaxConstants.CATALOG_METHOD_URL_NEW;
             try
@@ -350,7 +442,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
                 <Sub_Group></Sub_Group>
                 <StoreID>{branch.ComaxStoreId}</StoreID>
                 <PriceListID>{branch.ComaxPriceListId}</PriceListID>
-                <LastUpdatedFromDate>{LastUpdateDate.ToString("dd/MM/yyyy HH:mm:ss")}</LastUpdatedFromDate>
+                <LastUpdatedFromDate>{LastUpdateDate?.ToString("dd/MM/yyyy HH:mm:ss")}</LastUpdatedFromDate>
                 </Params>
                 <LoginID>{config.LoginId}</LoginID>
                 <LoginPassword>{config.LoginPassword}</LoginPassword>
