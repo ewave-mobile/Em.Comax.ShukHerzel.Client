@@ -1,11 +1,11 @@
 ﻿using EM.Comax.ShukHerzel.Models.Interfaces;
 using EM.Comax.ShukHerzel.Models.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using EFCore.BulkExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -34,15 +34,9 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
 
         public async Task BulkInsertAsync(IEnumerable<T> entities)
         {
-            try
-            {
-
-                await _context.BulkInsertAsync(entities);
-            }
-            catch (Exception ex)
-            {
-                //throw ex;
-            }
+            var entityList = entities as IList<T> ?? entities.ToList();
+            TruncateStringProperties(entityList);
+            await _context.BulkInsertAsync(entityList);
         }
 
         public async Task BulkUpdateAsync(IEnumerable<T> entities)
@@ -74,7 +68,41 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
         }
         public async Task BulkInsertOrUpdateAsync(IEnumerable<T> entities, BulkConfig config)
         {
-            await _context.BulkInsertOrUpdateAsync(entities, config);
+            var entityList = entities as IList<T> ?? entities.ToList();
+            TruncateStringProperties(entityList);
+            await _context.BulkInsertOrUpdateAsync(entityList, config);
+        }
+
+        private void TruncateStringProperties(IEnumerable<T> entities)
+        {
+            var entityType = _context.Model.FindEntityType(typeof(T));
+            if (entityType == null)
+            {
+                return;
+            }
+
+            var stringProperties = entityType.GetProperties()
+                .Where(p => p.ClrType == typeof(string) && p.GetMaxLength() is int maxLength && maxLength > 0)
+                .Select(p => (Property: p, MaxLength: p.GetMaxLength()!.Value, PropertyInfo: p.PropertyInfo))
+                .Where(x => x.PropertyInfo != null)
+                .ToList();
+
+            if (stringProperties.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var entity in entities)
+            {
+                foreach (var (_, maxLength, propertyInfo) in stringProperties)
+                {
+                    var value = (string?)propertyInfo!.GetValue(entity);
+                    if (value != null && value.Length > maxLength)
+                    {
+                        propertyInfo.SetValue(entity, value[..maxLength]);
+                    }
+                }
+            }
         }
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {

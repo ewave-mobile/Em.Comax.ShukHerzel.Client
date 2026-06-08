@@ -4,6 +4,7 @@ using EM.Comax.ShukHerzel.Models.CustomModels;
 using EM.Comax.ShukHerzel.Models.DtoModels;
 using EM.Comax.ShukHerzel.Models.Interfaces;
 using EM.Comax.ShukHerzel.Models.Models;
+using EM.Comax.ShukHerzl.Common;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -64,13 +65,13 @@ public AllItemsNewService(
                     }
                 );
 
-                using var reader = new StringReader(xml);
+                using var reader = new StringReader(XmlSanitizer.Sanitize(xml));
                 var result = (ArrayOfClsItemsWithoutSupplierdata)serializer.Deserialize(reader);
                 return result.ClsItems?.ToList() ?? new List<ClsItemsWithoutSupplierdata>();
             }
             catch (Exception ex)
             {
-                throw new Exception("XML ERROR: " + ex.InnerException?.Message ?? ex.Message);
+                throw new Exception("XML ERROR: " + (ex.InnerException?.Message ?? ex.Message));
             }
         }
        
@@ -173,10 +174,10 @@ public AllItemsNewService(
                     OldId = c.OldID.ToString(),
                     AnotherBarkods = c.AnotherBarkods?.ToString(),
                     WebShortName = c.WebShortName?.ToString(),
-                    WebDesc = c.WebDesc?.ToString(),
+                    /*WebDesc = c.WebDesc?.ToString(),
                     WebDesc2 = c.WebDesc2?.ToString(),
                     WebDelvDesc = c.WebDelvDesc?.ToString(),
-                    WebInstruction = c.WebInstruction?.ToString(),
+                    WebInstruction = c.WebInstruction?.ToString(),*/
                     Barcode = c.Barcode.ToString(),
                     PurchasingAccountId = c.PurchasingAccountID.ToString(),
                     SalesAccountId = c.SalesAccountID.ToString(),

@@ -1,5 +1,6 @@
 using EM.Comax.ShukHerzel.Bl.interfaces;
 using EM.Comax.ShukHerzel.Bl.services;
+using EM.Comax.ShukHerzel.Dal.Repositories;
 using EM.Comax.ShukHerzel.Integration.interfaces;
 using EM.Comax.ShukHerzel.Models.Interfaces;
 using EM.Comax.ShukHerzel.Models.Models;
@@ -376,8 +377,20 @@ namespace Em.Comax.ShukHerzel.Client
                 Width = 100
             });
 
+            button3.Click += Button3_Click;
+
             return true;
         }
+
+        private async void Button3_Click(object? sender, EventArgs e)
+        {
+            var branches = await _branchService.GetAllBranches();
+            foreach (var branch in branches)
+            {
+                await _priceUpdateService.InsertPriceUpdatesAsync(branch, null);
+            }
+        }
+
         private void tempPullDateTime_ValueChanged(object sender, EventArgs e)
         {
 

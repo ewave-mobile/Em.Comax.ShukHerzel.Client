@@ -31,6 +31,7 @@
             mainTabControl = new TabControl();
             operationsTab = new TabPage();
             catalogNewTempJob = new Button();
+            button3 = new Button();
             PriceUpdatesButton = new Button();
             logTextBox = new RichTextBox();
             eslTransferJob = new Button();
@@ -159,6 +160,7 @@
             // operationsTab
             // 
             operationsTab.Controls.Add(catalogNewTempJob);
+            operationsTab.Controls.Add(button3);
             operationsTab.Controls.Add(PriceUpdatesButton);
             operationsTab.Controls.Add(logTextBox);
             operationsTab.Controls.Add(eslTransferJob);
@@ -190,6 +192,16 @@
             catalogNewTempJob.Text = "ייבוא פריטים קטלוגיים חדש";
             catalogNewTempJob.UseVisualStyleBackColor = true;
             catalogNewTempJob.Click += catalogNewTempJob_Click;
+            // 
+            // button3
+            // 
+            button3.Location = new Point(627, 12);
+            button3.Margin = new Padding(2);
+            button3.Name = "button3";
+            button3.Size = new Size(233, 20);
+            button3.TabIndex = 10;
+            button3.Text = "עדכוני מחירים לכל הסניפים";
+            button3.UseVisualStyleBackColor = true;
             // 
             // PriceUpdatesButton
             // 
@@ -1161,6 +1173,7 @@
             ResumeLayout(false);
         }
 
+
         #endregion
 
         private TabControl mainTabControl;
@@ -1260,5 +1273,6 @@
         private Label label2;
         private Button itemsApiGetItemNewButton;
         private DataGridView itemsApiResultsNewDataGridView;
+        private Button button3;
     }
 }

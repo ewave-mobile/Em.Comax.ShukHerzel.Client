@@ -481,8 +481,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     SelfFinancingReward = src.SelfFinancingReward ?? "",
                     PromoForRealization = src.PromoForRealization ?? "",
                     CostOfRealizingGift = src.CostOfRealizingGift ?? "",
-                    SelectPromoToMultiply = src.SelectPromo_ToMultiply ?? "",
-                    SelectPromoToNotMultiply = src.SelectPromo_ToNotMultiply ?? "",
+                    //SelectPromoToMultiply = src.SelectPromo_ToMultiply ?? "",
+                    //SelectPromoToNotMultiply = src.SelectPromo_ToNotMultiply ?? "",
                     AnotherBarcodes = anotherBarcodes ?? "",
 
                     // Convert complex arrays/objects to JSON strings, so they fit into Promotion.* columns

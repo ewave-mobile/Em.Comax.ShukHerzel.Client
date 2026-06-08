@@ -177,7 +177,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
                 
                 // Read the response XML
                 var xml = await response.Content.ReadAsStringAsync();
-                return xml;
+                return XmlSanitizer.Sanitize(xml);
             }
             catch (Exception ex)
             {
@@ -267,7 +267,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
 
                     // 5. Read the raw XML string
                     var xml = await response.Content.ReadAsStringAsync();
-                    return xml;
+                    return XmlSanitizer.Sanitize(xml);
                 }
                 else return null;
             }
@@ -312,7 +312,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
 
                 // 4. Read the raw XML string
                 var xml = await response.Content.ReadAsStringAsync();
-                return xml;
+                return XmlSanitizer.Sanitize(xml);
             }
             catch (Exception ex)
             {
@@ -361,7 +361,7 @@ namespace EM.Comax.ShukHerzel.Integration.services
 
                     // 5. Read the raw XML string
                     var xml = await response.Content.ReadAsStringAsync();
-                    return xml;
+                    return XmlSanitizer.Sanitize(xml);
                 }
                 else return null;
             }
@@ -443,6 +443,8 @@ namespace EM.Comax.ShukHerzel.Integration.services
                 <StoreID>{branch.ComaxStoreId}</StoreID>
                 <PriceListID>{branch.ComaxPriceListId}</PriceListID>
                 <LastUpdatedFromDate>{LastUpdateDate?.ToString("dd/MM/yyyy HH:mm:ss")}</LastUpdatedFromDate>
+                <ShowInWeb>{((config.ShowInWeb ?? false) ? "true" : "false")}</ShowInWeb>
+                <WithOutArchive>{((config.WithOutArchive??false)?"true" :"false")}</WithOutArchive>
                 </Params>
                 <LoginID>{config.LoginId}</LoginID>
                 <LoginPassword>{config.LoginPassword}</LoginPassword>
