@@ -122,7 +122,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     string storeId = group.Key;
                     var storeItems = group.ToList();
 
-                    progress.Report($"Processing StoreId {storeId} with {storeItems.Count} items.");
+                    string key=await _apiConfigService.GetBranchKeyByStoreId(storeId);
+
+                    progress.Report($"Processing StoreId {storeId} with {storeItems.Count} items.with key: {key}");
                     await _databaseLogger.LogServiceActionAsync($"ApiClientService: Processing StoreId {storeId} with {storeItems.Count} items.");
 
                     // Split store items into batches
@@ -142,7 +144,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                         try
                         {
                             // Send the batch to the ESL API with the storeId
-                            await _eslApiClient.SendItemsToEslAsync(storeId, batch, cancellationToken);
+                            await _eslApiClient.SendItemsToEslAsync(storeId,key, batch, cancellationToken);
                             progress.Report($"Successfully sent {batchInfo}");
                             await _databaseLogger.LogServiceActionAsync($"ApiClientService: Successfully sent {batchInfo}");
 

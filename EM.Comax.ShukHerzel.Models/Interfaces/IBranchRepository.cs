@@ -15,5 +15,6 @@ namespace EM.Comax.ShukHerzel.Models.Interfaces
         Task UpdateLastCatalogTimestampAsync(long branchId, DateTime timestamp);
         Task UpdateLastPromotionTimestampAsync(long branchId, DateTime timestamp);
         Task UpdateLastPriceTimestampAsync(long branchId, DateTime timestamp);
+ 
     }
 }

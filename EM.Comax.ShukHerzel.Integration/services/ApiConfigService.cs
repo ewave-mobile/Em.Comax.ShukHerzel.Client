@@ -2,6 +2,7 @@
 using EM.Comax.ShukHerzel.Models.CustomModels;
 using EM.Comax.ShukHerzel.Models.Models;
 using EM.Comax.ShukHerzl.Common;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,18 @@ namespace EM.Comax.ShukHerzel.Integration.services
                 EslBaseUrl = row.EslUrl,
                 ComaxBaseUrl = row.ComaxApiUrl
             };
+        }
+
+        public async Task<string> GetBranchKeyByStoreId(string storeId)
+        {         
+            var branch = await _dbContext.Branches.Where(b => b.EslStoreId == storeId).FirstOrDefaultAsync();
+            if (branch != null && branch.CompanyId != null)
+            {
+                var conf = await _dbContext.Configurations.Where(c => c.CompanyId == branch.CompanyId.Value).FirstOrDefaultAsync();
+                return conf?.EslApiKey;
+            }
+
+            return null;
         }
     }
 

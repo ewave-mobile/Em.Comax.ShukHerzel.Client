@@ -10,5 +10,6 @@ namespace EM.Comax.ShukHerzel.Integration.interfaces
     public interface IApiConfigService
     {
         ApiConfig GetApiConfig(string apiName);
+        Task<string> GetBranchKeyByStoreId(string storeId);
     }
 }

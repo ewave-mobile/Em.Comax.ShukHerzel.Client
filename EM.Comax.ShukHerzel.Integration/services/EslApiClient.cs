@@ -39,18 +39,18 @@ namespace EM.Comax.ShukHerzel.Integration.services
         /// <param name="items">The list of EslDto items to send.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task SendItemsToEslAsync(string storeId, IEnumerable<EslDto> items, CancellationToken cancellationToken = default)
+        public async Task SendItemsToEslAsync(string storeId, string key, IEnumerable<EslDto> items, CancellationToken cancellationToken = default)
         {
             // Get the ESL API configuration
             //var apiConfig = _apiConfigService.GetApiConfig("EslApi");
             //_httpClient.BaseAddress = new Uri(apiConfig.EslBaseUrl ?? "https://api-eu.vusion.io/vcloud/v1/stores/" );
 
             //// Add headers if API key is provided
-            //if (!string.IsNullOrEmpty(apiConfig.EslApiKey))
-            //{
-            //    _httpClient.DefaultRequestHeaders.Remove("Ocp-Apim-Subscription-Key"); // Remove if already exists to prevent duplication
-            //    _httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", apiConfig.EslApiKey);
-            //}
+            if (!string.IsNullOrEmpty(key))
+            {
+                _httpClient.DefaultRequestHeaders.Remove("Ocp-Apim-Subscription-Key"); // Remove if already exists to prevent duplication
+                _httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
+            }
 
             // Construct the endpoint with the storeId
             string endpoint = $"{storeId}/items"; // e.g., "12345/items"

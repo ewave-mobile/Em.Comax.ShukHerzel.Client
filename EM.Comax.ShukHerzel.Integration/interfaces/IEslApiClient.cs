@@ -15,6 +15,6 @@ namespace EM.Comax.ShukHerzel.Integration.interfaces
         /// <param name="items">The list of EslDto items to send.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        Task SendItemsToEslAsync(string storeId, IEnumerable<EslDto> items, CancellationToken cancellationToken = default);
+        Task SendItemsToEslAsync(string storeId,string key, IEnumerable<EslDto> items, CancellationToken cancellationToken = default);
     }
 }
