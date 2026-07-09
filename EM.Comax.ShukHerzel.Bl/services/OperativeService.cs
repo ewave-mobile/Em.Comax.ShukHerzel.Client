@@ -1,10 +1,12 @@
 ﻿using EFCore.BulkExtensions;
 using EM.Comax.ShukHerzel.Bl.interfaces;
+using EM.Comax.ShukHerzel.Models.CustomModels;
 using EM.Comax.ShukHerzel.Models.DtoModels;
 using EM.Comax.ShukHerzel.Models.Interfaces;
 using EM.Comax.ShukHerzel.Models.Models;
 using EM.Comax.ShukHerzl.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -25,6 +27,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
         private readonly IBadItemLogRepository _badItemLogRepository;
         private readonly IPriceUpdateRepository _priceUpdateRepository;
         private readonly IBranchRepository _branchRepository;
+        private readonly OperativeSettings _operativeSettings;
 
         // You may have a constant defined for the batch size
         private const int BatchSize = 1000;
@@ -36,7 +39,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
             IDatabaseLogger databaseLogger,
             IBadItemLogRepository badItemLogRepository,
             IPriceUpdateRepository priceUpdateRepository,
-            IBranchRepository branchRepository)
+            IBranchRepository branchRepository,
+            IOptions<OperativeSettings> operativeSettings)
         {
             _allItemsRepo = allItemsRepo;
             _allItemsNewRepo = allItemsNewRepo;
@@ -46,6 +50,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
             _badItemLogRepository = badItemLogRepository;
             _priceUpdateRepository = priceUpdateRepository;
             _branchRepository = branchRepository;
+            _operativeSettings = operativeSettings?.Value ?? new OperativeSettings();
         }
 
         /// <summary>
@@ -92,9 +97,36 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 }
 
                 // Map AllItems to operative Items (upsert mapping)
-                var operativeItems = allItems.Select(item => MapItem(item, now)).ToList();
+                var calculateUnitPrice = _operativeSettings.CalculateUnitPrice;
+                if (calculateUnitPrice)
+                    progress.Report("Unit price calculation is enabled (ContentPrice / PromoContentPrice).");
+
+                var operativeItems = allItems.Select(item => MapItem(item, now, calculateUnitPrice)).ToList();
 
                 // Use BulkInsertOrUpdate to upsert items based on Barcode and BranchId.
+                var catalogProperties = new List<string>
+                {
+                    "Name",
+                    "XmlId",
+                    "Price",
+                    "CreateDateTime",
+                    "OperationGuid",
+                    "IsSentToEsl",
+                    "Content",
+                    "ContentMeasure",
+                    "ContentUnit",
+                    "Size",
+                    "SwWeighable",
+                    "ManufacturingCountry",
+                    "SwPikadon",
+                    "TrailingItem"
+                };
+                if (calculateUnitPrice)
+                {
+                    catalogProperties.Add("ContentPrice");
+                    catalogProperties.Add("PromoContentPrice");
+                }
+
                 var bulkConfigOnlyItem = new BulkConfig
                 {
                     PreserveInsertOrder = true,
@@ -102,24 +134,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     BatchSize = Constants.OPERATIVE_BATCH_SIZE,
                     NotifyAfter = 1000,
                     UpdateByProperties = new List<string> { "Barcode", "BranchId" },
-                    PropertiesToInclude = new List<string>
-    {
-        "Name",
-        "XmlId",
-        "Price",
-        "CreateDateTime",
-        "OperationGuid",
-        "IsSentToEsl",
-        "Content",
-        "ContentMeasure",
-        "ContentUnit",
-        "Size",
-        "SwWeighable",
-        "ManufacturingCountry",
-        "SwPikadon",
-        "TrailingItem"
-        // Add "Quantity" here if you want it updated as well.
-    }
+                    PropertiesToInclude = catalogProperties
                 };
 
                 var bulkConfig = new BulkConfig
@@ -248,6 +263,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         item.PromotionMaxQty = null;
                                         item.Rating = null;
                                         item.RemarkForPrint = null;
+                                        if (calculateUnitPrice)
+                                            ApplyUnitPrice(item);
                                         progress.Report($"Cancelled promotion {selectedPromo.Kod} for ItemKod: {selectedPromo.ItemKod}");
                                     }
                                     else
@@ -374,6 +391,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         item.PromotionMaxQty = selectedPromo.MaxQty;
                                         item.Rating = selectedPromo.Rating;
                                         item.RemarkForPrint = selectedPromo.RemarkForPrint;
+                                        if (calculateUnitPrice)
+                                            ApplyUnitPrice(item);
                                     }
                                 }
                                 itemsToUpdate.Add(item);
@@ -463,7 +482,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     {
                         if (itemDictForPrices.TryGetValue((pu.Barcode, pu.BranchId), out var item))
                         {
-                            UpdateItemWithPriceUpdate(item, pu);
+                            UpdateItemWithPriceUpdate(item, pu, calculateUnitPrice);
                             itemsToUpdateWithPrices.Add(item);
                             // Only add the price update's ID if there is a matching item.
                             matchedPuIds.Add(pu.Id);
@@ -542,10 +561,36 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     allItems = allItems.Except(itemsWithZeroPrice).ToList();
                 }
 
-                // Map AllItems to operative Items (upsert mapping)
-                var operativeItems = allItems.Select(item => MapItemNew(item, now)).ToList();
+                // New sync path always calculates unit prices (ContentPrice / PromoContentPrice).
+                const bool calculateUnitPrice = true;
+                progress.Report("Unit price calculation is enabled (ContentPrice / PromoContentPrice).");
+
+                var operativeItems = allItems.Select(item => MapItemNew(item, now, calculateUnitPrice)).ToList();
 
                 // Use BulkInsertOrUpdate to upsert items based on Barcode and BranchId.
+                var catalogProperties = new List<string>
+                {
+                    "Name",
+                    "XmlId",
+                    "Price",
+                    "CreateDateTime",
+                    "OperationGuid",
+                    "IsSentToEsl",
+                    "Content",
+                    "ContentMeasure",
+                    "ContentUnit",
+                    "Size",
+                    "SwWeighable",
+                    "ManufacturingCountry",
+                    "SwPikadon",
+                    "TrailingItem"
+                };
+                if (calculateUnitPrice)
+                {
+                    catalogProperties.Add("ContentPrice");
+                    catalogProperties.Add("PromoContentPrice");
+                }
+
                 var bulkConfigOnlyItem = new BulkConfig
                 {
                     PreserveInsertOrder = true,
@@ -553,24 +598,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     BatchSize = Constants.OPERATIVE_BATCH_SIZE,
                     NotifyAfter = 1000,
                     UpdateByProperties = new List<string> { "Barcode", "BranchId" },
-                    PropertiesToInclude = new List<string>
-    {
-        "Name",
-        "XmlId",
-        "Price",
-        "CreateDateTime",
-        "OperationGuid",
-        "IsSentToEsl",
-        "Content",
-        "ContentMeasure",
-        "ContentUnit",
-        "Size",
-        "SwWeighable",
-        "ManufacturingCountry",
-        "SwPikadon",
-        "TrailingItem"
-        // Add "Quantity" here if you want it updated as well.
-    }
+                    PropertiesToInclude = catalogProperties
                 };
 
                 var bulkConfig = new BulkConfig
@@ -699,6 +727,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         item.PromotionMaxQty = null;
                                         item.Rating = null;
                                         item.RemarkForPrint = null;
+                                        if (calculateUnitPrice)
+                                            ApplyUnitPrice(item);
                                         progress.Report($"Cancelled promotion {selectedPromo.Kod} for ItemKod: {selectedPromo.ItemKod}");
                                     }
                                     else
@@ -825,6 +855,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         item.PromotionMaxQty = selectedPromo.MaxQty;
                                         item.Rating = selectedPromo.Rating;
                                         item.RemarkForPrint = selectedPromo.RemarkForPrint;
+                                        if (calculateUnitPrice)
+                                            ApplyUnitPrice(item);
                                     }
                                 }
                                 itemsToUpdate.Add(item);
@@ -914,7 +946,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     {
                         if (itemDictForPrices.TryGetValue((pu.Barcode, pu.BranchId), out var item))
                         {
-                            UpdateItemWithPriceUpdate(item, pu);
+                            UpdateItemWithPriceUpdate(item, pu, calculateUnitPrice);
                             itemsToUpdateWithPrices.Add(item);
                             // Only add the price update's ID if there is a matching item.
                             matchedPuIds.Add(pu.Id);
@@ -954,82 +986,45 @@ namespace EM.Comax.ShukHerzel.Bl.services
             }
         }
 
-        /// <summary>
-        /// Maps a temp AllItem to an operative Item without promotion details.
-        /// (This mapping is used for the catalog upsert.)
-        /// </summary>
-        private Models.Models.Item MapItemWithoutPromotion(AllItem tempItem, DateTime now)
+        ///// <summary>
+        ///// Maps a temp AllItem to an operative Item without promotion details.
+        ///// (This mapping is used for the catalog upsert.)
+        ///// </summary>
+        //private Models.Models.Item MapItemWithoutPromotion(AllItem tempItem, DateTime now)
+        //{
+        //    decimal? price = TryParseDecimal(tempItem.Price);
+        //    decimal? quantity = TryParseDecimal(tempItem.Quantity);
+
+        //    var item = new Models.Models.Item
+        //    {
+        //        CompanyId = tempItem.CompanyId,
+        //        BranchId = tempItem.BranchId,
+        //        Barcode = tempItem.Barcode ?? "",
+        //        Name = tempItem.Name ?? "",
+        //        Price = price,
+        //        CreateDateTime = now,
+        //        OperationGuid = tempItem.OperationGuid,
+        //        IsSentToEsl = false,
+        //        IsPromotion = false,
+        //        Content = tempItem.Content,
+        //        ContentMeasure = tempItem.ContentMeasure,
+        //        ContentUnit = tempItem.ContentUnit,
+        //        Size = tempItem.Size,
+        //        SwWeighable = tempItem.SwWeighable?.ToLower() == "true",
+        //        ManufacturingCountry = tempItem.ManufacturingCountry,
+        //        //Quantity = quantity,
+        //        // Initialize promotion-related fields to default values.
+        //        PromotionKod = "",
+        //        PromotionFromDate = null,
+        //        PromotionToDate = null,
+        //        TotalPromotionPrice = null,
+        //        SwAllCustomers = false
+        //    };
+        //    return item;
+        //}
+        private Models.Models.Item MapItem(AllItem tempItem, DateTime now, bool calculateUnitPrice = false)
         {
             decimal? price = TryParseDecimal(tempItem.Price);
-            decimal? quantity = TryParseDecimal(tempItem.Quantity);
-
-            var item = new Models.Models.Item
-            {
-                CompanyId = tempItem.CompanyId,
-                BranchId = tempItem.BranchId,
-                Barcode = tempItem.Barcode ?? "",
-                Name = tempItem.Name ?? "",
-                Price = price,
-                CreateDateTime = now,
-                OperationGuid = tempItem.OperationGuid,
-                IsSentToEsl = false,
-                IsPromotion = false,
-                Content = tempItem.Content,
-                ContentMeasure = tempItem.ContentMeasure,
-                ContentUnit = tempItem.ContentUnit,
-                Size = tempItem.Size,
-                SwWeighable = tempItem.SwWeighable?.ToLower() == "true",
-                ManufacturingCountry = tempItem.ManufacturingCountry,
-                //Quantity = quantity,
-                // Initialize promotion-related fields to default values.
-                PromotionKod = "",
-                PromotionFromDate = null,
-                PromotionToDate = null,
-                TotalPromotionPrice = null,
-                SwAllCustomers = false
-            };
-            return item;
-        }
-        private Models.Models.Item MapItem(AllItem tempItem, DateTime now)
-        {
-            decimal? price = TryParseDecimal(tempItem.Price);
-            decimal? quantity = TryParseDecimal(tempItem.Quantity);
-
-            var item = new Models.Models.Item
-            {
-                CompanyId = tempItem.CompanyId,
-                BranchId = tempItem.BranchId,
-                XmlId = tempItem.XmlId ?? "",
-                Barcode = tempItem.Barcode ?? "",
-                Name = tempItem.Name ?? "",
-                Price = price,
-                CreateDateTime = now,
-                OperationGuid = tempItem.OperationGuid,
-                IsSentToEsl = false,
-                //IsPromotion = false,
-                Content = tempItem.Content,
-                ContentMeasure = tempItem.ContentMeasure,
-                ContentUnit = tempItem.ContentUnit,
-                Size = tempItem.Size,
-                SwWeighable = tempItem.SwWeighable?.ToLower() == "true",
-                ManufacturingCountry = tempItem.ManufacturingCountry,
-                SwPikadon = tempItem.SwPikadon?.ToLower() == "1",
-                TrailingItem = tempItem.TrailingItem,
-                //Quantity = quantity,
-                // Initialize promotion-related fields to default values.
-                //PromotionKod = "",
-                //PromotionFromDate = null,
-                //PromotionToDate = null,
-                //TotalPromotionPrice = null,
-                //SwAllCustomers = false
-            };
-            return item;
-        }
-
-        private Models.Models.Item MapItemNew(AllItemComax tempItem, DateTime now)
-        {
-            decimal? price = TryParseDecimal(tempItem.Price);
-            decimal? quantity = TryParseDecimal(tempItem.Quantity);
 
             var item = new Models.Models.Item
             {
@@ -1042,7 +1037,6 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 CreateDateTime = now,
                 OperationGuid = tempItem.OperationGuid,
                 IsSentToEsl = false,
-                //IsPromotion = false,
                 Content = tempItem.Content,
                 ContentMeasure = tempItem.ContentMeasure,
                 ContentUnit = tempItem.ContentUnit,
@@ -1051,35 +1045,124 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 ManufacturingCountry = tempItem.ManufacturingCountry,
                 SwPikadon = tempItem.SwPikadon?.ToLower() == "1",
                 TrailingItem = tempItem.TrailingItem,
-                //Quantity = quantity,
-                // Initialize promotion-related fields to default values.
-                //PromotionKod = "",
-                //PromotionFromDate = null,
-                //PromotionToDate = null,
-                //TotalPromotionPrice = null,
-                //SwAllCustomers = false
             };
+
+            if (calculateUnitPrice)
+                ApplyUnitPrice(item);
+            return item;
+        }
+
+        private Models.Models.Item MapItemNew(AllItemComax tempItem, DateTime now, bool calculateUnitPrice = false)
+        {
+            decimal? price = TryParseDecimal(tempItem.Price);
+
+            var item = new Models.Models.Item
+            {
+                CompanyId = tempItem.CompanyId,
+                BranchId = tempItem.BranchId,
+                XmlId = tempItem.XmlId ?? "",
+                Barcode = tempItem.Barcode ?? "",
+                Name = tempItem.Name ?? "",
+                Price = price,
+                CreateDateTime = now,
+                OperationGuid = tempItem.OperationGuid,
+                IsSentToEsl = false,
+                Content = tempItem.Content,
+                ContentMeasure = tempItem.ContentMeasure,
+                ContentUnit = tempItem.ContentUnit,
+                Size = tempItem.Size,
+                SwWeighable = tempItem.SwWeighable?.ToLower() == "true",
+                ManufacturingCountry = tempItem.ManufacturingCountry,
+                SwPikadon = tempItem.SwPikadon?.ToLower() == "1",
+                TrailingItem = tempItem.TrailingItem,
+            };
+
+            if (calculateUnitPrice)
+                ApplyUnitPrice(item);
             return item;
         }
 
         /// <summary>
         /// Updates an operative Item with new price details from a PriceUpdate record.
         /// </summary>
-        private void UpdateItemWithPriceUpdate(Models.Models.Item item, PriceUpdate pu)
+        private void UpdateItemWithPriceUpdate(Models.Models.Item item, PriceUpdate pu, bool calculateUnitPrice = false)
         {
-            // Update price-related fields on the operative item.
-            // Adjust conversion/parsing as needed; here we use TryParseDecimal.
             item.Price = TryParseDecimal(pu.Price);
             item.OperationGuid = pu.OperationGuid;
             item.IsSentToEsl = false;
-            // Assume that your operative Item entity has properties for these price details.
-            //item.NetPrice = TryParseDecimal(pu.NetPrice);
-            //item.ShekelPrice = TryParseDecimal(pu.ShekelPrice);
-            //item.ShekelNetPrice = TryParseDecimal(pu.ShekelNetPrice);
-            //item.SalePrice = TryParseDecimal(pu.SalePrice);
-            //// For OperationEndDate, you can update as a string (or convert to DateTime if needed)
-            //// Here we simply store the provided string value.
-            //item.OperationEndDate = pu.OperationEndDate;
+
+            // Regular unit price only (new sync path). PromoContentPrice is driven by promotions.
+            if (calculateUnitPrice)
+                ApplyRegularUnitPrice(item);
+        }
+
+        /// <summary>
+        /// ContentPrice = (Price / Content) * ContentMeasure
+        /// PromoContentPrice = ((TotalPromotionPrice / Quantity) / Content) * ContentMeasure when promotion is active; otherwise null.
+        /// </summary>
+        private void ApplyUnitPrice(Models.Models.Item item)
+        {
+            ApplyRegularUnitPrice(item);
+            ApplyPromoUnitPrice(item);
+        }
+
+        private void ApplyRegularUnitPrice(Models.Models.Item item)
+        {
+            item.ContentPrice = CalculateRegularUnitPrice(
+                item.Price,
+                TryParseDecimal(item.Content),
+                TryParseDecimal(item.ContentMeasure));
+        }
+
+        private void ApplyPromoUnitPrice(Models.Models.Item item)
+        {
+            if (item.IsPromotion == true)
+            {
+                item.PromoContentPrice = CalculatePromoUnitPrice(
+                    item.TotalPromotionPrice,
+                    item.Quantity,
+                    TryParseDecimal(item.Content),
+                    TryParseDecimal(item.ContentMeasure));
+            }
+            else
+            {
+                item.PromoContentPrice = null;
+            }
+        }
+
+        /// <summary>(Price / Content) * ContentMeasure</summary>
+        private static decimal? CalculateRegularUnitPrice(
+            decimal? price,
+            decimal? content,
+            decimal? contentMeasure)
+        {
+            if (!price.HasValue ||
+                !content.HasValue ||
+                content.Value == 0m)
+            {
+                return null;
+            }
+
+            var measure = contentMeasure ?? 1m;
+            return (price.Value / content.Value) * measure;
+        }
+
+        /// <summary>((TotalPromotionPrice / Quantity) / Content) * ContentMeasure</summary>
+        private static decimal? CalculatePromoUnitPrice(
+            decimal? promotionTotal,
+            decimal? promotionQuantity,
+            decimal? content,
+            decimal? contentMeasure)
+        {
+            if (!promotionTotal.HasValue ||
+                !promotionQuantity.HasValue ||
+                promotionQuantity.Value == 0m)
+            {
+                return null;
+            }
+
+            var promoPrice = promotionTotal.Value / promotionQuantity.Value;
+            return CalculateRegularUnitPrice(promoPrice, content, contentMeasure);
         }
 
         /// <summary>

@@ -41,6 +41,8 @@ public partial class Item
 
     public decimal? ContentPrice { get; set; }
 
+    public decimal? PromoContentPrice { get; set; }
+
     public decimal? Quantity { get; set; }
 
     public bool? SwPikadon { get; set; }

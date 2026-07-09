@@ -792,6 +792,7 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.Content).HasMaxLength(50);
             entity.Property(e => e.ContentMeasure).HasMaxLength(50);
             entity.Property(e => e.ContentPrice).HasColumnType("money");
+            entity.Property(e => e.PromoContentPrice).HasColumnType("money");
             entity.Property(e => e.ContentUnit).HasMaxLength(50);
             entity.Property(e => e.CreateDateTime)
                 .HasPrecision(3)

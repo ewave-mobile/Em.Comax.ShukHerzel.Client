@@ -243,7 +243,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     PromotionMaxQty = FormatPromotionMaxQty(item.PromotionMaxQty),
                     TrailingItemPrice = trailingItemPrice,
                     TrailingItemPromotionPrice = trailingItemPromotionPrice,
-                    RemarkForPrint = item.RemarkForPrint ?? string.Empty
+                    RemarkForPrint = item.RemarkForPrint ?? string.Empty,
+                    ContentPrice = item.ContentPrice?.ToString() ?? string.Empty,
+                    PromoContentPrice = item.PromoContentPrice?.ToString() ?? string.Empty
 
                 }
             };

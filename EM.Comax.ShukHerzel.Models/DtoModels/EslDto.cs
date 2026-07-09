@@ -47,6 +47,8 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
         public string PromotionMaxQty { get; set; }
 
         public string RemarkForPrint { get; set; }
+        public string ContentPrice { get; set; }
+        public string PromoContentPrice { get; set; }
 
     }
 }
