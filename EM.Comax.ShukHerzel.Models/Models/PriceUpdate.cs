@@ -48,4 +48,10 @@ public partial class PriceUpdate
     public string SalePrice { get; set; }
 
     public string OperationEndDate { get; set; }
+
+    // 02/08/2026 - Y.E - User approval for Oper transfer (used when Company.IsOperTransferApprovalRequired = 1)
+    public bool? IsOperTransferApproved { get; set; }
+
+    // 02/08/2026 - Y.E
+    public DateTime? OperTransferApprovedDate { get; set; }
 }

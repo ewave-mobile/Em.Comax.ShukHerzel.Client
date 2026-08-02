@@ -6,6 +6,7 @@ using EM.Comax.ShukHerzel.Models.Interfaces;
 using EM.Comax.ShukHerzel.Models.Models;
 using EM.Comax.ShukHerzl.Common;
 using Microsoft.EntityFrameworkCore.Metadata;
+using System.ComponentModel;
 using System.Text;
 
 namespace Em.Comax.ShukHerzel.Client
@@ -88,6 +89,7 @@ namespace Em.Comax.ShukHerzel.Client
             companyList.SelectedIndexChanged += CompanyList_SelectedIndexChanged;
 
             await LoadBranchesForSelectedCompanyAsync();
+            BindPriceApprovalCompanies();
 
             // Set up event handlers for the new UI controls
             itemSearchButton.Click += ItemSearchButton_Click;
@@ -116,6 +118,11 @@ namespace Em.Comax.ShukHerzel.Client
             promotionsApiAddSelectedButton.Click += PromotionsApiAddSelectedButton_Click;
             promotionsApiAddAllButton.Click += PromotionsApiAddAllButton_Click;
             itemsApiResultsDataGridView.CellDoubleClick += ItemsApiResultsDataGridView_CellDoubleClick;
+
+            priceApprovalLoadButton.Click += PriceApprovalLoadButton_Click;
+            priceApprovalApproveButton.Click += PriceApprovalApproveButton_Click;
+            priceApprovalSelectAllCheckBox.CheckedChanged += PriceApprovalSelectAllCheckBox_CheckedChanged;
+            SetupPriceApprovalGridColumns();
 
             // Set up DataGridView columns for items
             itemsDataGridView.AutoGenerateColumns = false;
@@ -410,6 +417,208 @@ namespace Em.Comax.ShukHerzel.Client
             promotionsApiBranchComboBox.DataSource = new List<Branch>(_branches);
             promotionsApiBranchComboBox.DisplayMember = "BranchName";
             promotionsApiBranchComboBox.ValueMember = "Id";
+        }
+
+        private void BindPriceApprovalCompanies()
+        {
+            priceApprovalCompanyComboBox.SelectedIndexChanged -= PriceApprovalCompanyComboBox_SelectedIndexChanged;
+            var approvalCompanies = (_companies ?? new List<Company>())
+                .Where(c => c.IsOperTransferApprovalRequired)
+                .ToList();
+            priceApprovalCompanyComboBox.DataSource = null;
+            priceApprovalCompanyComboBox.DisplayMember = "Description";
+            priceApprovalCompanyComboBox.ValueMember = "Id";
+            priceApprovalCompanyComboBox.DataSource = approvalCompanies;
+            priceApprovalCompanyComboBox.SelectedIndexChanged += PriceApprovalCompanyComboBox_SelectedIndexChanged;
+
+            // Load branches for the initially selected approval company (if any)
+            _ = LoadPriceApprovalBranchesForSelectedCompanyAsync();
+        }
+
+        private async void PriceApprovalCompanyComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            await LoadPriceApprovalBranchesForSelectedCompanyAsync();
+        }
+
+        private async Task LoadPriceApprovalBranchesForSelectedCompanyAsync()
+        {
+            priceApprovalBranchComboBox.SelectedIndexChanged -= PriceApprovalBranchComboBox_SelectedIndexChanged;
+            priceApprovalDataGridView.DataSource = null;
+            priceApprovalSelectAllCheckBox.Checked = false;
+
+            if (priceApprovalCompanyComboBox.SelectedItem is not Company selectedCompany)
+            {
+                priceApprovalBranchComboBox.DataSource = null;
+                priceApprovalBranchComboBox.SelectedIndexChanged += PriceApprovalBranchComboBox_SelectedIndexChanged;
+                return;
+            }
+
+            try
+            {
+                var branches = await _branchService.GetAllBranchesByCompany(selectedCompany.Id);
+                var approvalBranches = branches.Select(b => new BranchListItem(b)).ToList();
+                priceApprovalBranchComboBox.DataSource = null;
+                priceApprovalBranchComboBox.DisplayMember = "DisplayText";
+                priceApprovalBranchComboBox.ValueMember = "Id";
+                priceApprovalBranchComboBox.DataSource = approvalBranches;
+            }
+            catch (Exception ex)
+            {
+                priceApprovalBranchComboBox.DataSource = null;
+                MessageBox.Show($"שגיאה בטעינת סניפים: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                priceApprovalBranchComboBox.SelectedIndexChanged += PriceApprovalBranchComboBox_SelectedIndexChanged;
+            }
+
+            if (priceApprovalBranchComboBox.SelectedItem is BranchListItem)
+            {
+                await LoadPendingPriceApprovalsAsync();
+            }
+        }
+
+        private void SetupPriceApprovalGridColumns()
+        {
+            priceApprovalDataGridView.AutoGenerateColumns = false;
+            priceApprovalDataGridView.Columns.Clear();
+            priceApprovalDataGridView.Columns.Add(new DataGridViewCheckBoxColumn
+            {
+                DataPropertyName = nameof(PriceUpdateApprovalRow.IsSelected),
+                HeaderText = "",
+                Width = 40,
+                ReadOnly = false
+            });
+            priceApprovalDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(PriceUpdateApprovalRow.CreatedHourDisplay),
+                HeaderText = "תאריך",
+                ReadOnly = true
+            });
+            priceApprovalDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(PriceUpdateApprovalRow.Name),
+                HeaderText = "שם",
+                ReadOnly = true
+            });
+            priceApprovalDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(PriceUpdateApprovalRow.Barcode),
+                HeaderText = "ברקוד",
+                ReadOnly = true
+            });
+            priceApprovalDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(PriceUpdateApprovalRow.NetPrice),
+                HeaderText = "מחיר",
+                ReadOnly = true
+            });
+        }
+
+        private async void PriceApprovalBranchComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (priceApprovalBranchComboBox.SelectedItem is BranchListItem)
+            {
+                await LoadPendingPriceApprovalsAsync();
+            }
+        }
+
+        private async void PriceApprovalLoadButton_Click(object? sender, EventArgs e)
+        {
+            await LoadPendingPriceApprovalsAsync();
+        }
+
+        private async Task LoadPendingPriceApprovalsAsync()
+        {
+            if (priceApprovalBranchComboBox.SelectedItem is not BranchListItem selected)
+            {
+                MessageBox.Show("יש לבחור סניף.", "אישור עדכוני מחירים", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                ShowLoadingSpinner();
+                priceApprovalLoadButton.Enabled = false;
+
+                var pending = await _priceUpdateService.GetPendingApprovalByBranchAsync(selected.Id);
+                var rows = new BindingList<PriceUpdateApprovalRow>(pending.Select(pu => new PriceUpdateApprovalRow
+                {
+                    IsSelected = false,
+                    Id = pu.Id,
+                    CreatedHourDisplay = new DateTime(pu.CreatedDateTime.Year, pu.CreatedDateTime.Month, pu.CreatedDateTime.Day, pu.CreatedDateTime.Hour, 0, 0)
+                        .ToString("dd/MM/yyyy HH:00"),
+                    Name = pu.Name ?? string.Empty,
+                    Barcode = pu.Barcode ?? string.Empty,
+                    NetPrice = pu.NetPrice ?? string.Empty
+                }).ToList());
+
+                priceApprovalDataGridView.DataSource = rows;
+                priceApprovalSelectAllCheckBox.Checked = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"שגיאה בטעינת עדכוני מחירים לאישור: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                HideLoadingSpinner();
+                priceApprovalLoadButton.Enabled = true;
+            }
+        }
+
+        private void PriceApprovalSelectAllCheckBox_CheckedChanged(object? sender, EventArgs e)
+        {
+            if (priceApprovalDataGridView.DataSource is not BindingList<PriceUpdateApprovalRow> rows)
+            {
+                return;
+            }
+
+            priceApprovalDataGridView.EndEdit();
+            var selectAll = priceApprovalSelectAllCheckBox.Checked;
+            foreach (var row in rows)
+            {
+                row.IsSelected = selectAll;
+            }
+
+            priceApprovalDataGridView.Refresh();
+        }
+
+        private async void PriceApprovalApproveButton_Click(object? sender, EventArgs e)
+        {
+            if (priceApprovalDataGridView.DataSource is not BindingList<PriceUpdateApprovalRow> rows)
+            {
+                return;
+            }
+
+            // Commit any in-progress checkbox edit
+            priceApprovalDataGridView.EndEdit();
+
+            var selectedIds = rows.Where(r => r.IsSelected).Select(r => r.Id).ToList();
+            if (selectedIds.Count == 0)
+            {
+                MessageBox.Show("יש לבחור לפחות רשומה אחת לאישור.", "אישור עדכוני מחירים", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                ShowLoadingSpinner();
+                priceApprovalApproveButton.Enabled = false;
+
+                await _priceUpdateService.ApproveOperTransferAsync(selectedIds);
+                MessageBox.Show($"אושרו {selectedIds.Count} עדכוני מחירים.", "הצלחה", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await LoadPendingPriceApprovalsAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"שגיאה באישור עדכוני מחירים: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                HideLoadingSpinner();
+                priceApprovalApproveButton.Enabled = true;
+            }
         }
 
         private async void Button3_Click(object? sender, EventArgs e)

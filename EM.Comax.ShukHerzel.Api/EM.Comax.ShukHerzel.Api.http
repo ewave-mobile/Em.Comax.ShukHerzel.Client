@@ -1,0 +1,18 @@
+@EM.Comax.ShukHerzel.Api_HostAddress = http://localhost:5184
+
+GET {{EM.Comax.ShukHerzel.Api_HostAddress}}/api/branches
+Accept: application/json
+
+###
+
+GET {{EM.Comax.ShukHerzel.Api_HostAddress}}/api/branches/1/price-updates/pending
+Accept: application/json
+
+###
+
+POST {{EM.Comax.ShukHerzel.Api_HostAddress}}/api/branches/1/price-updates/approve
+Content-Type: application/json
+
+{
+  "ids": [1, 2]
+}

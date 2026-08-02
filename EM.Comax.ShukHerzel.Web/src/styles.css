@@ -1,0 +1,36 @@
+:root {
+  --brand-blue: #2b60e4;
+  --brand-blue-dark: #1f4bb8;
+  --text-primary: #1a1f36;
+  --text-secondary: #6b7280;
+  --bg-page: #f5f7fb;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --danger: #dc2626;
+  --shadow: 0 2px 8px rgba(26, 31, 54, 0.06);
+  --radius: 14px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: 'Heebo', sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+select,
+input {
+  font-family: inherit;
+}

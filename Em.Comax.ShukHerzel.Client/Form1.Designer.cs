@@ -108,6 +108,17 @@
             promotionsApiResultsDataGridView = new DataGridView();
             promotionsApiAddSelectedButton = new Button();
             promotionsApiAddAllButton = new Button();
+            priceApprovalTab = new TabPage();
+            priceApprovalDataGridView = new DataGridView();
+            priceApprovalSearchPanel = new Panel();
+            priceApprovalCompanyComboBox = new ComboBox();
+            priceApprovalCompanyLabel = new Label();
+            priceApprovalBranchComboBox = new ComboBox();
+            priceApprovalBranchLabel = new Label();
+            priceApprovalLoadButton = new Button();
+            priceApprovalActionsPanel = new Panel();
+            priceApprovalSelectAllCheckBox = new CheckBox();
+            priceApprovalApproveButton = new Button();
             loadingSpinner = new PictureBox();
             comaxApiPanel = new Panel();
             comaxApiBranchComboBox = new ComboBox();
@@ -142,6 +153,10 @@
             promotionsApiTab.SuspendLayout();
             promotionsApiPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)promotionsApiResultsDataGridView).BeginInit();
+            priceApprovalTab.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)priceApprovalDataGridView).BeginInit();
+            priceApprovalSearchPanel.SuspendLayout();
+            priceApprovalActionsPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)loadingSpinner).BeginInit();
             ((System.ComponentModel.ISupportInitialize)comaxApiResultsDataGridView).BeginInit();
             SuspendLayout();
@@ -152,11 +167,11 @@
             mainTabControl.Controls.Add(dataManagementTab);
             mainTabControl.Dock = DockStyle.Fill;
             mainTabControl.Location = new Point(0, 0);
-            mainTabControl.Margin = new Padding(2);
+            mainTabControl.Margin = new Padding(2, 3, 2, 3);
             mainTabControl.Name = "mainTabControl";
             mainTabControl.RightToLeft = RightToLeft.Yes;
             mainTabControl.SelectedIndex = 0;
-            mainTabControl.Size = new Size(902, 578);
+            mainTabControl.Size = new Size(1031, 771);
             mainTabControl.TabIndex = 11;
             // 
             // operationsTab
@@ -177,21 +192,21 @@
             operationsTab.Controls.Add(companyList);
             operationsTab.Controls.Add(branchLabel);
             operationsTab.Controls.Add(branchList);
-            operationsTab.Location = new Point(4, 24);
-            operationsTab.Margin = new Padding(2);
+            operationsTab.Location = new Point(4, 29);
+            operationsTab.Margin = new Padding(2, 3, 2, 3);
             operationsTab.Name = "operationsTab";
-            operationsTab.Padding = new Padding(2);
-            operationsTab.Size = new Size(894, 550);
+            operationsTab.Padding = new Padding(2, 3, 2, 3);
+            operationsTab.Size = new Size(1023, 738);
             operationsTab.TabIndex = 0;
             operationsTab.Text = "פעולות";
             operationsTab.UseVisualStyleBackColor = true;
             // 
             // catalogNewTempJob
             // 
-            catalogNewTempJob.Location = new Point(405, 158);
-            catalogNewTempJob.Margin = new Padding(2);
+            catalogNewTempJob.Location = new Point(463, 211);
+            catalogNewTempJob.Margin = new Padding(2, 3, 2, 3);
             catalogNewTempJob.Name = "catalogNewTempJob";
-            catalogNewTempJob.Size = new Size(233, 20);
+            catalogNewTempJob.Size = new Size(266, 27);
             catalogNewTempJob.TabIndex = 11;
             catalogNewTempJob.Text = "ייבוא פריטים קטלוגיים חדש";
             catalogNewTempJob.UseVisualStyleBackColor = true;
@@ -199,20 +214,20 @@
             // 
             // button3
             // 
-            button3.Location = new Point(627, 12);
-            button3.Margin = new Padding(2);
+            button3.Location = new Point(717, 16);
+            button3.Margin = new Padding(2, 3, 2, 3);
             button3.Name = "button3";
-            button3.Size = new Size(233, 21);
+            button3.Size = new Size(266, 28);
             button3.TabIndex = 10;
             button3.Text = "עדכוני מחירים לכל הסניפים";
             button3.UseVisualStyleBackColor = true;
             // 
             // PriceUpdatesButton
             // 
-            PriceUpdatesButton.Location = new Point(150, 208);
-            PriceUpdatesButton.Margin = new Padding(2);
+            PriceUpdatesButton.Location = new Point(171, 277);
+            PriceUpdatesButton.Margin = new Padding(2, 3, 2, 3);
             PriceUpdatesButton.Name = "PriceUpdatesButton";
-            PriceUpdatesButton.Size = new Size(233, 20);
+            PriceUpdatesButton.Size = new Size(266, 27);
             PriceUpdatesButton.TabIndex = 10;
             PriceUpdatesButton.Text = "עדכוני מחירים";
             PriceUpdatesButton.UseVisualStyleBackColor = true;
@@ -220,19 +235,19 @@
             // 
             // logTextBox
             // 
-            logTextBox.Location = new Point(41, 314);
-            logTextBox.Margin = new Padding(2);
+            logTextBox.Location = new Point(47, 419);
+            logTextBox.Margin = new Padding(2, 3, 2, 3);
             logTextBox.Name = "logTextBox";
-            logTextBox.Size = new Size(425, 123);
+            logTextBox.Size = new Size(485, 163);
             logTextBox.TabIndex = 9;
             logTextBox.Text = "";
             // 
             // eslTransferJob
             // 
-            eslTransferJob.Location = new Point(150, 263);
-            eslTransferJob.Margin = new Padding(2);
+            eslTransferJob.Location = new Point(171, 351);
+            eslTransferJob.Margin = new Padding(2, 3, 2, 3);
             eslTransferJob.Name = "eslTransferJob";
-            eslTransferJob.Size = new Size(233, 20);
+            eslTransferJob.Size = new Size(266, 27);
             eslTransferJob.TabIndex = 8;
             eslTransferJob.Text = "העברה למנג'ר";
             eslTransferJob.UseVisualStyleBackColor = true;
@@ -240,10 +255,10 @@
             // 
             // button1
             // 
-            button1.Location = new Point(405, 236);
-            button1.Margin = new Padding(2);
+            button1.Location = new Point(463, 315);
+            button1.Margin = new Padding(2, 3, 2, 3);
             button1.Name = "button1";
-            button1.Size = new Size(297, 20);
+            button1.Size = new Size(339, 27);
             button1.TabIndex = 7;
             button1.Text = "העברה לטבלה אופרטיבית חדש";
             button1.UseVisualStyleBackColor = true;
@@ -251,10 +266,10 @@
             // 
             // operTableJob
             // 
-            operTableJob.Location = new Point(150, 236);
-            operTableJob.Margin = new Padding(2);
+            operTableJob.Location = new Point(171, 315);
+            operTableJob.Margin = new Padding(2, 3, 2, 3);
             operTableJob.Name = "operTableJob";
-            operTableJob.Size = new Size(233, 20);
+            operTableJob.Size = new Size(266, 27);
             operTableJob.TabIndex = 7;
             operTableJob.Text = "העברה לטבלה אופרטיבית";
             operTableJob.UseVisualStyleBackColor = true;
@@ -262,10 +277,10 @@
             // 
             // promotionsTempJob
             // 
-            promotionsTempJob.Location = new Point(150, 182);
-            promotionsTempJob.Margin = new Padding(2);
+            promotionsTempJob.Location = new Point(171, 243);
+            promotionsTempJob.Margin = new Padding(2, 3, 2, 3);
             promotionsTempJob.Name = "promotionsTempJob";
-            promotionsTempJob.Size = new Size(233, 20);
+            promotionsTempJob.Size = new Size(266, 27);
             promotionsTempJob.TabIndex = 6;
             promotionsTempJob.Text = "ייבוא מבצעים";
             promotionsTempJob.UseVisualStyleBackColor = true;
@@ -273,10 +288,10 @@
             // 
             // catalogTempJob
             // 
-            catalogTempJob.Location = new Point(150, 158);
-            catalogTempJob.Margin = new Padding(2);
+            catalogTempJob.Location = new Point(171, 211);
+            catalogTempJob.Margin = new Padding(2, 3, 2, 3);
             catalogTempJob.Name = "catalogTempJob";
-            catalogTempJob.Size = new Size(233, 20);
+            catalogTempJob.Size = new Size(266, 27);
             catalogTempJob.TabIndex = 5;
             catalogTempJob.Text = "ייבוא פריטים קטלוגיים";
             catalogTempJob.UseVisualStyleBackColor = true;
@@ -287,20 +302,20 @@
             tempPullDateTime.AllowDrop = true;
             tempPullDateTime.CustomFormat = "dd/MM/yyyy HH:mm:ss";
             tempPullDateTime.Format = DateTimePickerFormat.Custom;
-            tempPullDateTime.Location = new Point(340, 124);
-            tempPullDateTime.Margin = new Padding(2);
+            tempPullDateTime.Location = new Point(389, 165);
+            tempPullDateTime.Margin = new Padding(2, 3, 2, 3);
             tempPullDateTime.Name = "tempPullDateTime";
-            tempPullDateTime.Size = new Size(166, 23);
+            tempPullDateTime.Size = new Size(189, 27);
             tempPullDateTime.TabIndex = 4;
             tempPullDateTime.ValueChanged += tempPullDateTime_ValueChanged;
             // 
             // branchCatalogCheckBox
             // 
             branchCatalogCheckBox.AutoSize = true;
-            branchCatalogCheckBox.Location = new Point(386, 95);
-            branchCatalogCheckBox.Margin = new Padding(2);
+            branchCatalogCheckBox.Location = new Point(441, 127);
+            branchCatalogCheckBox.Margin = new Padding(2, 3, 2, 3);
             branchCatalogCheckBox.Name = "branchCatalogCheckBox";
-            branchCatalogCheckBox.Size = new Size(114, 19);
+            branchCatalogCheckBox.Size = new Size(140, 24);
             branchCatalogCheckBox.TabIndex = 3;
             branchCatalogCheckBox.Text = "משיכת ספר סניף";
             branchCatalogCheckBox.UseVisualStyleBackColor = true;
@@ -309,10 +324,10 @@
             // singleBranchCheckBox
             // 
             singleBranchCheckBox.AutoSize = true;
-            singleBranchCheckBox.Location = new Point(372, 14);
-            singleBranchCheckBox.Margin = new Padding(2);
+            singleBranchCheckBox.Location = new Point(425, 19);
+            singleBranchCheckBox.Margin = new Padding(2, 3, 2, 3);
             singleBranchCheckBox.Name = "singleBranchCheckBox";
-            singleBranchCheckBox.Size = new Size(125, 19);
+            singleBranchCheckBox.Size = new Size(154, 24);
             singleBranchCheckBox.TabIndex = 2;
             singleBranchCheckBox.Text = "פעולה על סניף יחיד";
             singleBranchCheckBox.TextAlign = ContentAlignment.MiddleCenter;
@@ -322,49 +337,49 @@
             // companyLabel
             // 
             companyLabel.AutoSize = true;
-            companyLabel.Location = new Point(460, 42);
+            companyLabel.Location = new Point(526, 56);
             companyLabel.Margin = new Padding(2, 0, 2, 0);
             companyLabel.Name = "companyLabel";
-            companyLabel.Size = new Size(37, 15);
+            companyLabel.Size = new Size(46, 20);
             companyLabel.TabIndex = 12;
             companyLabel.Text = "חברה";
             // 
             // companyList
             // 
             companyList.FormattingEnabled = true;
-            companyList.Location = new Point(230, 39);
-            companyList.Margin = new Padding(2);
+            companyList.Location = new Point(263, 52);
+            companyList.Margin = new Padding(2, 3, 2, 3);
             companyList.Name = "companyList";
-            companyList.Size = new Size(213, 23);
+            companyList.Size = new Size(243, 28);
             companyList.TabIndex = 13;
             // 
             // branchLabel
             // 
             branchLabel.AutoSize = true;
-            branchLabel.Location = new Point(467, 72);
+            branchLabel.Location = new Point(534, 96);
             branchLabel.Margin = new Padding(2, 0, 2, 0);
             branchLabel.Name = "branchLabel";
-            branchLabel.Size = new Size(30, 15);
+            branchLabel.Size = new Size(38, 20);
             branchLabel.TabIndex = 1;
             branchLabel.Text = "סניף";
             // 
             // branchList
             // 
             branchList.FormattingEnabled = true;
-            branchList.Location = new Point(230, 69);
-            branchList.Margin = new Padding(2);
+            branchList.Location = new Point(263, 92);
+            branchList.Margin = new Padding(2, 3, 2, 3);
             branchList.Name = "branchList";
-            branchList.Size = new Size(213, 23);
+            branchList.Size = new Size(243, 28);
             branchList.TabIndex = 0;
             // 
             // dataManagementTab
             // 
             dataManagementTab.Controls.Add(dataManagementTabControl);
-            dataManagementTab.Location = new Point(4, 24);
-            dataManagementTab.Margin = new Padding(2);
+            dataManagementTab.Location = new Point(4, 29);
+            dataManagementTab.Margin = new Padding(2, 3, 2, 3);
             dataManagementTab.Name = "dataManagementTab";
-            dataManagementTab.Padding = new Padding(2);
-            dataManagementTab.Size = new Size(894, 550);
+            dataManagementTab.Padding = new Padding(2, 3, 2, 3);
+            dataManagementTab.Size = new Size(1023, 738);
             dataManagementTab.TabIndex = 1;
             dataManagementTab.Text = "ניהול נתונים";
             dataManagementTab.UseVisualStyleBackColor = true;
@@ -376,13 +391,14 @@
             dataManagementTabControl.Controls.Add(itemsApiTab);
             dataManagementTabControl.Controls.Add(tabPage1);
             dataManagementTabControl.Controls.Add(promotionsApiTab);
+            dataManagementTabControl.Controls.Add(priceApprovalTab);
             dataManagementTabControl.Dock = DockStyle.Fill;
-            dataManagementTabControl.Location = new Point(2, 2);
-            dataManagementTabControl.Margin = new Padding(2);
+            dataManagementTabControl.Location = new Point(2, 3);
+            dataManagementTabControl.Margin = new Padding(2, 3, 2, 3);
             dataManagementTabControl.Name = "dataManagementTabControl";
             dataManagementTabControl.RightToLeft = RightToLeft.Yes;
             dataManagementTabControl.SelectedIndex = 0;
-            dataManagementTabControl.Size = new Size(890, 546);
+            dataManagementTabControl.Size = new Size(1019, 732);
             dataManagementTabControl.TabIndex = 0;
             // 
             // itemsTab
@@ -390,11 +406,11 @@
             itemsTab.Controls.Add(itemsDataGridView);
             itemsTab.Controls.Add(itemSearchPanel);
             itemsTab.Controls.Add(itemActionsPanel);
-            itemsTab.Location = new Point(4, 24);
-            itemsTab.Margin = new Padding(2);
+            itemsTab.Location = new Point(4, 29);
+            itemsTab.Margin = new Padding(2, 3, 2, 3);
             itemsTab.Name = "itemsTab";
-            itemsTab.Padding = new Padding(2);
-            itemsTab.Size = new Size(882, 518);
+            itemsTab.Padding = new Padding(2, 3, 2, 3);
+            itemsTab.Size = new Size(1011, 699);
             itemsTab.TabIndex = 0;
             itemsTab.Text = "פריטים";
             itemsTab.UseVisualStyleBackColor = true;
@@ -406,13 +422,13 @@
             itemsDataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             itemsDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
             itemsDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            itemsDataGridView.Location = new Point(4, 90);
-            itemsDataGridView.Margin = new Padding(2);
+            itemsDataGridView.Location = new Point(5, 120);
+            itemsDataGridView.Margin = new Padding(2, 3, 2, 3);
             itemsDataGridView.Name = "itemsDataGridView";
             itemsDataGridView.ReadOnly = true;
             itemsDataGridView.RowHeadersWidth = 62;
             itemsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            itemsDataGridView.Size = new Size(876, 388);
+            itemsDataGridView.Size = new Size(1003, 515);
             itemsDataGridView.TabIndex = 0;
             // 
             // itemSearchPanel
@@ -426,83 +442,83 @@
             itemSearchPanel.Controls.Add(itemSearchButton);
             itemSearchPanel.Controls.Add(itemSearchClearButton);
             itemSearchPanel.Dock = DockStyle.Top;
-            itemSearchPanel.Location = new Point(2, 2);
-            itemSearchPanel.Margin = new Padding(2);
+            itemSearchPanel.Location = new Point(2, 3);
+            itemSearchPanel.Margin = new Padding(2, 3, 2, 3);
             itemSearchPanel.Name = "itemSearchPanel";
-            itemSearchPanel.Size = new Size(878, 86);
+            itemSearchPanel.Size = new Size(1007, 115);
             itemSearchPanel.TabIndex = 1;
             // 
             // itemSearchBranchComboBox
             // 
             itemSearchBranchComboBox.FormattingEnabled = true;
-            itemSearchBranchComboBox.Location = new Point(490, 12);
-            itemSearchBranchComboBox.Margin = new Padding(2);
+            itemSearchBranchComboBox.Location = new Point(560, 16);
+            itemSearchBranchComboBox.Margin = new Padding(2, 3, 2, 3);
             itemSearchBranchComboBox.Name = "itemSearchBranchComboBox";
-            itemSearchBranchComboBox.Size = new Size(141, 23);
+            itemSearchBranchComboBox.Size = new Size(161, 28);
             itemSearchBranchComboBox.TabIndex = 0;
             // 
             // itemSearchBranchLabel
             // 
             itemSearchBranchLabel.AutoSize = true;
-            itemSearchBranchLabel.Location = new Point(637, 14);
+            itemSearchBranchLabel.Location = new Point(728, 19);
             itemSearchBranchLabel.Margin = new Padding(2, 0, 2, 0);
             itemSearchBranchLabel.Name = "itemSearchBranchLabel";
-            itemSearchBranchLabel.Size = new Size(30, 15);
+            itemSearchBranchLabel.Size = new Size(38, 20);
             itemSearchBranchLabel.TabIndex = 1;
             itemSearchBranchLabel.Text = "סניף";
             // 
             // itemSearchBarcodeTextBox
             // 
-            itemSearchBarcodeTextBox.Location = new Point(490, 36);
-            itemSearchBarcodeTextBox.Margin = new Padding(2);
+            itemSearchBarcodeTextBox.Location = new Point(560, 48);
+            itemSearchBarcodeTextBox.Margin = new Padding(2, 3, 2, 3);
             itemSearchBarcodeTextBox.Name = "itemSearchBarcodeTextBox";
-            itemSearchBarcodeTextBox.Size = new Size(141, 23);
+            itemSearchBarcodeTextBox.Size = new Size(161, 27);
             itemSearchBarcodeTextBox.TabIndex = 2;
             // 
             // itemSearchBarcodeLabel
             // 
             itemSearchBarcodeLabel.AutoSize = true;
-            itemSearchBarcodeLabel.Location = new Point(637, 38);
+            itemSearchBarcodeLabel.Location = new Point(728, 51);
             itemSearchBarcodeLabel.Margin = new Padding(2, 0, 2, 0);
             itemSearchBarcodeLabel.Name = "itemSearchBarcodeLabel";
-            itemSearchBarcodeLabel.Size = new Size(38, 15);
+            itemSearchBarcodeLabel.Size = new Size(47, 20);
             itemSearchBarcodeLabel.TabIndex = 3;
             itemSearchBarcodeLabel.Text = "ברקוד";
             // 
             // itemSearchNameTextBox
             // 
-            itemSearchNameTextBox.Location = new Point(490, 60);
-            itemSearchNameTextBox.Margin = new Padding(2);
+            itemSearchNameTextBox.Location = new Point(560, 80);
+            itemSearchNameTextBox.Margin = new Padding(2, 3, 2, 3);
             itemSearchNameTextBox.Name = "itemSearchNameTextBox";
-            itemSearchNameTextBox.Size = new Size(141, 23);
+            itemSearchNameTextBox.Size = new Size(161, 27);
             itemSearchNameTextBox.TabIndex = 4;
             // 
             // itemSearchNameLabel
             // 
             itemSearchNameLabel.AutoSize = true;
-            itemSearchNameLabel.Location = new Point(637, 62);
+            itemSearchNameLabel.Location = new Point(728, 83);
             itemSearchNameLabel.Margin = new Padding(2, 0, 2, 0);
             itemSearchNameLabel.Name = "itemSearchNameLabel";
-            itemSearchNameLabel.Size = new Size(24, 15);
+            itemSearchNameLabel.Size = new Size(31, 20);
             itemSearchNameLabel.TabIndex = 5;
             itemSearchNameLabel.Text = "שם";
             // 
             // itemSearchButton
             // 
-            itemSearchButton.Location = new Point(420, 36);
-            itemSearchButton.Margin = new Padding(2);
+            itemSearchButton.Location = new Point(480, 48);
+            itemSearchButton.Margin = new Padding(2, 3, 2, 3);
             itemSearchButton.Name = "itemSearchButton";
-            itemSearchButton.Size = new Size(66, 20);
+            itemSearchButton.Size = new Size(75, 27);
             itemSearchButton.TabIndex = 6;
             itemSearchButton.Text = "חפש";
             itemSearchButton.UseVisualStyleBackColor = true;
             // 
             // itemSearchClearButton
             // 
-            itemSearchClearButton.Location = new Point(350, 36);
-            itemSearchClearButton.Margin = new Padding(2);
+            itemSearchClearButton.Location = new Point(400, 48);
+            itemSearchClearButton.Margin = new Padding(2, 3, 2, 3);
             itemSearchClearButton.Name = "itemSearchClearButton";
-            itemSearchClearButton.Size = new Size(66, 20);
+            itemSearchClearButton.Size = new Size(75, 27);
             itemSearchClearButton.TabIndex = 7;
             itemSearchClearButton.Text = "נקה";
             itemSearchClearButton.UseVisualStyleBackColor = true;
@@ -513,38 +529,38 @@
             itemActionsPanel.Controls.Add(removePromotionButton);
             itemActionsPanel.Controls.Add(viewItemDetailsButton);
             itemActionsPanel.Dock = DockStyle.Bottom;
-            itemActionsPanel.Location = new Point(2, 481);
-            itemActionsPanel.Margin = new Padding(2);
+            itemActionsPanel.Location = new Point(2, 649);
+            itemActionsPanel.Margin = new Padding(2, 3, 2, 3);
             itemActionsPanel.Name = "itemActionsPanel";
-            itemActionsPanel.Size = new Size(878, 35);
+            itemActionsPanel.Size = new Size(1007, 47);
             itemActionsPanel.TabIndex = 2;
             // 
             // setItemNotSentButton
             // 
-            setItemNotSentButton.Location = new Point(560, 8);
-            setItemNotSentButton.Margin = new Padding(2);
+            setItemNotSentButton.Location = new Point(640, 11);
+            setItemNotSentButton.Margin = new Padding(2, 3, 2, 3);
             setItemNotSentButton.Name = "setItemNotSentButton";
-            setItemNotSentButton.Size = new Size(105, 20);
+            setItemNotSentButton.Size = new Size(120, 27);
             setItemNotSentButton.TabIndex = 0;
             setItemNotSentButton.Text = "סמן כלא נשלח";
             setItemNotSentButton.UseVisualStyleBackColor = true;
             // 
             // removePromotionButton
             // 
-            removePromotionButton.Location = new Point(455, 8);
-            removePromotionButton.Margin = new Padding(2);
+            removePromotionButton.Location = new Point(520, 11);
+            removePromotionButton.Margin = new Padding(2, 3, 2, 3);
             removePromotionButton.Name = "removePromotionButton";
-            removePromotionButton.Size = new Size(105, 20);
+            removePromotionButton.Size = new Size(120, 27);
             removePromotionButton.TabIndex = 1;
             removePromotionButton.Text = "הסר מבצע";
             removePromotionButton.UseVisualStyleBackColor = true;
             // 
             // viewItemDetailsButton
             // 
-            viewItemDetailsButton.Location = new Point(350, 8);
-            viewItemDetailsButton.Margin = new Padding(2);
+            viewItemDetailsButton.Location = new Point(400, 11);
+            viewItemDetailsButton.Margin = new Padding(2, 3, 2, 3);
             viewItemDetailsButton.Name = "viewItemDetailsButton";
-            viewItemDetailsButton.Size = new Size(105, 20);
+            viewItemDetailsButton.Size = new Size(120, 27);
             viewItemDetailsButton.TabIndex = 2;
             viewItemDetailsButton.Text = "הצג פרטים";
             viewItemDetailsButton.UseVisualStyleBackColor = true;
@@ -554,11 +570,11 @@
             promotionsTab.Controls.Add(promotionsDataGridView);
             promotionsTab.Controls.Add(promotionSearchPanel);
             promotionsTab.Controls.Add(promotionActionsPanel);
-            promotionsTab.Location = new Point(4, 24);
-            promotionsTab.Margin = new Padding(2);
+            promotionsTab.Location = new Point(4, 29);
+            promotionsTab.Margin = new Padding(2, 3, 2, 3);
             promotionsTab.Name = "promotionsTab";
-            promotionsTab.Padding = new Padding(2);
-            promotionsTab.Size = new Size(882, 518);
+            promotionsTab.Padding = new Padding(2, 3, 2, 3);
+            promotionsTab.Size = new Size(1009, 695);
             promotionsTab.TabIndex = 1;
             promotionsTab.Text = "מבצעים";
             promotionsTab.UseVisualStyleBackColor = true;
@@ -570,13 +586,13 @@
             promotionsDataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             promotionsDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
             promotionsDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            promotionsDataGridView.Location = new Point(4, 90);
-            promotionsDataGridView.Margin = new Padding(2);
+            promotionsDataGridView.Location = new Point(5, 120);
+            promotionsDataGridView.Margin = new Padding(2, 3, 2, 3);
             promotionsDataGridView.Name = "promotionsDataGridView";
             promotionsDataGridView.ReadOnly = true;
             promotionsDataGridView.RowHeadersWidth = 62;
             promotionsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            promotionsDataGridView.Size = new Size(876, 388);
+            promotionsDataGridView.Size = new Size(1001, 511);
             promotionsDataGridView.TabIndex = 0;
             // 
             // promotionSearchPanel
@@ -590,38 +606,38 @@
             promotionSearchPanel.Controls.Add(promotionSearchButton);
             promotionSearchPanel.Controls.Add(promotionSearchClearButton);
             promotionSearchPanel.Dock = DockStyle.Top;
-            promotionSearchPanel.Location = new Point(2, 2);
-            promotionSearchPanel.Margin = new Padding(2);
+            promotionSearchPanel.Location = new Point(2, 3);
+            promotionSearchPanel.Margin = new Padding(2, 3, 2, 3);
             promotionSearchPanel.Name = "promotionSearchPanel";
-            promotionSearchPanel.Size = new Size(878, 86);
+            promotionSearchPanel.Size = new Size(1005, 115);
             promotionSearchPanel.TabIndex = 1;
             // 
             // promotionSearchBranchComboBox
             // 
             promotionSearchBranchComboBox.FormattingEnabled = true;
-            promotionSearchBranchComboBox.Location = new Point(490, 12);
-            promotionSearchBranchComboBox.Margin = new Padding(2);
+            promotionSearchBranchComboBox.Location = new Point(560, 16);
+            promotionSearchBranchComboBox.Margin = new Padding(2, 3, 2, 3);
             promotionSearchBranchComboBox.Name = "promotionSearchBranchComboBox";
-            promotionSearchBranchComboBox.Size = new Size(141, 23);
+            promotionSearchBranchComboBox.Size = new Size(161, 28);
             promotionSearchBranchComboBox.TabIndex = 0;
             // 
             // promotionSearchBranchLabel
             // 
             promotionSearchBranchLabel.AutoSize = true;
-            promotionSearchBranchLabel.Location = new Point(637, 14);
+            promotionSearchBranchLabel.Location = new Point(728, 19);
             promotionSearchBranchLabel.Margin = new Padding(2, 0, 2, 0);
             promotionSearchBranchLabel.Name = "promotionSearchBranchLabel";
-            promotionSearchBranchLabel.Size = new Size(30, 15);
+            promotionSearchBranchLabel.Size = new Size(38, 20);
             promotionSearchBranchLabel.TabIndex = 1;
             promotionSearchBranchLabel.Text = "סניף";
             // 
             // promotionSearchKodRadioButton
             // 
             promotionSearchKodRadioButton.AutoSize = true;
-            promotionSearchKodRadioButton.Location = new Point(560, 36);
-            promotionSearchKodRadioButton.Margin = new Padding(2);
+            promotionSearchKodRadioButton.Location = new Point(640, 48);
+            promotionSearchKodRadioButton.Margin = new Padding(2, 3, 2, 3);
             promotionSearchKodRadioButton.Name = "promotionSearchKodRadioButton";
-            promotionSearchKodRadioButton.Size = new Size(74, 19);
+            promotionSearchKodRadioButton.Size = new Size(92, 24);
             promotionSearchKodRadioButton.TabIndex = 2;
             promotionSearchKodRadioButton.Text = "קוד מבצע";
             promotionSearchKodRadioButton.UseVisualStyleBackColor = true;
@@ -630,10 +646,10 @@
             // 
             promotionSearchItemKodRadioButton.AutoSize = true;
             promotionSearchItemKodRadioButton.Checked = true;
-            promotionSearchItemKodRadioButton.Location = new Point(560, 54);
-            promotionSearchItemKodRadioButton.Margin = new Padding(2);
+            promotionSearchItemKodRadioButton.Location = new Point(640, 72);
+            promotionSearchItemKodRadioButton.Margin = new Padding(2, 3, 2, 3);
             promotionSearchItemKodRadioButton.Name = "promotionSearchItemKodRadioButton";
-            promotionSearchItemKodRadioButton.Size = new Size(71, 19);
+            promotionSearchItemKodRadioButton.Size = new Size(86, 24);
             promotionSearchItemKodRadioButton.TabIndex = 3;
             promotionSearchItemKodRadioButton.TabStop = true;
             promotionSearchItemKodRadioButton.Text = "קוד פריט";
@@ -641,38 +657,38 @@
             // 
             // promotionSearchValueTextBox
             // 
-            promotionSearchValueTextBox.Location = new Point(420, 45);
-            promotionSearchValueTextBox.Margin = new Padding(2);
+            promotionSearchValueTextBox.Location = new Point(480, 60);
+            promotionSearchValueTextBox.Margin = new Padding(2, 3, 2, 3);
             promotionSearchValueTextBox.Name = "promotionSearchValueTextBox";
-            promotionSearchValueTextBox.Size = new Size(106, 23);
+            promotionSearchValueTextBox.Size = new Size(121, 27);
             promotionSearchValueTextBox.TabIndex = 4;
             // 
             // promotionSearchValueLabel
             // 
             promotionSearchValueLabel.AutoSize = true;
-            promotionSearchValueLabel.Location = new Point(532, 47);
+            promotionSearchValueLabel.Location = new Point(608, 63);
             promotionSearchValueLabel.Margin = new Padding(2, 0, 2, 0);
             promotionSearchValueLabel.Name = "promotionSearchValueLabel";
-            promotionSearchValueLabel.Size = new Size(28, 15);
+            promotionSearchValueLabel.Size = new Size(34, 20);
             promotionSearchValueLabel.TabIndex = 5;
             promotionSearchValueLabel.Text = "ערך";
             // 
             // promotionSearchButton
             // 
-            promotionSearchButton.Location = new Point(350, 45);
-            promotionSearchButton.Margin = new Padding(2);
+            promotionSearchButton.Location = new Point(400, 60);
+            promotionSearchButton.Margin = new Padding(2, 3, 2, 3);
             promotionSearchButton.Name = "promotionSearchButton";
-            promotionSearchButton.Size = new Size(66, 20);
+            promotionSearchButton.Size = new Size(75, 27);
             promotionSearchButton.TabIndex = 6;
             promotionSearchButton.Text = "חפש";
             promotionSearchButton.UseVisualStyleBackColor = true;
             // 
             // promotionSearchClearButton
             // 
-            promotionSearchClearButton.Location = new Point(280, 45);
-            promotionSearchClearButton.Margin = new Padding(2);
+            promotionSearchClearButton.Location = new Point(320, 60);
+            promotionSearchClearButton.Margin = new Padding(2, 3, 2, 3);
             promotionSearchClearButton.Name = "promotionSearchClearButton";
-            promotionSearchClearButton.Size = new Size(66, 20);
+            promotionSearchClearButton.Size = new Size(75, 27);
             promotionSearchClearButton.TabIndex = 7;
             promotionSearchClearButton.Text = "נקה";
             promotionSearchClearButton.UseVisualStyleBackColor = true;
@@ -682,28 +698,28 @@
             promotionActionsPanel.Controls.Add(setPromotionNotTransferredButton);
             promotionActionsPanel.Controls.Add(viewPromotionDetailsButton);
             promotionActionsPanel.Dock = DockStyle.Bottom;
-            promotionActionsPanel.Location = new Point(2, 481);
-            promotionActionsPanel.Margin = new Padding(2);
+            promotionActionsPanel.Location = new Point(2, 645);
+            promotionActionsPanel.Margin = new Padding(2, 3, 2, 3);
             promotionActionsPanel.Name = "promotionActionsPanel";
-            promotionActionsPanel.Size = new Size(878, 35);
+            promotionActionsPanel.Size = new Size(1005, 47);
             promotionActionsPanel.TabIndex = 2;
             // 
             // setPromotionNotTransferredButton
             // 
-            setPromotionNotTransferredButton.Location = new Point(560, 8);
-            setPromotionNotTransferredButton.Margin = new Padding(2);
+            setPromotionNotTransferredButton.Location = new Point(640, 11);
+            setPromotionNotTransferredButton.Margin = new Padding(2, 3, 2, 3);
             setPromotionNotTransferredButton.Name = "setPromotionNotTransferredButton";
-            setPromotionNotTransferredButton.Size = new Size(105, 20);
+            setPromotionNotTransferredButton.Size = new Size(120, 27);
             setPromotionNotTransferredButton.TabIndex = 0;
             setPromotionNotTransferredButton.Text = "סמן כלא הועבר";
             setPromotionNotTransferredButton.UseVisualStyleBackColor = true;
             // 
             // viewPromotionDetailsButton
             // 
-            viewPromotionDetailsButton.Location = new Point(455, 8);
-            viewPromotionDetailsButton.Margin = new Padding(2);
+            viewPromotionDetailsButton.Location = new Point(520, 11);
+            viewPromotionDetailsButton.Margin = new Padding(2, 3, 2, 3);
             viewPromotionDetailsButton.Name = "viewPromotionDetailsButton";
-            viewPromotionDetailsButton.Size = new Size(105, 20);
+            viewPromotionDetailsButton.Size = new Size(120, 27);
             viewPromotionDetailsButton.TabIndex = 1;
             viewPromotionDetailsButton.Text = "הצג פרטים";
             viewPromotionDetailsButton.UseVisualStyleBackColor = true;
@@ -714,11 +730,11 @@
             itemsApiTab.Controls.Add(itemsApiResultsDataGridView);
             itemsApiTab.Controls.Add(itemsApiAddSelectedButton);
             itemsApiTab.Controls.Add(itemsApiAddAllButton);
-            itemsApiTab.Location = new Point(4, 24);
-            itemsApiTab.Margin = new Padding(2);
+            itemsApiTab.Location = new Point(4, 29);
+            itemsApiTab.Margin = new Padding(2, 3, 2, 3);
             itemsApiTab.Name = "itemsApiTab";
-            itemsApiTab.Padding = new Padding(2);
-            itemsApiTab.Size = new Size(882, 518);
+            itemsApiTab.Padding = new Padding(2, 3, 2, 3);
+            itemsApiTab.Size = new Size(1009, 695);
             itemsApiTab.TabIndex = 2;
             itemsApiTab.Text = "ממשק API פריטים";
             itemsApiTab.UseVisualStyleBackColor = true;
@@ -731,55 +747,55 @@
             itemsApiPanel.Controls.Add(itemsApiItemIdLabel);
             itemsApiPanel.Controls.Add(itemsApiGetItemButton);
             itemsApiPanel.Dock = DockStyle.Top;
-            itemsApiPanel.Location = new Point(2, 2);
-            itemsApiPanel.Margin = new Padding(2);
+            itemsApiPanel.Location = new Point(2, 3);
+            itemsApiPanel.Margin = new Padding(2, 3, 2, 3);
             itemsApiPanel.Name = "itemsApiPanel";
-            itemsApiPanel.Size = new Size(878, 60);
+            itemsApiPanel.Size = new Size(1005, 80);
             itemsApiPanel.TabIndex = 0;
             // 
             // itemsApiBranchComboBox
             // 
             itemsApiBranchComboBox.FormattingEnabled = true;
-            itemsApiBranchComboBox.Location = new Point(350, 6);
-            itemsApiBranchComboBox.Margin = new Padding(2);
+            itemsApiBranchComboBox.Location = new Point(400, 8);
+            itemsApiBranchComboBox.Margin = new Padding(2, 3, 2, 3);
             itemsApiBranchComboBox.Name = "itemsApiBranchComboBox";
-            itemsApiBranchComboBox.Size = new Size(141, 23);
+            itemsApiBranchComboBox.Size = new Size(161, 28);
             itemsApiBranchComboBox.TabIndex = 0;
             // 
             // itemsApiBranchLabel
             // 
             itemsApiBranchLabel.AutoSize = true;
-            itemsApiBranchLabel.Location = new Point(517, 9);
+            itemsApiBranchLabel.Location = new Point(591, 12);
             itemsApiBranchLabel.Margin = new Padding(2, 0, 2, 0);
             itemsApiBranchLabel.Name = "itemsApiBranchLabel";
-            itemsApiBranchLabel.Size = new Size(30, 15);
+            itemsApiBranchLabel.Size = new Size(38, 20);
             itemsApiBranchLabel.TabIndex = 1;
             itemsApiBranchLabel.Text = "סניף";
             // 
             // itemsApiItemIdTextBox
             // 
-            itemsApiItemIdTextBox.Location = new Point(210, 33);
-            itemsApiItemIdTextBox.Margin = new Padding(2);
+            itemsApiItemIdTextBox.Location = new Point(240, 44);
+            itemsApiItemIdTextBox.Margin = new Padding(2, 3, 2, 3);
             itemsApiItemIdTextBox.Name = "itemsApiItemIdTextBox";
-            itemsApiItemIdTextBox.Size = new Size(281, 23);
+            itemsApiItemIdTextBox.Size = new Size(321, 27);
             itemsApiItemIdTextBox.TabIndex = 2;
             // 
             // itemsApiItemIdLabel
             // 
             itemsApiItemIdLabel.AutoSize = true;
-            itemsApiItemIdLabel.Location = new Point(497, 38);
+            itemsApiItemIdLabel.Location = new Point(568, 51);
             itemsApiItemIdLabel.Margin = new Padding(2, 0, 2, 0);
             itemsApiItemIdLabel.Name = "itemsApiItemIdLabel";
-            itemsApiItemIdLabel.Size = new Size(169, 15);
+            itemsApiItemIdLabel.Size = new Size(208, 20);
             itemsApiItemIdLabel.TabIndex = 3;
             itemsApiItemIdLabel.Text = "ברקוד פריט (מופרדים בפסיקים)";
             // 
             // itemsApiGetItemButton
             // 
-            itemsApiGetItemButton.Location = new Point(119, 32);
-            itemsApiGetItemButton.Margin = new Padding(2);
+            itemsApiGetItemButton.Location = new Point(136, 43);
+            itemsApiGetItemButton.Margin = new Padding(2, 3, 2, 3);
             itemsApiGetItemButton.Name = "itemsApiGetItemButton";
-            itemsApiGetItemButton.Size = new Size(75, 26);
+            itemsApiGetItemButton.Size = new Size(86, 35);
             itemsApiGetItemButton.TabIndex = 4;
             itemsApiGetItemButton.Text = "משוך פריטים";
             itemsApiGetItemButton.UseVisualStyleBackColor = true;
@@ -791,22 +807,22 @@
             itemsApiResultsDataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             itemsApiResultsDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
             itemsApiResultsDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            itemsApiResultsDataGridView.Location = new Point(4, 66);
-            itemsApiResultsDataGridView.Margin = new Padding(2);
+            itemsApiResultsDataGridView.Location = new Point(5, 88);
+            itemsApiResultsDataGridView.Margin = new Padding(2, 3, 2, 3);
             itemsApiResultsDataGridView.Name = "itemsApiResultsDataGridView";
             itemsApiResultsDataGridView.ReadOnly = true;
             itemsApiResultsDataGridView.RowHeadersWidth = 62;
             itemsApiResultsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            itemsApiResultsDataGridView.Size = new Size(876, 412);
+            itemsApiResultsDataGridView.Size = new Size(1001, 543);
             itemsApiResultsDataGridView.TabIndex = 1;
             // 
             // itemsApiAddSelectedButton
             // 
             itemsApiAddSelectedButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            itemsApiAddSelectedButton.Location = new Point(761, 481);
-            itemsApiAddSelectedButton.Margin = new Padding(2);
+            itemsApiAddSelectedButton.Location = new Point(870, 635);
+            itemsApiAddSelectedButton.Margin = new Padding(2, 3, 2, 3);
             itemsApiAddSelectedButton.Name = "itemsApiAddSelectedButton";
-            itemsApiAddSelectedButton.Size = new Size(105, 20);
+            itemsApiAddSelectedButton.Size = new Size(120, 27);
             itemsApiAddSelectedButton.TabIndex = 2;
             itemsApiAddSelectedButton.Text = "הוסף נבחרים";
             itemsApiAddSelectedButton.UseVisualStyleBackColor = true;
@@ -814,10 +830,10 @@
             // itemsApiAddAllButton
             // 
             itemsApiAddAllButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            itemsApiAddAllButton.Location = new Point(656, 481);
-            itemsApiAddAllButton.Margin = new Padding(2);
+            itemsApiAddAllButton.Location = new Point(750, 635);
+            itemsApiAddAllButton.Margin = new Padding(2, 3, 2, 3);
             itemsApiAddAllButton.Name = "itemsApiAddAllButton";
-            itemsApiAddAllButton.Size = new Size(105, 20);
+            itemsApiAddAllButton.Size = new Size(120, 27);
             itemsApiAddAllButton.TabIndex = 3;
             itemsApiAddAllButton.Text = "הוסף הכל";
             itemsApiAddAllButton.UseVisualStyleBackColor = true;
@@ -828,9 +844,10 @@
             tabPage1.Controls.Add(itemsApiAddAllButtonNew);
             tabPage1.Controls.Add(itemsApiResultsNewDataGridView);
             tabPage1.Controls.Add(panel1);
-            tabPage1.Location = new Point(4, 24);
+            tabPage1.Location = new Point(4, 29);
+            tabPage1.Margin = new Padding(3, 4, 3, 4);
             tabPage1.Name = "tabPage1";
-            tabPage1.Size = new Size(882, 518);
+            tabPage1.Size = new Size(1011, 699);
             tabPage1.TabIndex = 4;
             tabPage1.Text = "ממשק API פריטים קומקס";
             tabPage1.UseVisualStyleBackColor = true;
@@ -838,10 +855,10 @@
             // itemsApiAddSelectedButtonNew
             // 
             itemsApiAddSelectedButtonNew.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            itemsApiAddSelectedButtonNew.Location = new Point(777, 495);
-            itemsApiAddSelectedButtonNew.Margin = new Padding(2);
+            itemsApiAddSelectedButtonNew.Location = new Point(890, 657);
+            itemsApiAddSelectedButtonNew.Margin = new Padding(2, 3, 2, 3);
             itemsApiAddSelectedButtonNew.Name = "itemsApiAddSelectedButtonNew";
-            itemsApiAddSelectedButtonNew.Size = new Size(105, 20);
+            itemsApiAddSelectedButtonNew.Size = new Size(120, 27);
             itemsApiAddSelectedButtonNew.TabIndex = 4;
             itemsApiAddSelectedButtonNew.Text = "הוסף נבחרים";
             itemsApiAddSelectedButtonNew.UseVisualStyleBackColor = true;
@@ -849,10 +866,10 @@
             // itemsApiAddAllButtonNew
             // 
             itemsApiAddAllButtonNew.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            itemsApiAddAllButtonNew.Location = new Point(672, 495);
-            itemsApiAddAllButtonNew.Margin = new Padding(2);
+            itemsApiAddAllButtonNew.Location = new Point(770, 657);
+            itemsApiAddAllButtonNew.Margin = new Padding(2, 3, 2, 3);
             itemsApiAddAllButtonNew.Name = "itemsApiAddAllButtonNew";
-            itemsApiAddAllButtonNew.Size = new Size(105, 20);
+            itemsApiAddAllButtonNew.Size = new Size(120, 27);
             itemsApiAddAllButtonNew.TabIndex = 5;
             itemsApiAddAllButtonNew.Text = "הוסף הכל";
             itemsApiAddAllButtonNew.UseVisualStyleBackColor = true;
@@ -864,13 +881,13 @@
             itemsApiResultsNewDataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             itemsApiResultsNewDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
             itemsApiResultsNewDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            itemsApiResultsNewDataGridView.Location = new Point(2, 62);
-            itemsApiResultsNewDataGridView.Margin = new Padding(2);
+            itemsApiResultsNewDataGridView.Location = new Point(2, 83);
+            itemsApiResultsNewDataGridView.Margin = new Padding(2, 3, 2, 3);
             itemsApiResultsNewDataGridView.Name = "itemsApiResultsNewDataGridView";
             itemsApiResultsNewDataGridView.ReadOnly = true;
             itemsApiResultsNewDataGridView.RowHeadersWidth = 62;
             itemsApiResultsNewDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            itemsApiResultsNewDataGridView.Size = new Size(876, 412);
+            itemsApiResultsNewDataGridView.Size = new Size(1003, 547);
             itemsApiResultsNewDataGridView.TabIndex = 2;
             // 
             // panel1
@@ -882,54 +899,54 @@
             panel1.Controls.Add(itemsApiGetItemNewButton);
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
-            panel1.Margin = new Padding(2);
+            panel1.Margin = new Padding(2, 3, 2, 3);
             panel1.Name = "panel1";
-            panel1.Size = new Size(882, 60);
+            panel1.Size = new Size(1011, 80);
             panel1.TabIndex = 1;
             // 
             // itemsApiBranchNewComboBox
             // 
             itemsApiBranchNewComboBox.FormattingEnabled = true;
-            itemsApiBranchNewComboBox.Location = new Point(350, 6);
-            itemsApiBranchNewComboBox.Margin = new Padding(2);
+            itemsApiBranchNewComboBox.Location = new Point(400, 8);
+            itemsApiBranchNewComboBox.Margin = new Padding(2, 3, 2, 3);
             itemsApiBranchNewComboBox.Name = "itemsApiBranchNewComboBox";
-            itemsApiBranchNewComboBox.Size = new Size(141, 23);
+            itemsApiBranchNewComboBox.Size = new Size(161, 28);
             itemsApiBranchNewComboBox.TabIndex = 0;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(517, 9);
+            label1.Location = new Point(591, 12);
             label1.Margin = new Padding(2, 0, 2, 0);
             label1.Name = "label1";
-            label1.Size = new Size(30, 15);
+            label1.Size = new Size(38, 20);
             label1.TabIndex = 1;
             label1.Text = "סניף";
             // 
             // itemsApiItemIdNewTextBox
             // 
-            itemsApiItemIdNewTextBox.Location = new Point(210, 33);
-            itemsApiItemIdNewTextBox.Margin = new Padding(2);
+            itemsApiItemIdNewTextBox.Location = new Point(240, 44);
+            itemsApiItemIdNewTextBox.Margin = new Padding(2, 3, 2, 3);
             itemsApiItemIdNewTextBox.Name = "itemsApiItemIdNewTextBox";
-            itemsApiItemIdNewTextBox.Size = new Size(281, 23);
+            itemsApiItemIdNewTextBox.Size = new Size(321, 27);
             itemsApiItemIdNewTextBox.TabIndex = 2;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(497, 38);
+            label2.Location = new Point(568, 51);
             label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
-            label2.Size = new Size(169, 15);
+            label2.Size = new Size(208, 20);
             label2.TabIndex = 3;
             label2.Text = "ברקוד פריט (מופרדים בפסיקים)";
             // 
             // itemsApiGetItemNewButton
             // 
-            itemsApiGetItemNewButton.Location = new Point(119, 32);
-            itemsApiGetItemNewButton.Margin = new Padding(2);
+            itemsApiGetItemNewButton.Location = new Point(136, 43);
+            itemsApiGetItemNewButton.Margin = new Padding(2, 3, 2, 3);
             itemsApiGetItemNewButton.Name = "itemsApiGetItemNewButton";
-            itemsApiGetItemNewButton.Size = new Size(75, 26);
+            itemsApiGetItemNewButton.Size = new Size(86, 35);
             itemsApiGetItemNewButton.TabIndex = 4;
             itemsApiGetItemNewButton.Text = "משוך פריטים";
             itemsApiGetItemNewButton.UseVisualStyleBackColor = true;
@@ -940,11 +957,11 @@
             promotionsApiTab.Controls.Add(promotionsApiResultsDataGridView);
             promotionsApiTab.Controls.Add(promotionsApiAddSelectedButton);
             promotionsApiTab.Controls.Add(promotionsApiAddAllButton);
-            promotionsApiTab.Location = new Point(4, 24);
-            promotionsApiTab.Margin = new Padding(2);
+            promotionsApiTab.Location = new Point(4, 29);
+            promotionsApiTab.Margin = new Padding(2, 3, 2, 3);
             promotionsApiTab.Name = "promotionsApiTab";
-            promotionsApiTab.Padding = new Padding(2);
-            promotionsApiTab.Size = new Size(882, 518);
+            promotionsApiTab.Padding = new Padding(2, 3, 2, 3);
+            promotionsApiTab.Size = new Size(1011, 699);
             promotionsApiTab.TabIndex = 3;
             promotionsApiTab.Text = "ממשק API מבצעים";
             promotionsApiTab.UseVisualStyleBackColor = true;
@@ -958,65 +975,65 @@
             promotionsApiPanel.Controls.Add(promotionsApiGetPromotionsButton);
             promotionsApiPanel.Controls.Add(promotionsApiApplyFilterButton);
             promotionsApiPanel.Dock = DockStyle.Top;
-            promotionsApiPanel.Location = new Point(2, 2);
-            promotionsApiPanel.Margin = new Padding(2);
+            promotionsApiPanel.Location = new Point(2, 3);
+            promotionsApiPanel.Margin = new Padding(2, 3, 2, 3);
             promotionsApiPanel.Name = "promotionsApiPanel";
-            promotionsApiPanel.Size = new Size(878, 60);
+            promotionsApiPanel.Size = new Size(1007, 80);
             promotionsApiPanel.TabIndex = 0;
             // 
             // promotionsApiBranchComboBox
             // 
             promotionsApiBranchComboBox.FormattingEnabled = true;
-            promotionsApiBranchComboBox.Location = new Point(350, 6);
-            promotionsApiBranchComboBox.Margin = new Padding(2);
+            promotionsApiBranchComboBox.Location = new Point(400, 8);
+            promotionsApiBranchComboBox.Margin = new Padding(2, 3, 2, 3);
             promotionsApiBranchComboBox.Name = "promotionsApiBranchComboBox";
-            promotionsApiBranchComboBox.Size = new Size(141, 23);
+            promotionsApiBranchComboBox.Size = new Size(161, 28);
             promotionsApiBranchComboBox.TabIndex = 0;
             // 
             // promotionsApiBranchLabel
             // 
             promotionsApiBranchLabel.AutoSize = true;
-            promotionsApiBranchLabel.Location = new Point(517, 9);
+            promotionsApiBranchLabel.Location = new Point(591, 12);
             promotionsApiBranchLabel.Margin = new Padding(2, 0, 2, 0);
             promotionsApiBranchLabel.Name = "promotionsApiBranchLabel";
-            promotionsApiBranchLabel.Size = new Size(30, 15);
+            promotionsApiBranchLabel.Size = new Size(38, 20);
             promotionsApiBranchLabel.TabIndex = 1;
             promotionsApiBranchLabel.Text = "סניף";
             // 
             // promotionsApiBarcodeFilterTextBox
             // 
-            promotionsApiBarcodeFilterTextBox.Location = new Point(210, 30);
-            promotionsApiBarcodeFilterTextBox.Margin = new Padding(2);
+            promotionsApiBarcodeFilterTextBox.Location = new Point(240, 40);
+            promotionsApiBarcodeFilterTextBox.Margin = new Padding(2, 3, 2, 3);
             promotionsApiBarcodeFilterTextBox.Name = "promotionsApiBarcodeFilterTextBox";
-            promotionsApiBarcodeFilterTextBox.Size = new Size(281, 23);
+            promotionsApiBarcodeFilterTextBox.Size = new Size(321, 27);
             promotionsApiBarcodeFilterTextBox.TabIndex = 2;
             // 
             // promotionsApiBarcodeFilterLabel
             // 
             promotionsApiBarcodeFilterLabel.AutoSize = true;
-            promotionsApiBarcodeFilterLabel.Location = new Point(495, 33);
+            promotionsApiBarcodeFilterLabel.Location = new Point(566, 44);
             promotionsApiBarcodeFilterLabel.Margin = new Padding(2, 0, 2, 0);
             promotionsApiBarcodeFilterLabel.Name = "promotionsApiBarcodeFilterLabel";
-            promotionsApiBarcodeFilterLabel.Size = new Size(84, 15);
+            promotionsApiBarcodeFilterLabel.Size = new Size(104, 20);
             promotionsApiBarcodeFilterLabel.TabIndex = 3;
             promotionsApiBarcodeFilterLabel.Text = "סינון לפי ברקוד";
             // 
             // promotionsApiGetPromotionsButton
             // 
-            promotionsApiGetPromotionsButton.Location = new Point(146, 26);
-            promotionsApiGetPromotionsButton.Margin = new Padding(2);
+            promotionsApiGetPromotionsButton.Location = new Point(167, 35);
+            promotionsApiGetPromotionsButton.Margin = new Padding(2, 3, 2, 3);
             promotionsApiGetPromotionsButton.Name = "promotionsApiGetPromotionsButton";
-            promotionsApiGetPromotionsButton.Size = new Size(63, 29);
+            promotionsApiGetPromotionsButton.Size = new Size(72, 39);
             promotionsApiGetPromotionsButton.TabIndex = 4;
             promotionsApiGetPromotionsButton.Text = "משוך מבצעים";
             promotionsApiGetPromotionsButton.UseVisualStyleBackColor = true;
             // 
             // promotionsApiApplyFilterButton
             // 
-            promotionsApiApplyFilterButton.Location = new Point(81, 27);
-            promotionsApiApplyFilterButton.Margin = new Padding(2);
+            promotionsApiApplyFilterButton.Location = new Point(93, 36);
+            promotionsApiApplyFilterButton.Margin = new Padding(2, 3, 2, 3);
             promotionsApiApplyFilterButton.Name = "promotionsApiApplyFilterButton";
-            promotionsApiApplyFilterButton.Size = new Size(61, 26);
+            promotionsApiApplyFilterButton.Size = new Size(70, 35);
             promotionsApiApplyFilterButton.TabIndex = 5;
             promotionsApiApplyFilterButton.Text = "סנן";
             promotionsApiApplyFilterButton.UseVisualStyleBackColor = true;
@@ -1028,22 +1045,22 @@
             promotionsApiResultsDataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             promotionsApiResultsDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
             promotionsApiResultsDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            promotionsApiResultsDataGridView.Location = new Point(4, 66);
-            promotionsApiResultsDataGridView.Margin = new Padding(2);
+            promotionsApiResultsDataGridView.Location = new Point(5, 88);
+            promotionsApiResultsDataGridView.Margin = new Padding(2, 3, 2, 3);
             promotionsApiResultsDataGridView.Name = "promotionsApiResultsDataGridView";
             promotionsApiResultsDataGridView.ReadOnly = true;
             promotionsApiResultsDataGridView.RowHeadersWidth = 62;
             promotionsApiResultsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            promotionsApiResultsDataGridView.Size = new Size(876, 412);
+            promotionsApiResultsDataGridView.Size = new Size(1003, 547);
             promotionsApiResultsDataGridView.TabIndex = 1;
             // 
             // promotionsApiAddSelectedButton
             // 
             promotionsApiAddSelectedButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            promotionsApiAddSelectedButton.Location = new Point(761, 481);
-            promotionsApiAddSelectedButton.Margin = new Padding(2);
+            promotionsApiAddSelectedButton.Location = new Point(872, 639);
+            promotionsApiAddSelectedButton.Margin = new Padding(2, 3, 2, 3);
             promotionsApiAddSelectedButton.Name = "promotionsApiAddSelectedButton";
-            promotionsApiAddSelectedButton.Size = new Size(105, 20);
+            promotionsApiAddSelectedButton.Size = new Size(120, 27);
             promotionsApiAddSelectedButton.TabIndex = 2;
             promotionsApiAddSelectedButton.Text = "הוסף נבחרים";
             promotionsApiAddSelectedButton.UseVisualStyleBackColor = true;
@@ -1051,19 +1068,147 @@
             // promotionsApiAddAllButton
             // 
             promotionsApiAddAllButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            promotionsApiAddAllButton.Location = new Point(656, 481);
-            promotionsApiAddAllButton.Margin = new Padding(2);
+            promotionsApiAddAllButton.Location = new Point(752, 639);
+            promotionsApiAddAllButton.Margin = new Padding(2, 3, 2, 3);
             promotionsApiAddAllButton.Name = "promotionsApiAddAllButton";
-            promotionsApiAddAllButton.Size = new Size(105, 20);
+            promotionsApiAddAllButton.Size = new Size(120, 27);
             promotionsApiAddAllButton.TabIndex = 3;
             promotionsApiAddAllButton.Text = "הוסף הכל";
             promotionsApiAddAllButton.UseVisualStyleBackColor = true;
             // 
+            // priceApprovalTab
+            // 
+            priceApprovalTab.Controls.Add(priceApprovalDataGridView);
+            priceApprovalTab.Controls.Add(priceApprovalSearchPanel);
+            priceApprovalTab.Controls.Add(priceApprovalActionsPanel);
+            priceApprovalTab.Location = new Point(4, 29);
+            priceApprovalTab.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalTab.Name = "priceApprovalTab";
+            priceApprovalTab.Padding = new Padding(2, 3, 2, 3);
+            priceApprovalTab.Size = new Size(1011, 699);
+            priceApprovalTab.TabIndex = 5;
+            priceApprovalTab.Text = "אישור עדכוני מחירים";
+            priceApprovalTab.UseVisualStyleBackColor = true;
+            // 
+            // priceApprovalDataGridView
+            // 
+            priceApprovalDataGridView.AllowUserToAddRows = false;
+            priceApprovalDataGridView.AllowUserToDeleteRows = false;
+            priceApprovalDataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            priceApprovalDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            priceApprovalDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            priceApprovalDataGridView.Location = new Point(5, 75);
+            priceApprovalDataGridView.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalDataGridView.Name = "priceApprovalDataGridView";
+            priceApprovalDataGridView.RowHeadersWidth = 51;
+            priceApprovalDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            priceApprovalDataGridView.Size = new Size(1003, 560);
+            priceApprovalDataGridView.TabIndex = 0;
+            // 
+            // priceApprovalSearchPanel
+            // 
+            priceApprovalSearchPanel.Controls.Add(priceApprovalCompanyComboBox);
+            priceApprovalSearchPanel.Controls.Add(priceApprovalCompanyLabel);
+            priceApprovalSearchPanel.Controls.Add(priceApprovalBranchComboBox);
+            priceApprovalSearchPanel.Controls.Add(priceApprovalBranchLabel);
+            priceApprovalSearchPanel.Controls.Add(priceApprovalLoadButton);
+            priceApprovalSearchPanel.Dock = DockStyle.Top;
+            priceApprovalSearchPanel.Location = new Point(2, 3);
+            priceApprovalSearchPanel.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalSearchPanel.Name = "priceApprovalSearchPanel";
+            priceApprovalSearchPanel.Size = new Size(1007, 69);
+            priceApprovalSearchPanel.TabIndex = 1;
+            // 
+            // priceApprovalCompanyComboBox
+            // 
+            priceApprovalCompanyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            priceApprovalCompanyComboBox.FormattingEnabled = true;
+            priceApprovalCompanyComboBox.Location = new Point(663, 19);
+            priceApprovalCompanyComboBox.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalCompanyComboBox.Name = "priceApprovalCompanyComboBox";
+            priceApprovalCompanyComboBox.Size = new Size(182, 28);
+            priceApprovalCompanyComboBox.TabIndex = 0;
+            // 
+            // priceApprovalCompanyLabel
+            // 
+            priceApprovalCompanyLabel.AutoSize = true;
+            priceApprovalCompanyLabel.Location = new Point(850, 23);
+            priceApprovalCompanyLabel.Margin = new Padding(2, 0, 2, 0);
+            priceApprovalCompanyLabel.Name = "priceApprovalCompanyLabel";
+            priceApprovalCompanyLabel.Size = new Size(46, 20);
+            priceApprovalCompanyLabel.TabIndex = 1;
+            priceApprovalCompanyLabel.Text = "חברה";
+            // 
+            // priceApprovalBranchComboBox
+            // 
+            priceApprovalBranchComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            priceApprovalBranchComboBox.FormattingEnabled = true;
+            priceApprovalBranchComboBox.Location = new Point(320, 19);
+            priceApprovalBranchComboBox.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalBranchComboBox.Name = "priceApprovalBranchComboBox";
+            priceApprovalBranchComboBox.Size = new Size(251, 28);
+            priceApprovalBranchComboBox.TabIndex = 2;
+            // 
+            // priceApprovalBranchLabel
+            // 
+            priceApprovalBranchLabel.AutoSize = true;
+            priceApprovalBranchLabel.Location = new Point(576, 23);
+            priceApprovalBranchLabel.Margin = new Padding(2, 0, 2, 0);
+            priceApprovalBranchLabel.Name = "priceApprovalBranchLabel";
+            priceApprovalBranchLabel.Size = new Size(38, 20);
+            priceApprovalBranchLabel.TabIndex = 3;
+            priceApprovalBranchLabel.Text = "סניף";
+            // 
+            // priceApprovalLoadButton
+            // 
+            priceApprovalLoadButton.Location = new Point(194, 17);
+            priceApprovalLoadButton.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalLoadButton.Name = "priceApprovalLoadButton";
+            priceApprovalLoadButton.Size = new Size(103, 33);
+            priceApprovalLoadButton.TabIndex = 4;
+            priceApprovalLoadButton.Text = "טען";
+            priceApprovalLoadButton.UseVisualStyleBackColor = true;
+            // 
+            // priceApprovalActionsPanel
+            // 
+            priceApprovalActionsPanel.Controls.Add(priceApprovalSelectAllCheckBox);
+            priceApprovalActionsPanel.Controls.Add(priceApprovalApproveButton);
+            priceApprovalActionsPanel.Dock = DockStyle.Bottom;
+            priceApprovalActionsPanel.Location = new Point(2, 648);
+            priceApprovalActionsPanel.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalActionsPanel.Name = "priceApprovalActionsPanel";
+            priceApprovalActionsPanel.Size = new Size(1007, 48);
+            priceApprovalActionsPanel.TabIndex = 2;
+            // 
+            // priceApprovalSelectAllCheckBox
+            // 
+            priceApprovalSelectAllCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            priceApprovalSelectAllCheckBox.AutoSize = true;
+            priceApprovalSelectAllCheckBox.Location = new Point(728, 12);
+            priceApprovalSelectAllCheckBox.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalSelectAllCheckBox.Name = "priceApprovalSelectAllCheckBox";
+            priceApprovalSelectAllCheckBox.Size = new Size(88, 24);
+            priceApprovalSelectAllCheckBox.TabIndex = 1;
+            priceApprovalSelectAllCheckBox.Text = "בחר הכל";
+            priceApprovalSelectAllCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // priceApprovalApproveButton
+            // 
+            priceApprovalApproveButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            priceApprovalApproveButton.Location = new Point(850, 8);
+            priceApprovalApproveButton.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalApproveButton.Name = "priceApprovalApproveButton";
+            priceApprovalApproveButton.Size = new Size(137, 33);
+            priceApprovalApproveButton.TabIndex = 0;
+            priceApprovalApproveButton.Text = "אשר נבחרים";
+            priceApprovalApproveButton.UseVisualStyleBackColor = true;
+            // 
             // loadingSpinner
             // 
             loadingSpinner.Location = new Point(0, 0);
+            loadingSpinner.Margin = new Padding(3, 4, 3, 4);
             loadingSpinner.Name = "loadingSpinner";
-            loadingSpinner.Size = new Size(100, 50);
+            loadingSpinner.Size = new Size(114, 67);
             loadingSpinner.TabIndex = 0;
             loadingSpinner.TabStop = false;
             // 
@@ -1078,7 +1223,7 @@
             // 
             comaxApiBranchComboBox.Location = new Point(0, 0);
             comaxApiBranchComboBox.Name = "comaxApiBranchComboBox";
-            comaxApiBranchComboBox.Size = new Size(121, 23);
+            comaxApiBranchComboBox.Size = new Size(121, 28);
             comaxApiBranchComboBox.TabIndex = 0;
             // 
             // comaxApiBranchLabel
@@ -1092,7 +1237,7 @@
             // 
             comaxApiItemsBarcodesTextBox.Location = new Point(0, 0);
             comaxApiItemsBarcodesTextBox.Name = "comaxApiItemsBarcodesTextBox";
-            comaxApiItemsBarcodesTextBox.Size = new Size(100, 23);
+            comaxApiItemsBarcodesTextBox.Size = new Size(100, 27);
             comaxApiItemsBarcodesTextBox.TabIndex = 0;
             // 
             // comaxApiItemsBarcodesLabel
@@ -1113,7 +1258,7 @@
             // 
             comaxApiPromotionsBarcodesTextBox.Location = new Point(0, 0);
             comaxApiPromotionsBarcodesTextBox.Name = "comaxApiPromotionsBarcodesTextBox";
-            comaxApiPromotionsBarcodesTextBox.Size = new Size(100, 23);
+            comaxApiPromotionsBarcodesTextBox.Size = new Size(100, 27);
             comaxApiPromotionsBarcodesTextBox.TabIndex = 0;
             // 
             // comaxApiPromotionsBarcodesLabel
@@ -1155,12 +1300,12 @@
             // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(902, 578);
+            ClientSize = new Size(1031, 771);
             Controls.Add(loadingSpinner);
             Controls.Add(mainTabControl);
-            Margin = new Padding(2);
+            Margin = new Padding(2, 3, 2, 3);
             Name = "Form1";
             RightToLeft = RightToLeft.Yes;
             Text = "ניהול נתונים";
@@ -1191,6 +1336,12 @@
             promotionsApiPanel.ResumeLayout(false);
             promotionsApiPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)promotionsApiResultsDataGridView).EndInit();
+            priceApprovalTab.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)priceApprovalDataGridView).EndInit();
+            priceApprovalSearchPanel.ResumeLayout(false);
+            priceApprovalSearchPanel.PerformLayout();
+            priceApprovalActionsPanel.ResumeLayout(false);
+            priceApprovalActionsPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)loadingSpinner).EndInit();
             ((System.ComponentModel.ISupportInitialize)comaxApiResultsDataGridView).EndInit();
             ResumeLayout(false);
@@ -1299,5 +1450,16 @@
         private Button itemsApiGetItemNewButton;
         private DataGridView itemsApiResultsNewDataGridView;
         private Button button3;
+        private TabPage priceApprovalTab;
+        private DataGridView priceApprovalDataGridView;
+        private Panel priceApprovalSearchPanel;
+        private ComboBox priceApprovalCompanyComboBox;
+        private Label priceApprovalCompanyLabel;
+        private ComboBox priceApprovalBranchComboBox;
+        private Label priceApprovalBranchLabel;
+        private Button priceApprovalLoadButton;
+        private Panel priceApprovalActionsPanel;
+        private CheckBox priceApprovalSelectAllCheckBox;
+        private Button priceApprovalApproveButton;
     }
 }

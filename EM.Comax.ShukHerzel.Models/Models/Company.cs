@@ -12,4 +12,7 @@ public partial class Company
     public string Description { get; set; }
 
     public DateTime? CreateDate { get; set; }
+
+    // 02/08/2026 - Y.E - When true, PriceUpdates require user approval before Oper transfer
+    public bool IsOperTransferApprovalRequired { get; set; }
 }

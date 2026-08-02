@@ -82,8 +82,27 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
 
         public async Task<List<PriceUpdate>> GetNonTransferredItemsAsync()
         {
-            //get all marked as not transferred
-            return await _context.PriceUpdates.Where(x => x.IsTransferredToOper == false).ToListAsync();
+
+            var nonTransferred = await _context.PriceUpdates
+                .Where(x => x.IsTransferredToOper == false)
+                .ToListAsync();
+
+            // 02/08/2026 - Y.E - When Company requires approval, transfer only if the latest PU per barcode/branch is approved
+            var companiesRequiringApproval = (await _context.Companies
+                .Where(c => c.IsOperTransferApprovalRequired)
+                .Select(c => c.Id)
+                .ToListAsync()).ToHashSet();
+
+            var transferableKeys = nonTransferred
+                .GroupBy(p => new { p.Barcode, p.BranchId })
+                .Select(g => g.OrderByDescending(p => p.CreatedDateTime).First())
+                .Where(pu => !companiesRequiringApproval.Contains(pu.CompanyId) || pu.IsOperTransferApproved == true)
+                .Select(pu => (pu.Barcode, pu.BranchId))
+                .ToHashSet();
+
+            return nonTransferred
+                .Where(pu => transferableKeys.Contains((pu.Barcode, pu.BranchId)))
+                .ToList();
         }
 
         public async Task MarkAsTransferredAsync(IEnumerable<long> ids, DateTime transferredTime)
@@ -94,6 +113,39 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             {
                 x.IsTransferredToOper = true;
                 x.TransferredDateTime = transferredTime;
+            });
+            await _context.BulkUpdateAsync(items);
+        }
+
+        public async Task<List<PriceUpdate>> GetPendingApprovalByBranchAsync(long branchId)
+        {
+            var candidates = await _context.PriceUpdates
+                .Where(x => x.BranchId == branchId
+                    && x.IsTransferredToOper == false
+                    && x.IsOperTransferApproved != true)
+                .ToListAsync();
+
+            return candidates
+                .GroupBy(p => p.Barcode)
+                .Select(g => g.OrderByDescending(p => p.CreatedDateTime).First())
+                .OrderByDescending(p => p.CreatedDateTime)
+                .ToList();
+        }
+
+        public async Task ApproveOperTransferAsync(IEnumerable<long> ids)
+        {
+            var idList = ids?.Distinct().ToList() ?? new List<long>();
+            if (!idList.Any())
+            {
+                return;
+            }
+
+            var approvedAt = DateTime.Now;
+            var items = await _context.PriceUpdates.Where(x => idList.Contains(x.Id)).ToListAsync();
+            items.ForEach(x =>
+            {
+                x.IsOperTransferApproved = true;
+                x.OperTransferApprovedDate = approvedAt;
             });
             await _context.BulkUpdateAsync(items);
         }

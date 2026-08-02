@@ -27,5 +27,15 @@ namespace EM.Comax.ShukHerzel.Bl.interfaces
         /// Marks the provided price update IDs as transferred.
         /// </summary>
         Task MarkAsTransferredAsync(IEnumerable<long> ids, DateTime transferredTime);
+
+        /// <summary>
+        /// Latest non-transferred, non-approved PriceUpdate per barcode for the branch.
+        /// </summary>
+        Task<List<PriceUpdate>> GetPendingApprovalByBranchAsync(long branchId);
+
+        /// <summary>
+        /// Approves Oper transfer for the given price update IDs.
+        /// </summary>
+        Task ApproveOperTransferAsync(IEnumerable<long> ids);
     }
 }

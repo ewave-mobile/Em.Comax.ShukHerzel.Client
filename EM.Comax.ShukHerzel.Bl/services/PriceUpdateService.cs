@@ -128,6 +128,16 @@ namespace EM.Comax.ShukHerzel.Bl.services
             await _priceUpdateRepository.MarkAsTransferredAsync(ids, transferredTime);
         }
 
+        public async Task<List<PriceUpdate>> GetPendingApprovalByBranchAsync(long branchId)
+        {
+            return await _priceUpdateRepository.GetPendingApprovalByBranchAsync(branchId);
+        }
+
+        public async Task ApproveOperTransferAsync(IEnumerable<long> ids)
+        {
+            await _priceUpdateRepository.ApproveOperTransferAsync(ids);
+        }
+
         /// <summary>
         /// Maps an individual ItemSalePriceDto (from Comax) to a PriceUpdate entity.
         /// </summary>

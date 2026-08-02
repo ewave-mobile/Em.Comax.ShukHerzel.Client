@@ -1,0 +1,92 @@
+<div class="page">
+  <header class="header">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <div class="brand-eyebrow">רשת</div>
+        <div class="brand-name">ליאור עדיקא</div>
+      </div>
+    </div>
+
+    <h1>עדכון מחירים</h1>
+    <p class="branch-subtitle" *ngIf="selectedBranch">
+      {{ selectedBranch.branchName }}
+      <span *ngIf="selectedBranch.comaxStoreId"> ({{ selectedBranch.comaxStoreId }})</span>
+    </p>
+
+    <label class="field">
+      <span>סניף</span>
+      <select
+        [(ngModel)]="selectedBranchId"
+        (ngModelChange)="onBranchChange()"
+        [disabled]="loadingBranches || branches.length === 0">
+        <option *ngFor="let b of branches" [ngValue]="b.id">
+          {{ b.branchName }}<ng-container *ngIf="b.comaxStoreId"> ({{ b.comaxStoreId }})</ng-container>
+        </option>
+      </select>
+    </label>
+
+    <label class="field barcode-field" *ngIf="selectedBranchId">
+      <span>ברקוד / ברקודים</span>
+      <input
+        type="text"
+        [(ngModel)]="barcodeFilter"
+        placeholder="לדוגמה: 7290001, 7290002"
+        autocomplete="off" />
+    </label>
+  </header>
+
+  <div class="toolbar" *ngIf="!loadingItems && selectedBranchId && items.length > 0">
+    <label class="select-all">
+      <input
+        type="checkbox"
+        [checked]="allSelected"
+        [disabled]="filteredItems.length === 0"
+        (change)="toggleSelectAll($any($event.target).checked)" />
+      <span>בחר הכל</span>
+    </label>
+    <span class="count">{{ foundCount }} פריטים שנמצאו</span>
+  </div>
+
+  <div class="status error" *ngIf="error">{{ error }}</div>
+  <div class="status success" *ngIf="success">{{ success }}</div>
+
+  <div class="state" *ngIf="loadingItems">טוען פריטים...</div>
+  <div class="state" *ngIf="!loadingItems && !loadingBranches && items.length === 0 && selectedBranchId">
+    אין פריטים ממתינים לשידור
+  </div>
+  <div class="state" *ngIf="!loadingItems && items.length > 0 && filteredItems.length === 0">
+    לא נמצאו פריטים התואמים לברקוד
+  </div>
+  <div class="state" *ngIf="!loadingBranches && branches.length === 0">
+    לא נמצאו סניפים לאישור
+  </div>
+
+  <main class="list" *ngIf="!loadingItems && filteredItems.length > 0">
+    <article
+      class="card"
+      *ngFor="let item of filteredItems"
+      [class.selected]="item.selected"
+      (click)="toggleItem(item)">
+      <div class="card-check" [class.on]="item.selected" aria-hidden="true"></div>
+      <div class="card-body">
+        <div class="card-title">{{ item.name || 'ללא שם' }}</div>
+        <div class="card-meta">
+          <span>{{ formatTime(item.createdDateTime) }}</span>
+          <span>{{ item.barcode }}</span>
+        </div>
+      </div>
+      <div class="card-price">{{ formatPrice(item.netPrice) }}</div>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <button
+      type="button"
+      class="broadcast"
+      [disabled]="selectedCount === 0 || approving"
+      (click)="broadcast()">
+      {{ approving ? 'משדר...' : (selectedCount > 0 ? 'שדר (' + selectedCount + ')' : 'שדר') }}
+    </button>
+  </footer>
+</div>

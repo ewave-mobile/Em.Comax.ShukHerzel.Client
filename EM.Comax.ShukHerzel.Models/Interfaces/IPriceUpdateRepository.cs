@@ -17,5 +17,15 @@ namespace EM.Comax.ShukHerzel.Models.Interfaces
         Task MarkAsTransferredAsync(IEnumerable<long> ids, DateTime transferredTime);
         Task RemoveDuplicateItemsAsync();
         Task DeleteTransferredItemsOlderThanAsync(int days);
+
+        /// <summary>
+        /// Latest non-transferred, non-approved PriceUpdate per barcode for the branch.
+        /// </summary>
+        Task<List<PriceUpdate>> GetPendingApprovalByBranchAsync(long branchId);
+
+        /// <summary>
+        /// Sets IsOperTransferApproved and OperTransferApprovedDate for the given IDs.
+        /// </summary>
+        Task ApproveOperTransferAsync(IEnumerable<long> ids);
     }
 }
