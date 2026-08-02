@@ -73,6 +73,8 @@ namespace EM.Comax.ShukHerzl.Infrastructure
 
             services.AddScoped<IBranchRepository, BranchRepository>();
             services.AddScoped<IBranchService, BranchService>();
+            services.AddScoped<ICompanyRepository, CompanyRepository>();
+            services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IAllItemsService, AllItemsService>();
             services.AddScoped<IAllItemsNewService, AllItemsNewService>();
             services.AddScoped<IConfigurationRepository, ConfigurationRepository>();

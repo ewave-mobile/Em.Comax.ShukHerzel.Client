@@ -13,9 +13,11 @@ namespace Em.Comax.ShukHerzel.Client
     public partial class Form1 : Form
     {
         private readonly IBranchService _branchService;
+        private readonly ICompanyService _companyService;
         private readonly IAllItemsService _allItemsService;
         private readonly IAllItemsNewService _allItemsNewService;
         private List<Branch> _branches = null;
+        private List<Company> _companies = null;
         private readonly IPromotionsService _promotionsService;
         private readonly IOperativeService _operativeService;
         private readonly IApiClientService _apiClientService;
@@ -29,6 +31,7 @@ namespace Em.Comax.ShukHerzel.Client
 
         public Form1(
             IBranchService branchService,
+            ICompanyService companyService,
             IAllItemsService allItemsService,
             IAllItemsNewService allItemsNewService,
             IPromotionsService promotionsService,
@@ -40,6 +43,7 @@ namespace Em.Comax.ShukHerzel.Client
             IDatabaseLogger databaseLogger)
         {
             _branchService = branchService;
+            _companyService = companyService;
             _allItemsService = allItemsService;
             _allItemsNewService = allItemsNewService;
             _promotionsService = promotionsService;
@@ -74,38 +78,16 @@ namespace Em.Comax.ShukHerzel.Client
             // We'll bring it to front when needed in ShowLoadingSpinner
 
             branchList.Enabled = false;
+            companyList.Enabled = false;
             tempPullDateTime.Enabled = true;
-            //Remove 17-09-2025
-            //  _branches = await _branchService.GetAllBranchesByCompany(Constants.SHUK_HERZEL_COMPANY_ID);
-            _branches = await _branchService.GetAllBranches();
-            branchList.DataSource = _branches;
-            branchList.DisplayMember = "BranchName";
-            branchList.ValueMember = "Id";
 
-            // Initialize branch combo boxes in data management tabs
-            // Create separate lists for each combo box to avoid binding issues
-            itemSearchBranchComboBox.DataSource = new List<Branch>(_branches);
-            itemSearchBranchComboBox.DisplayMember = "BranchName";
-            itemSearchBranchComboBox.ValueMember = "Id";
+            _companies = await _companyService.GetAllCompanies();
+            companyList.DisplayMember = "Description";
+            companyList.ValueMember = "Id";
+            companyList.DataSource = _companies;
+            companyList.SelectedIndexChanged += CompanyList_SelectedIndexChanged;
 
-            promotionSearchBranchComboBox.DataSource = new List<Branch>(_branches);
-            promotionSearchBranchComboBox.DisplayMember = "BranchName";
-            promotionSearchBranchComboBox.ValueMember = "Id";
-
-            // comaxApiBranchComboBox removed
-
-            // Initialize branch combo boxes for the new API tabs
-            itemsApiBranchComboBox.DataSource = new List<Branch>(_branches);
-            itemsApiBranchComboBox.DisplayMember = "BranchName";
-            itemsApiBranchComboBox.ValueMember = "Id";
-
-            itemsApiBranchNewComboBox.DataSource = new List<Branch>(_branches);
-            itemsApiBranchNewComboBox.DisplayMember = "BranchName";
-            itemsApiBranchNewComboBox.ValueMember = "Id";
-
-            promotionsApiBranchComboBox.DataSource = new List<Branch>(_branches);
-            promotionsApiBranchComboBox.DisplayMember = "BranchName";
-            promotionsApiBranchComboBox.ValueMember = "Id";
+            await LoadBranchesForSelectedCompanyAsync();
 
             // Set up event handlers for the new UI controls
             itemSearchButton.Click += ItemSearchButton_Click;
@@ -382,10 +364,57 @@ namespace Em.Comax.ShukHerzel.Client
             return true;
         }
 
+        private async void CompanyList_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            await LoadBranchesForSelectedCompanyAsync();
+        }
+
+        private async Task LoadBranchesForSelectedCompanyAsync()
+        {
+            if (companyList.SelectedItem is Company selectedCompany)
+            {
+                _branches = await _branchService.GetAllBranchesByCompany(selectedCompany.Id);
+            }
+            else
+            {
+                _branches = await _branchService.GetAllBranches();
+            }
+
+            BindBranchComboBoxes();
+        }
+
+        private void BindBranchComboBoxes()
+        {
+            branchList.DataSource = null;
+            branchList.DisplayMember = "BranchName";
+            branchList.ValueMember = "Id";
+            branchList.DataSource = _branches;
+
+            // Separate lists for each combo box to avoid binding issues
+            itemSearchBranchComboBox.DataSource = new List<Branch>(_branches);
+            itemSearchBranchComboBox.DisplayMember = "BranchName";
+            itemSearchBranchComboBox.ValueMember = "Id";
+
+            promotionSearchBranchComboBox.DataSource = new List<Branch>(_branches);
+            promotionSearchBranchComboBox.DisplayMember = "BranchName";
+            promotionSearchBranchComboBox.ValueMember = "Id";
+
+            itemsApiBranchComboBox.DataSource = new List<Branch>(_branches);
+            itemsApiBranchComboBox.DisplayMember = "BranchName";
+            itemsApiBranchComboBox.ValueMember = "Id";
+
+            itemsApiBranchNewComboBox.DataSource = new List<Branch>(_branches);
+            itemsApiBranchNewComboBox.DisplayMember = "BranchName";
+            itemsApiBranchNewComboBox.ValueMember = "Id";
+
+            promotionsApiBranchComboBox.DataSource = new List<Branch>(_branches);
+            promotionsApiBranchComboBox.DisplayMember = "BranchName";
+            promotionsApiBranchComboBox.ValueMember = "Id";
+        }
+
         private async void Button3_Click(object? sender, EventArgs e)
         {
-            var branches = await _branchService.GetAllBranches();
-            foreach (var branch in branches)
+            foreach (var branch in _branches)
             {
                 await _priceUpdateService.InsertPriceUpdatesAsync(branch, null);
             }
@@ -447,10 +476,12 @@ namespace Em.Comax.ShukHerzel.Client
         {
             if (singleBranchCheckBox.Checked)
             {
+                companyList.Enabled = true;
                 branchList.Enabled = true;
             }
             else
             {
+                companyList.Enabled = false;
                 branchList.Enabled = false;
             }
         }
