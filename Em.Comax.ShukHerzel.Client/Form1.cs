@@ -28,6 +28,7 @@ namespace Em.Comax.ShukHerzel.Client
         private readonly IDatabaseLogger _databaseLogger;
         private System.Windows.Forms.Timer _spinnerTimer;
         private int _spinnerAngle = 0;
+        private List<PriceUpdateApprovalRow> _priceApprovalAllRows = new();
         //private const long SHUK_HERZEL_COMPANY_ID = 1;
 
         public Form1(
@@ -122,7 +123,9 @@ namespace Em.Comax.ShukHerzel.Client
             priceApprovalLoadButton.Click += PriceApprovalLoadButton_Click;
             priceApprovalApproveButton.Click += PriceApprovalApproveButton_Click;
             priceApprovalSelectAllCheckBox.CheckedChanged += PriceApprovalSelectAllCheckBox_CheckedChanged;
+            priceApprovalBarcodeTextBox.TextChanged += PriceApprovalBarcodeTextBox_TextChanged;
             SetupPriceApprovalGridColumns();
+            UpdatePriceApprovalCountLabel(0);
 
             // Set up DataGridView columns for items
             itemsDataGridView.AutoGenerateColumns = false;
@@ -443,8 +446,11 @@ namespace Em.Comax.ShukHerzel.Client
         private async Task LoadPriceApprovalBranchesForSelectedCompanyAsync()
         {
             priceApprovalBranchComboBox.SelectedIndexChanged -= PriceApprovalBranchComboBox_SelectedIndexChanged;
+            _priceApprovalAllRows = new List<PriceUpdateApprovalRow>();
             priceApprovalDataGridView.DataSource = null;
             priceApprovalSelectAllCheckBox.Checked = false;
+            priceApprovalBarcodeTextBox.Text = string.Empty;
+            UpdatePriceApprovalCountLabel(0);
 
             if (priceApprovalCompanyComboBox.SelectedItem is not Company selectedCompany)
             {
@@ -542,7 +548,7 @@ namespace Em.Comax.ShukHerzel.Client
                 priceApprovalLoadButton.Enabled = false;
 
                 var pending = await _priceUpdateService.GetPendingApprovalByBranchAsync(selected.Id);
-                var rows = new BindingList<PriceUpdateApprovalRow>(pending.Select(pu => new PriceUpdateApprovalRow
+                _priceApprovalAllRows = pending.Select(pu => new PriceUpdateApprovalRow
                 {
                     IsSelected = false,
                     Id = pu.Id,
@@ -551,10 +557,10 @@ namespace Em.Comax.ShukHerzel.Client
                     Name = pu.Name ?? string.Empty,
                     Barcode = pu.Barcode ?? string.Empty,
                     NetPrice = pu.NetPrice ?? string.Empty
-                }).ToList());
+                }).ToList();
 
-                priceApprovalDataGridView.DataSource = rows;
                 priceApprovalSelectAllCheckBox.Checked = false;
+                ApplyPriceApprovalBarcodeFilter();
             }
             catch (Exception ex)
             {
@@ -565,6 +571,49 @@ namespace Em.Comax.ShukHerzel.Client
                 HideLoadingSpinner();
                 priceApprovalLoadButton.Enabled = true;
             }
+        }
+
+        private void PriceApprovalBarcodeTextBox_TextChanged(object? sender, EventArgs e)
+        {
+            ApplyPriceApprovalBarcodeFilter();
+        }
+
+        private void ApplyPriceApprovalBarcodeFilter()
+        {
+            var barcodes = ParsePriceApprovalBarcodes(priceApprovalBarcodeTextBox.Text);
+            IEnumerable<PriceUpdateApprovalRow> filtered = _priceApprovalAllRows;
+            if (barcodes.Count > 0)
+            {
+                var barcodeSet = new HashSet<string>(barcodes, StringComparer.Ordinal);
+                filtered = _priceApprovalAllRows.Where(r => barcodeSet.Contains((r.Barcode ?? string.Empty).Trim()));
+            }
+
+            var rows = filtered.ToList();
+            priceApprovalSelectAllCheckBox.CheckedChanged -= PriceApprovalSelectAllCheckBox_CheckedChanged;
+            priceApprovalSelectAllCheckBox.Checked = rows.Count > 0 && rows.All(r => r.IsSelected);
+            priceApprovalSelectAllCheckBox.CheckedChanged += PriceApprovalSelectAllCheckBox_CheckedChanged;
+
+            priceApprovalDataGridView.DataSource = new BindingList<PriceUpdateApprovalRow>(rows);
+            UpdatePriceApprovalCountLabel(rows.Count);
+        }
+
+        private static List<string> ParsePriceApprovalBarcodes(string? raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return new List<string>();
+            }
+
+            return raw
+                .Split(',')
+                .Select(s => s.Trim())
+                .Where(s => s.Length > 0)
+                .ToList();
+        }
+
+        private void UpdatePriceApprovalCountLabel(int count)
+        {
+            priceApprovalCountLabel.Text = $"{count} פריטים שנמצאו";
         }
 
         private void PriceApprovalSelectAllCheckBox_CheckedChanged(object? sender, EventArgs e)

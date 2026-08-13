@@ -1,0 +1,73 @@
+.section-label {
+  margin: 4px 0 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.action-card {
+  width: 100%;
+  min-height: 74px;
+  display: flex;
+  justify-content: flex-start;
+  padding: 14px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: start;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.action-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-end: 12px;
+  border-radius: 12px;
+}
+
+.action-icon.items {
+  color: var(--brand-blue);
+  background: #eef3ff;
+}
+
+.action-icon.rewards {
+  color: #047857;
+  background: #ecfdf5;
+}
+
+.action-body {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.action-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.action-sub {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: #aab1c0;
+}

@@ -1,0 +1,89 @@
+<app-page-shell>
+  <app-page-header
+    appHeader
+    title="עדכון תגמולים"
+    [subtitle]="branch()?.branchName ?? null"
+    [showBack]="true"
+    [showRefresh]="true"
+    [refreshing]="loadingItems()"
+    (back)="back()"
+    (refresh)="refresh()" />
+
+  <app-approval-filters
+    searchPlaceholder="ברקוד, תיאור או קוד תגמול"
+    [search]="searchFilter()"
+    [date]="dateFilter()"
+    (searchChange)="searchFilter.set($event)"
+    (dateChange)="onDateChange($event)" />
+
+  @if (!loadingItems() && items().length > 0) {
+    <app-selection-toolbar
+      entityLabel="תגמולים"
+      [count]="foundCount()"
+      [selectedCount]="selectedCount()"
+      [allSelected]="allSelected()"
+      (selectAll)="toggleSelectAll($event)" />
+  }
+
+  <app-page-status
+    [error]="error()"
+    [success]="success()"
+    [loading]="loadingItems()"
+    [empty]="!loadingItems() && items().length === 0"
+    [noMatches]="!loadingItems() && items().length > 0 && filteredItems().length === 0"
+    loadingText="טוען תגמולים..."
+    emptyText="אין תגמולים ממתינים לשידור"
+    noMatchesText="לא נמצאו תגמולים התואמים לסינון" />
+
+  @if (!loadingItems() && filteredItems().length > 0) {
+    <main class="approval-list">
+      @for (item of filteredItems(); track item.id) {
+        <mat-card
+          appearance="outlined"
+          class="approval-card promotion-card"
+          [class.selected]="isSelected(item)"
+          (click)="toggleItem(item)">
+          <mat-checkbox
+            [checked]="isSelected(item)"
+            aria-label="בחירת תגמול"
+            (click)="$event.stopPropagation()"
+            (change)="toggleItem(item)" />
+          <div class="item-body">
+            <div class="item-row">
+              <span class="item-label">קוד תגמול</span>
+              <span class="item-value">{{ item.kod || '—' }}</span>
+            </div>
+            <div class="item-row">
+              <span class="item-label">ברקוד</span>
+              <span class="item-value">{{ item.itemKod || '—' }}</span>
+            </div>
+            <div class="item-row item-row-desc">
+              <span class="item-label">תיאור</span>
+              <span class="item-value item-desc">{{ item.nm || '—' }}</span>
+            </div>
+            <div class="item-row item-row-dates">
+              <span class="item-label">טווח תאריכים</span>
+              <span class="item-value">
+                {{ formatPromoDate(item.fromDate) }}
+                –
+                {{ formatPromoDate(item.toDate) }}
+              </span>
+            </div>
+            <div class="item-row">
+              <span class="item-label">מחיר</span>
+              <span class="item-value item-price">{{ formatPrice(item.total) }}</span>
+            </div>
+          </div>
+        </mat-card>
+      }
+    </main>
+  }
+
+  <app-footer-action
+    appFooter
+    [label]="selectedCount() > 0 ? 'שדר (' + selectedCount() + ')' : 'שדר'"
+    loadingLabel="משדר..."
+    [disabled]="selectedCount() === 0"
+    [loading]="approving()"
+    (action)="broadcast()" />
+</app-page-shell>

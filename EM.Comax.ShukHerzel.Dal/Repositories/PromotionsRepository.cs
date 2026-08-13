@@ -180,6 +180,26 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             {
                 await _databaseLogger.LogServiceActionAsync($"Filtered out {filteredCount} future promotions that haven't started yet.");
             }
+
+            // 12/08/2026 - Y.E - When Company requires approval, transfer only approved promotions
+            var companiesRequiringApproval = (await _context.Companies
+                .Where(c => c.IsOperTransferApprovalRequired)
+                .Select(c => c.Id)
+                .ToListAsync()).ToHashSet();
+
+            if (companiesRequiringApproval.Count > 0)
+            {
+                var beforeApprovalFilter = validPromotions.Count;
+                validPromotions = validPromotions
+                    .Where(p => !companiesRequiringApproval.Contains(p.CompanyId) || p.IsOperTransferApproved == true)
+                    .ToList();
+                var approvalFiltered = beforeApprovalFilter - validPromotions.Count;
+                if (approvalFiltered > 0)
+                {
+                    await _databaseLogger.LogServiceActionAsync(
+                        $"Filtered out {approvalFiltered} promotions awaiting Oper transfer approval.");
+                }
+            }
             
             return validPromotions;
         }
@@ -230,6 +250,49 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                 await _context.SaveChangesAsync();
                 await _databaseLogger.LogServiceActionAsync($"Promotion ID {promotionId} marked as not transferred to operative table.");
             }
+        }
+
+        // 13/08/2026 - Y.E
+        public async Task<List<Promotion>> GetPendingApprovalByBranchAsync(long branchId, DateTime? createdDate = null)
+        {
+            var query = _context.Promotions
+                .Where(x => x.BranchId == branchId
+                    && x.IsTransferredToOper == false
+                    && x.IsOperTransferApproved != true);
+
+            if (createdDate.HasValue)
+            {
+                var dayStart = createdDate.Value.Date;
+                var dayEnd = dayStart.AddDays(1);
+                query = query.Where(x => x.CreatedDateTime >= dayStart && x.CreatedDateTime < dayEnd);
+            }
+
+            var candidates = await query.ToListAsync();
+
+            return candidates
+                .GroupBy(p => p.ItemKod)
+                .Select(g => g.OrderByDescending(p => p.CreatedDateTime).First())
+                .OrderByDescending(p => p.CreatedDateTime)
+                .ToList();
+        }
+
+        // 13/08/2026 - Y.E
+        public async Task ApproveOperTransferAsync(IEnumerable<long> ids)
+        {
+            var idList = ids?.Distinct().ToList() ?? new List<long>();
+            if (!idList.Any())
+            {
+                return;
+            }
+
+            var approvedAt = DateTime.Now;
+            var items = await _context.Promotions.Where(x => idList.Contains(x.Id)).ToListAsync();
+            items.ForEach(x =>
+            {
+                x.IsOperTransferApproved = true;
+                x.OperTransferApprovedDate = approvedAt;
+            });
+            await _context.BulkUpdateAsync(items);
         }
     }
 }

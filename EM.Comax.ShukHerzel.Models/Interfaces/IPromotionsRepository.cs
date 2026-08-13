@@ -17,5 +17,9 @@ namespace EM.Comax.ShukHerzel.Models.Interfaces
         // New methods for data management
         Task<List<Promotion>> SearchPromotionsAsync(string kod = null, string itemKod = null, long? branchId = null);
         Task SetPromotionNotTransferredAsync(long promotionId);
+
+        // 13/08/2026 - Y.E
+        Task<List<Promotion>> GetPendingApprovalByBranchAsync(long branchId, DateTime? createdDate = null);
+        Task ApproveOperTransferAsync(IEnumerable<long> ids);
     }
 }

@@ -3,17 +3,20 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --proxy-config proxy.conf.json",
-    "build": "ng build",
+    "start": "ng serve --proxy-config proxy.conf.json --port 4300",
+    "build": "ng build --configuration production",
+    "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
   "private": true,
   "dependencies": {
+    "@angular/cdk": "^22.1.2",
     "@angular/common": "^22.1.0",
     "@angular/compiler": "^22.1.0",
     "@angular/core": "^22.1.0",
     "@angular/forms": "^22.1.0",
+    "@angular/material": "^22.1.2",
     "@angular/platform-browser": "^22.1.0",
     "@angular/platform-browser-dynamic": "^22.1.0",
     "@angular/router": "^22.1.0",

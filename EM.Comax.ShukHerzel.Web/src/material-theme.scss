@@ -1,0 +1,29 @@
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Heebo,
+    density: 0,
+  ));
+}
+
+:root {
+  @include mat.button-overrides((
+    filled-container-shape: 14px,
+    outlined-container-shape: 14px,
+    text-container-shape: 14px,
+  ));
+
+  @include mat.card-overrides((
+    elevated-container-shape: 14px,
+    outlined-container-shape: 14px,
+  ));
+
+  @include mat.form-field-overrides((
+    outlined-container-shape: 12px,
+  ));
+}

@@ -1,0 +1,31 @@
+<div class="page-head">
+  @if (showBack()) {
+    <button
+      mat-icon-button
+      type="button"
+      matTooltip="חזרה"
+      aria-label="חזרה"
+      (click)="back.emit()">
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  }
+
+  <div class="page-head-text">
+    <h1>{{ title() }}</h1>
+    @if (subtitle()) {
+      <p>{{ subtitle() }}</p>
+    }
+  </div>
+
+  @if (showRefresh()) {
+    <button
+      mat-icon-button
+      type="button"
+      matTooltip="רענון"
+      aria-label="רענון"
+      [disabled]="refreshing()"
+      (click)="refresh.emit()">
+      <mat-icon [class.spinning]="refreshing()">refresh</mat-icon>
+    </button>
+  }
+</div>

@@ -25,31 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EM.Comax.New.Service", "EM.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EM.Comax.ShukHerzel.Api", "EM.Comax.ShukHerzel.Api\EM.Comax.ShukHerzel.Api.csproj", "{200A84D0-A417-416B-B988-438BB3AFE326}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EM.Comax.ShukHerzel.Web", "EM.Comax.ShukHerzel.Web", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
-	ProjectSection(SolutionItems) = preProject
-		EM.Comax.ShukHerzel.Web\angular.json = EM.Comax.ShukHerzel.Web\angular.json
-		EM.Comax.ShukHerzel.Web\package.json = EM.Comax.ShukHerzel.Web\package.json
-		EM.Comax.ShukHerzel.Web\proxy.conf.json = EM.Comax.ShukHerzel.Web\proxy.conf.json
-		EM.Comax.ShukHerzel.Web\README.md = EM.Comax.ShukHerzel.Web\README.md
-		EM.Comax.ShukHerzel.Web\tsconfig.json = EM.Comax.ShukHerzel.Web\tsconfig.json
-		EM.Comax.ShukHerzel.Web\tsconfig.app.json = EM.Comax.ShukHerzel.Web\tsconfig.app.json
-		EM.Comax.ShukHerzel.Web\src\index.html = EM.Comax.ShukHerzel.Web\src\index.html
-		EM.Comax.ShukHerzel.Web\src\main.ts = EM.Comax.ShukHerzel.Web\src\main.ts
-		EM.Comax.ShukHerzel.Web\src\styles.css = EM.Comax.ShukHerzel.Web\src\styles.css
-		EM.Comax.ShukHerzel.Web\src\app\app.component.html = EM.Comax.ShukHerzel.Web\src\app\app.component.html
-		EM.Comax.ShukHerzel.Web\src\app\app.component.css = EM.Comax.ShukHerzel.Web\src\app\app.component.css
-		EM.Comax.ShukHerzel.Web\src\app\app.component.ts = EM.Comax.ShukHerzel.Web\src\app\app.component.ts
-		EM.Comax.ShukHerzel.Web\src\app\app.config.ts = EM.Comax.ShukHerzel.Web\src\app\app.config.ts
-		EM.Comax.ShukHerzel.Web\src\app\app.routes.ts = EM.Comax.ShukHerzel.Web\src\app\app.routes.ts
-		EM.Comax.ShukHerzel.Web\src\app\core\services\price-approval.api.ts = EM.Comax.ShukHerzel.Web\src\app\core\services\price-approval.api.ts
-		EM.Comax.ShukHerzel.Web\src\app\features\price-approval\price-approval.component.html = EM.Comax.ShukHerzel.Web\src\app\features\price-approval\price-approval.component.html
-		EM.Comax.ShukHerzel.Web\src\app\features\price-approval\price-approval.component.css = EM.Comax.ShukHerzel.Web\src\app\features\price-approval\price-approval.component.css
-		EM.Comax.ShukHerzel.Web\src\app\features\price-approval\price-approval.component.ts = EM.Comax.ShukHerzel.Web\src\app\features\price-approval\price-approval.component.ts
-		EM.Comax.ShukHerzel.Web\src\app\shared\models\branch.ts = EM.Comax.ShukHerzel.Web\src\app\shared\models\branch.ts
-		EM.Comax.ShukHerzel.Web\src\app\shared\models\pending-price-update.ts = EM.Comax.ShukHerzel.Web\src\app\shared\models\pending-price-update.ts
-		EM.Comax.ShukHerzel.Web\src\environments\environment.ts = EM.Comax.ShukHerzel.Web\src\environments\environment.ts
-		EM.Comax.ShukHerzel.Web\src\environments\environment.development.ts = EM.Comax.ShukHerzel.Web\src\environments\environment.development.ts
-	EndProjectSection
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "EM.Comax.ShukHerzel.Web", "EM.Comax.ShukHerzel.Web\EM.Comax.ShukHerzel.Web.esproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -145,6 +121,14 @@ Global
 		{200A84D0-A417-416B-B988-438BB3AFE326}.Release|Any CPU.Build.0 = Release|Any CPU
 		{200A84D0-A417-416B-B988-438BB3AFE326}.Release|x86.ActiveCfg = Release|Any CPU
 		{200A84D0-A417-416B-B988-438BB3AFE326}.Release|x86.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|x86.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|x86.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

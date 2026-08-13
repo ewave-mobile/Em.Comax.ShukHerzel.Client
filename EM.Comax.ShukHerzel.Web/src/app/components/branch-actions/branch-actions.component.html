@@ -1,0 +1,41 @@
+<app-page-shell>
+  <app-page-header
+    appHeader
+    [title]="branch()?.branchName ?? 'פעולות בסניף'"
+    [subtitle]="branch()?.comaxStoreId ? 'קוד סניף ' + branch()?.comaxStoreId : null" />
+
+  <div class="section-label">פעולות</div>
+
+  <main class="action-list">
+    <button matRipple type="button" class="action-card" (click)="openPriceUpdates()">
+      <span class="action-icon items" aria-hidden="true">
+        <mat-icon>sell</mat-icon>
+      </span>
+      <span class="action-body">
+        <span class="action-title">עדכון פריטים ({{ pendingItemsCount() }})</span>
+        <span class="action-sub">אישור ושידור עדכוני מחירים</span>
+      </span>
+      <mat-icon class="chevron">chevron_left</mat-icon>
+    </button>
+
+    <button matRipple type="button" class="action-card" (click)="openPromotions()">
+      <span class="action-icon rewards" aria-hidden="true">
+        <mat-icon>redeem</mat-icon>
+      </span>
+      <span class="action-body">
+        <span class="action-title">עדכון תגמולים ({{ pendingPromotionsCount() }})</span>
+        <span class="action-sub">אישור ושידור תגמולים</span>
+      </span>
+      <mat-icon class="chevron">chevron_left</mat-icon>
+    </button>
+  </main>
+
+  <button
+    appFooter
+    mat-stroked-button
+    type="button"
+    class="secondary-action"
+    (click)="changeBranch()">
+    החלפת סניף
+  </button>
+</app-page-shell>

@@ -252,4 +252,10 @@ public partial class Promotion
     public string SameGetAndBuy { get; set; }
 
     public string SwNotForShelfSignage { get; set; }
+
+    // 12/08/2026 - Y.E - User approval for Oper transfer (used when Company.IsOperTransferApprovalRequired = 1)
+    public bool? IsOperTransferApproved { get; set; }
+
+    // 12/08/2026 - Y.E
+    public DateTime? OperTransferApprovedDate { get; set; }
 }

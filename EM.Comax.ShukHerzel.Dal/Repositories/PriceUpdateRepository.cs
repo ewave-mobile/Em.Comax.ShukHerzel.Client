@@ -117,13 +117,21 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             await _context.BulkUpdateAsync(items);
         }
 
-        public async Task<List<PriceUpdate>> GetPendingApprovalByBranchAsync(long branchId)
+        public async Task<List<PriceUpdate>> GetPendingApprovalByBranchAsync(long branchId, DateTime? createdDate = null)
         {
-            var candidates = await _context.PriceUpdates
+            var query = _context.PriceUpdates
                 .Where(x => x.BranchId == branchId
                     && x.IsTransferredToOper == false
-                    && x.IsOperTransferApproved != true)
-                .ToListAsync();
+                    && x.IsOperTransferApproved != true);
+
+            if (createdDate.HasValue)
+            {
+                var dayStart = createdDate.Value.Date;
+                var dayEnd = dayStart.AddDays(1);
+                query = query.Where(x => x.CreatedDateTime >= dayStart && x.CreatedDateTime < dayEnd);
+            }
+
+            var candidates = await query.ToListAsync();
 
             return candidates
                 .GroupBy(p => p.Barcode)

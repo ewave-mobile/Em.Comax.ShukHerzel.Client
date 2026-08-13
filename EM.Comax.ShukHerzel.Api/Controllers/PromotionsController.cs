@@ -1,0 +1,57 @@
+using EM.Comax.ShukHerzel.Api.Dtos;
+using EM.Comax.ShukHerzel.Bl.interfaces;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EM.Comax.ShukHerzel.Api.Controllers;
+
+// 13/08/2026 - Y.E
+[ApiController]
+[Route("api/branches/{branchId:long}/promotions")]
+public class PromotionsController : ControllerBase
+{
+    private readonly IPromotionsService _promotionsService;
+
+    public PromotionsController(IPromotionsService promotionsService)
+    {
+        _promotionsService = promotionsService;
+    }
+
+    [HttpGet("pending")]
+    public async Task<ActionResult<List<PendingPromotionDto>>> GetPending(
+        long branchId,
+        [FromQuery] DateOnly? date = null)
+    {
+        DateTime? createdDate = date.HasValue
+            ? date.Value.ToDateTime(TimeOnly.MinValue)
+            : null;
+
+        var pending = await _promotionsService.GetPendingApprovalByBranchAsync(branchId, createdDate);
+        var result = pending
+            .Select(p => new PendingPromotionDto
+            {
+                Id = p.Id,
+                Nm = p.Nm,
+                ItemKod = p.ItemKod,
+                Kod = p.Kod,
+                Total = p.Total,
+                FromDate = p.FromDate,
+                ToDate = p.ToDate,
+                CreatedDateTime = p.CreatedDateTime
+            })
+            .ToList();
+
+        return Ok(result);
+    }
+
+    [HttpPost("approve")]
+    public async Task<IActionResult> Approve(long branchId, [FromBody] ApproveRequest request)
+    {
+        if (request?.Ids == null || request.Ids.Count == 0)
+        {
+            return BadRequest("No ids provided.");
+        }
+
+        await _promotionsService.ApproveOperTransferAsync(request.Ids);
+        return Ok(new { approved = request.Ids.Count });
+    }
+}

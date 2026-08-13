@@ -1,0 +1,12 @@
+<div class="page-shell">
+  <header>
+    <app-brand />
+    <ng-content select="[appHeader]" />
+  </header>
+
+  <ng-content />
+
+  <footer class="page-footer">
+    <ng-content select="[appFooter]" />
+  </footer>
+</div>

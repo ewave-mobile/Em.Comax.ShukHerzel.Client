@@ -5,7 +5,7 @@ Accept: application/json
 
 ###
 
-GET {{EM.Comax.ShukHerzel.Api_HostAddress}}/api/branches/1/price-updates/pending
+GET {{EM.Comax.ShukHerzel.Api_HostAddress}}/api/branches/1/price-updates/pending?date=2026-08-02
 Accept: application/json
 
 ###

@@ -1,0 +1,10 @@
+<div class="toolbar">
+  <mat-checkbox
+    [checked]="allSelected()"
+    [indeterminate]="partiallySelected()"
+    [disabled]="count() === 0"
+    (change)="selectAll.emit($event.checked)">
+    בחר הכל
+  </mat-checkbox>
+  <span>{{ count() }} {{ entityLabel() }} שנמצאו</span>
+</div>

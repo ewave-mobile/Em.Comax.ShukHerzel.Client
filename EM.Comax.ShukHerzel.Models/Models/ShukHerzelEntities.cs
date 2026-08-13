@@ -1045,6 +1045,8 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.WithoutPresentList).HasMaxLength(10);
             entity.Property(e => e.WithoutPrintContent).HasMaxLength(10);
             entity.Property(e => e.WithoutPrintingData).HasMaxLength(10);
+            // 12/08/2026 - Y.E
+            entity.Property(e => e.OperTransferApprovedDate).HasPrecision(3);
         });
 
         modelBuilder.Entity<ServiceLog>(entity =>

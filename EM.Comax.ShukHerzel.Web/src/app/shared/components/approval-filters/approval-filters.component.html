@@ -1,0 +1,35 @@
+<div class="filters">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>חיפוש</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input
+      matInput
+      type="search"
+      autocomplete="off"
+      [placeholder]="searchPlaceholder()"
+      [value]="search()"
+      (input)="searchChange.emit($any($event.target).value)" />
+    @if (search()) {
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        aria-label="ניקוי חיפוש"
+        (click)="searchChange.emit('')">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>תאריך</mat-label>
+    <input
+      matInput
+      readonly
+      [matDatepicker]="picker"
+      [value]="selectedDate()"
+      (dateChange)="onDateChange($event.value)" />
+    <mat-datepicker-toggle matIconSuffix [for]="picker" />
+    <mat-datepicker #picker />
+  </mat-form-field>
+</div>

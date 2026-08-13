@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+.promotion-card {
+  align-items: flex-start;
+}
+
+.promotion-card .item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  font-size: 13px;
+}
+
+.item-label {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.item-value {
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.item-desc {
+  line-height: 1.4;
+  white-space: normal;
+}
+
+@media (max-width: 380px) {
+  .item-row {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+}

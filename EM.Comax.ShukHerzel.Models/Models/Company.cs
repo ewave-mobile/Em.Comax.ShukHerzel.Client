@@ -13,6 +13,6 @@ public partial class Company
 
     public DateTime? CreateDate { get; set; }
 
-    // 02/08/2026 - Y.E - When true, PriceUpdates require user approval before Oper transfer
+    // 02/08/2026 - Y.E - When true, PriceUpdates/Promotions require user approval before Oper transfer
     public bool IsOperTransferApprovalRequired { get; set; }
 }

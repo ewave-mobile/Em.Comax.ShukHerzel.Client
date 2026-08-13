@@ -1,0 +1,30 @@
+@if (error()) {
+  <div class="status error" role="alert">
+    <mat-icon>error</mat-icon>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+@if (success()) {
+  <div class="status success" role="status">
+    <mat-icon>check_circle</mat-icon>
+    <span>{{ success() }}</span>
+  </div>
+}
+
+@if (loading()) {
+  <div class="state">
+    <mat-spinner diameter="28" />
+    <span>{{ loadingText() }}</span>
+  </div>
+} @else if (empty()) {
+  <div class="state">
+    <mat-icon>inbox</mat-icon>
+    <span>{{ emptyText() }}</span>
+  </div>
+} @else if (noMatches()) {
+  <div class="state">
+    <mat-icon>search_off</mat-icon>
+    <span>{{ noMatchesText() }}</span>
+  </div>
+}

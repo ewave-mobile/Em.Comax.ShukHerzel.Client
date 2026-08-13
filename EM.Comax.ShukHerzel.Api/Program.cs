@@ -31,17 +31,21 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseCors("AngularDev");
 }
 
-app.UseCors("AngularDev");
-
-// HTTPS redirect breaks Angular/dev-proxy CORS (HTTP origin → HTTPS API).
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseAuthorization();
 app.MapControllers();
+
+// SPA fallback — Angular routes (same-origin with /api)
+app.MapFallbackToFile("index.html");
 
 app.Run();

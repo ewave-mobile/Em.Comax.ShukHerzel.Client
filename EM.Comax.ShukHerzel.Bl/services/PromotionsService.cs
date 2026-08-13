@@ -574,5 +574,17 @@ namespace EM.Comax.ShukHerzel.Bl.services
             }
         }
 
+        // 13/08/2026 - Y.E
+        public async Task<List<Promotion>> GetPendingApprovalByBranchAsync(long branchId, DateTime? createdDate = null)
+        {
+            return await _promotionsRepository.GetPendingApprovalByBranchAsync(branchId, createdDate);
+        }
+
+        // 13/08/2026 - Y.E
+        public async Task ApproveOperTransferAsync(IEnumerable<long> ids)
+        {
+            await _promotionsRepository.ApproveOperTransferAsync(ids);
+        }
+
     }
 }

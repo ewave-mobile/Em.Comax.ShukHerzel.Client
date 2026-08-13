@@ -1,0 +1,20 @@
+.filters {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-icon[matPrefix] {
+  margin-inline: 4px 8px;
+  color: var(--text-secondary);
+}
+
+@media (min-width: 480px) {
+  .filters {
+    grid-template-columns: 1fr 180px;
+  }
+}

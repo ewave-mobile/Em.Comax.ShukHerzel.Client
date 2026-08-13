@@ -4,5 +4,4 @@ export interface PendingPriceUpdate {
   barcode: string | null;
   netPrice: string | null;
   createdDateTime: string;
-  selected?: boolean;
 }

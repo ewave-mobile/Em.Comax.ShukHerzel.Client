@@ -1,0 +1,70 @@
+<app-page-shell>
+  <app-page-header
+    appHeader
+    title="עדכון פריטים"
+    [subtitle]="branch()?.branchName ?? null"
+    [showBack]="true"
+    [showRefresh]="true"
+    [refreshing]="loadingItems()"
+    (back)="back()"
+    (refresh)="refresh()" />
+
+  <app-approval-filters
+    searchPlaceholder="ברקוד או פריט"
+    [search]="searchFilter()"
+    [date]="dateFilter()"
+    (searchChange)="searchFilter.set($event)"
+    (dateChange)="onDateChange($event)" />
+
+  @if (!loadingItems() && items().length > 0) {
+    <app-selection-toolbar
+      entityLabel="פריטים"
+      [count]="foundCount()"
+      [selectedCount]="selectedCount()"
+      [allSelected]="allSelected()"
+      (selectAll)="toggleSelectAll($event)" />
+  }
+
+  <app-page-status
+    [error]="error()"
+    [success]="success()"
+    [loading]="loadingItems()"
+    [empty]="!loadingItems() && items().length === 0"
+    [noMatches]="!loadingItems() && items().length > 0 && filteredItems().length === 0"
+    loadingText="טוען פריטים..."
+    emptyText="אין פריטים ממתינים לשידור"
+    noMatchesText="לא נמצאו פריטים התואמים לסינון" />
+
+  @if (!loadingItems() && filteredItems().length > 0) {
+    <main class="approval-list">
+      @for (item of filteredItems(); track item.id) {
+        <mat-card
+          appearance="outlined"
+          class="approval-card"
+          [class.selected]="isSelected(item)"
+          (click)="toggleItem(item)">
+          <mat-checkbox
+            [checked]="isSelected(item)"
+            aria-label="בחירת פריט"
+            (click)="$event.stopPropagation()"
+            (change)="toggleItem(item)" />
+          <div class="item-body">
+            <div class="item-title">{{ item.name || 'ללא שם' }}</div>
+            <div class="item-meta">
+              <span>{{ item.barcode }}</span>
+            </div>
+          </div>
+          <div class="item-price">{{ formatPrice(item.netPrice) }}</div>
+        </mat-card>
+      }
+    </main>
+  }
+
+  <app-footer-action
+    appFooter
+    [label]="selectedCount() > 0 ? 'שדר (' + selectedCount() + ')' : 'שדר'"
+    loadingLabel="משדר..."
+    [disabled]="selectedCount() === 0"
+    [loading]="approving()"
+    (action)="broadcast()" />
+</app-page-shell>

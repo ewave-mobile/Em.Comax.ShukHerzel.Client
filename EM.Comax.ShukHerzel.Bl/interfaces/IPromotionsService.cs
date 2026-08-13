@@ -53,5 +53,9 @@ namespace EM.Comax.ShukHerzel.Bl.interfaces
          IProgress<string>? progress = null,
          CancellationToken cancellationToken = default
         );
+
+        // 13/08/2026 - Y.E
+        Task<List<Promotion>> GetPendingApprovalByBranchAsync(long branchId, DateTime? createdDate = null);
+        Task ApproveOperTransferAsync(IEnumerable<long> ids);
     }
 }

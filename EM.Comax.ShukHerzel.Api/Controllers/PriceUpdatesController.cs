@@ -16,9 +16,15 @@ public class PriceUpdatesController : ControllerBase
     }
 
     [HttpGet("pending")]
-    public async Task<ActionResult<List<PendingPriceUpdateDto>>> GetPending(long branchId)
+    public async Task<ActionResult<List<PendingPriceUpdateDto>>> GetPending(
+        long branchId,
+        [FromQuery] DateOnly? date = null)
     {
-        var pending = await _priceUpdateService.GetPendingApprovalByBranchAsync(branchId);
+        DateTime? createdDate = date.HasValue
+            ? date.Value.ToDateTime(TimeOnly.MinValue)
+            : null;
+
+        var pending = await _priceUpdateService.GetPendingApprovalByBranchAsync(branchId, createdDate);
         var result = pending
             .Select(pu => new PendingPriceUpdateDto
             {

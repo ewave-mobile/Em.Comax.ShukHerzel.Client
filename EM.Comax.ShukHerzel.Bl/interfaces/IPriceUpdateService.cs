@@ -30,8 +30,9 @@ namespace EM.Comax.ShukHerzel.Bl.interfaces
 
         /// <summary>
         /// Latest non-transferred, non-approved PriceUpdate per barcode for the branch.
+        /// Optional <paramref name="createdDate"/> filters by CreatedDateTime calendar day (local).
         /// </summary>
-        Task<List<PriceUpdate>> GetPendingApprovalByBranchAsync(long branchId);
+        Task<List<PriceUpdate>> GetPendingApprovalByBranchAsync(long branchId, DateTime? createdDate = null);
 
         /// <summary>
         /// Approves Oper transfer for the given price update IDs.

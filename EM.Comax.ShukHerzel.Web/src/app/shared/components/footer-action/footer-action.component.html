@@ -1,0 +1,12 @@
+<button
+  mat-flat-button
+  type="button"
+  [disabled]="disabled() || loading()"
+  (click)="action.emit()">
+  @if (loading()) {
+    <mat-spinner diameter="20" />
+    <span>{{ loadingLabel() }}</span>
+  } @else {
+    <span>{{ label() }}</span>
+  }
+</button>
