@@ -2,10 +2,11 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatRadioModule } from '@angular/material/radio';
 import { BranchStoreService } from '../../services/branch-store.service';
-import { AppPageShellComponent } from '../../shared/components/app-page-shell/app-page-shell.component';
-import { AppPageHeaderComponent } from '../../shared/components/app-page-header/app-page-header.component';
-import { PageStatusComponent } from '../../shared/components/page-status/page-status.component';
-import { FooterActionComponent } from '../../shared/components/footer-action/footer-action.component';
+import { AppPageShellComponent } from '../app-page-shell/app-page-shell.component';
+import { AppPageHeaderComponent } from '../app-page-header/app-page-header.component';
+import { PageStatusComponent } from '../page-status/page-status.component';
+import { FooterActionComponent } from '../footer-action/footer-action.component';
+import { getApiErrorMessage } from '../../interceptors/api-error';
 
 @Component({
   selector: 'app-branch-select',
@@ -17,7 +18,7 @@ import { FooterActionComponent } from '../../shared/components/footer-action/foo
     FooterActionComponent
   ],
   templateUrl: './branch-select.component.html',
-  styleUrl: './branch-select.component.css'
+  styleUrl: './branch-select.component.scss'
 })
 export class BranchSelectComponent implements OnInit {
   private readonly store = inject(BranchStoreService);
@@ -45,9 +46,9 @@ export class BranchSelectComponent implements OnInit {
           this.selectedId.set(branches[0].id);
         }
       },
-      error: () => {
+      error: err => {
         this.loading.set(false);
-        this.error.set('שגיאה בטעינת סניפים');
+        this.error.set(getApiErrorMessage(err));
       }
     });
   }

@@ -7,7 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   selector: 'app-page-header',
   imports: [MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './app-page-header.component.html',
-  styleUrl: './app-page-header.component.css'
+  styleUrl: './app-page-header.component.scss'
 })
 export class AppPageHeaderComponent {
   readonly title = input.required<string>();

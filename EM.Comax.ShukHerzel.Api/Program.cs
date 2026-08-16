@@ -1,3 +1,4 @@
+using EM.Comax.ShukHerzel.Api.Logging;
 using EM.Comax.ShukHerzl.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,22 +6,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProjectServices(builder.Configuration);
-
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AngularDev", policy =>
+    options.AddPolicy("WebApp", policy =>
     {
         policy
-            .SetIsOriginAllowed(origin =>
-            {
-                if (string.IsNullOrWhiteSpace(origin))
-                {
-                    return false;
-                }
-
-                var uri = new Uri(origin);
-                return uri.Host is "localhost" or "127.0.0.1";
-            })
+            .SetIsOriginAllowed(_ => true)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -28,24 +21,29 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Allow GlobalExceptionHandler to re-read POST bodies for Log.ErrorLog.
+app.Use(async (context, next) =>
+{
+    context.Request.EnableBuffering();
+    await next();
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseCors("AngularDev");
 }
 
-if (!app.Environment.IsDevelopment())
+// CORS must run before other middleware that can short-circuit the response.
+app.UseCors("WebApp");
+app.UseExceptionHandler();
+if (builder.Configuration.GetValue<bool>("CustomConfiguration:InsertTraceLog"))
 {
-    app.UseHttpsRedirection();
+    app.UseMiddleware<WebApiCustomMiddleware>();
 }
-
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
 app.UseAuthorization();
 app.MapControllers();
-
-// SPA fallback — Angular routes (same-origin with /api)
 app.MapFallbackToFile("index.html");
 
 app.Run();

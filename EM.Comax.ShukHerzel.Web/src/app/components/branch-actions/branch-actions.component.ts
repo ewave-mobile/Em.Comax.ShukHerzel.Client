@@ -6,9 +6,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { BranchStoreService } from '../../services/branch-store.service';
 import { PriceApprovalService } from '../../services/price-approval.service';
 import { PromotionApprovalService } from '../../services/promotion-approval.service';
-import { AppPageShellComponent } from '../../shared/components/app-page-shell/app-page-shell.component';
-import { AppPageHeaderComponent } from '../../shared/components/app-page-header/app-page-header.component';
-import { todayKey } from '../../shared/utils/formatters';
+import { AppPageShellComponent } from '../app-page-shell/app-page-shell.component';
+import { AppPageHeaderComponent } from '../app-page-header/app-page-header.component';
+import { PageStatusComponent } from '../page-status/page-status.component';
+import { todayKey } from '../../pipes/comax-date.pipe';
+import { FooterActionComponent } from '../footer-action/footer-action.component';
+import { getApiErrorMessage } from '../../interceptors/api-error';
 
 @Component({
   selector: 'app-branch-actions',
@@ -17,10 +20,12 @@ import { todayKey } from '../../shared/utils/formatters';
     MatRippleModule,
     MatIconModule,
     AppPageShellComponent,
-    AppPageHeaderComponent
+    AppPageHeaderComponent,
+    PageStatusComponent,
+    FooterActionComponent
   ],
   templateUrl: './branch-actions.component.html',
-  styleUrl: './branch-actions.component.css'
+  styleUrl: './branch-actions.component.scss'
 })
 export class BranchActionsComponent implements OnInit {
   private readonly store = inject(BranchStoreService);
@@ -32,6 +37,7 @@ export class BranchActionsComponent implements OnInit {
   readonly branchId = signal<number | null>(null);
   readonly pendingItemsCount = signal(0);
   readonly pendingPromotionsCount = signal(0);
+  readonly error = signal<string | null>(null);
   readonly branch = computed(() => this.store.byId(this.branchId()));
 
   ngOnInit(): void {
@@ -50,7 +56,7 @@ export class BranchActionsComponent implements OnInit {
         }
         this.loadPendingCounts(branchId);
       },
-      error: () => this.changeBranch()
+      error: err => this.error.set(getApiErrorMessage(err))
     });
   }
 
@@ -58,11 +64,17 @@ export class BranchActionsComponent implements OnInit {
     const date = todayKey();
     this.priceApi.getPending(branchId, date).subscribe({
       next: items => this.pendingItemsCount.set(items.length),
-      error: () => this.pendingItemsCount.set(0)
+      error: err => {
+        this.pendingItemsCount.set(0);
+        this.error.set(getApiErrorMessage(err));
+      }
     });
     this.promotionApi.getPending(branchId, date).subscribe({
       next: items => this.pendingPromotionsCount.set(items.length),
-      error: () => this.pendingPromotionsCount.set(0)
+      error: err => {
+        this.pendingPromotionsCount.set(0);
+        this.error.set(getApiErrorMessage(err));
+      }
     });
   }
 

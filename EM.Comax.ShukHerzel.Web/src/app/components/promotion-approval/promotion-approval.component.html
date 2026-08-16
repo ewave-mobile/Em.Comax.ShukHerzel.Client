@@ -64,14 +64,14 @@
             <div class="item-row item-row-dates">
               <span class="item-label">טווח תאריכים</span>
               <span class="item-value">
-                {{ formatPromoDate(item.fromDate) }}
+                {{ item.fromDate | comaxDate }}
                 –
-                {{ formatPromoDate(item.toDate) }}
+                {{ item.toDate | comaxDate }}
               </span>
             </div>
             <div class="item-row">
               <span class="item-label">מחיר</span>
-              <span class="item-value item-price">{{ formatPrice(item.total) }}</span>
+              <span class="item-value item-price">{{ item.total | price }}</span>
             </div>
           </div>
         </mat-card>

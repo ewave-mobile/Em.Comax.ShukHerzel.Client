@@ -1,7 +1,7 @@
 <app-page-shell>
   <app-page-header
     appHeader
-    title="עדכון פריטים"
+    title="עדכון מחירים"
     [subtitle]="branch()?.branchName ?? null"
     [showBack]="true"
     [showRefresh]="true"
@@ -54,7 +54,7 @@
               <span>{{ item.barcode }}</span>
             </div>
           </div>
-          <div class="item-price">{{ formatPrice(item.netPrice) }}</div>
+          <div class="item-price">{{ item.netPrice | price }}</div>
         </mat-card>
       }
     </main>

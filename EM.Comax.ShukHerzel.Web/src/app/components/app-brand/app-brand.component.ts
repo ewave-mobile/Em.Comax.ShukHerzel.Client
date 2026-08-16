@@ -5,6 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-brand',
   imports: [MatIconModule],
   templateUrl: './app-brand.component.html',
-  styleUrl: './app-brand.component.css'
+  styleUrl: './app-brand.component.scss'
 })
 export class AppBrandComponent {}

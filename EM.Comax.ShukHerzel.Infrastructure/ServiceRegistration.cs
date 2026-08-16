@@ -32,7 +32,6 @@ namespace EM.Comax.ShukHerzl.Infrastructure
             {
                 options.UseSqlServer(configuration.GetConnectionString("ShukHerzelDb"));
             });
-
             services.AddScoped<IApiConfigService, ApiConfigService>();
 
         

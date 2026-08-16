@@ -17,7 +17,7 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatNativeDateModule
   ],
   templateUrl: './approval-filters.component.html',
-  styleUrl: './approval-filters.component.css'
+  styleUrl: './approval-filters.component.scss'
 })
 export class ApprovalFiltersComponent {
   readonly search = input('');

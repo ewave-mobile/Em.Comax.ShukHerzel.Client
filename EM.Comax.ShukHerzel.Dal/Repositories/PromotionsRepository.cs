@@ -270,8 +270,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             var candidates = await query.ToListAsync();
 
             return candidates
-                .GroupBy(p => p.ItemKod)
-                .Select(g => g.OrderByDescending(p => p.CreatedDateTime).First())
+               
                 .OrderByDescending(p => p.CreatedDateTime)
                 .ToList();
         }

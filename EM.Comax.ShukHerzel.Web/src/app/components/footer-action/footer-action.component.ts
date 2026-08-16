@@ -6,7 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   selector: 'app-footer-action',
   imports: [MatButtonModule, MatProgressSpinnerModule],
   templateUrl: './footer-action.component.html',
-  styleUrl: './footer-action.component.css'
+  styleUrl: './footer-action.component.scss'
 })
 export class FooterActionComponent {
   readonly label = input.required<string>();

@@ -6,7 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   selector: 'app-page-status',
   imports: [MatIconModule, MatProgressSpinnerModule],
   templateUrl: './page-status.component.html',
-  styleUrl: './page-status.component.css'
+  styleUrl: './page-status.component.scss'
 })
 export class PageStatusComponent {
   readonly error = input<string | null>(null);

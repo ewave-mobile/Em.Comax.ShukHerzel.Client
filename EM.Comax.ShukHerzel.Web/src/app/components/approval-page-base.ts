@@ -1,12 +1,13 @@
 import { Directive, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BranchStoreService } from '../../services/branch-store.service';
+import { BranchStoreService } from '../services/branch-store.service';
 import {
   ApprovalPageText,
   PendingApprovalApi,
   PendingApprovalItem
 } from '../models/pending-approval';
-import { todayKey } from '../utils/formatters';
+import { todayKey } from '../pipes/comax-date.pipe';
+import { getApiErrorMessage } from '../interceptors/api-error';
 
 @Directive()
 export abstract class ApprovalPageBase<T extends PendingApprovalItem> implements OnInit {
@@ -64,7 +65,7 @@ export abstract class ApprovalPageBase<T extends PendingApprovalItem> implements
           void this.router.navigate(['/']);
         }
       },
-      error: () => this.error.set('שגיאה בטעינת פרטי הסניף')
+      error: err => this.error.set(getApiErrorMessage(err))
     });
 
     this.loadPending();
@@ -104,9 +105,9 @@ export abstract class ApprovalPageBase<T extends PendingApprovalItem> implements
         this.items.set(items);
         this.loadingItems.set(false);
       },
-      error: () => {
+      error: err => {
         this.loadingItems.set(false);
-        this.error.set(this.text.loadError);
+        this.error.set(getApiErrorMessage(err));
       }
     });
   }
@@ -150,9 +151,9 @@ export abstract class ApprovalPageBase<T extends PendingApprovalItem> implements
         this.success.set(`שודרו ${result.approved} ${this.text.successEntity}`);
         this.loadPending();
       },
-      error: () => {
+      error: err => {
         this.approving.set(false);
-        this.error.set(this.text.approveError);
+        this.error.set(getApiErrorMessage(err));
       }
     });
   }

@@ -19,7 +19,7 @@ export class AppConfigService {
   }
 
   load(): Promise<void> {
-    return firstValueFrom(this.http.get<RuntimeConfig>('config.json', { headers: { 'Cache-Control': 'no-cache' } }))
+    return firstValueFrom(this.http.get<RuntimeConfig>('assets/config.json', { headers: { 'Cache-Control': 'no-cache' } }))
       .then(cfg => {
         if (cfg && typeof cfg.apiBaseUrl === 'string') {
           this.config = { apiBaseUrl: cfg.apiBaseUrl };

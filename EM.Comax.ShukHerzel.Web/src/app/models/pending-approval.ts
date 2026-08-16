@@ -10,7 +10,5 @@ export interface PendingApprovalApi<T extends PendingApprovalItem> {
 }
 
 export interface ApprovalPageText {
-  loadError: string;
-  approveError: string;
   successEntity: string;
 }

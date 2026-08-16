@@ -5,7 +5,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
   selector: 'app-selection-toolbar',
   imports: [MatCheckboxModule],
   templateUrl: './selection-toolbar.component.html',
-  styleUrl: './selection-toolbar.component.css'
+  styleUrl: './selection-toolbar.component.scss'
 })
 export class SelectionToolbarComponent {
   readonly count = input(0);

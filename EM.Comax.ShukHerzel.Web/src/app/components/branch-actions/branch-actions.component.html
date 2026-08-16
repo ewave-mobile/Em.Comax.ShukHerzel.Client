@@ -1,8 +1,9 @@
 <app-page-shell>
-  <app-page-header
-    appHeader
-    [title]="branch()?.branchName ?? 'פעולות בסניף'"
-    [subtitle]="branch()?.comaxStoreId ? 'קוד סניף ' + branch()?.comaxStoreId : null" />
+  <app-page-header appHeader
+                   [title]="branch()?.branchName ?? 'פעולות בסניף'"
+                   [subtitle]="branch()?.comaxStoreId ? 'קוד סניף ' + branch()?.comaxStoreId : null" />
+
+  <app-page-status [error]="error()" />
 
   <div class="section-label">פעולות</div>
 
@@ -12,7 +13,7 @@
         <mat-icon>sell</mat-icon>
       </span>
       <span class="action-body">
-        <span class="action-title">עדכון פריטים ({{ pendingItemsCount() }})</span>
+        <span class="action-title">עדכון מחירים ({{ pendingItemsCount() }})</span>
         <span class="action-sub">אישור ושידור עדכוני מחירים</span>
       </span>
       <mat-icon class="chevron">chevron_left</mat-icon>
@@ -30,12 +31,16 @@
     </button>
   </main>
 
-  <button
+  <app-footer-action appFooter
+                     label="החלפת סניף"
+                    
+                     (action)="changeBranch()" />
+  <!--<button
     appFooter
     mat-stroked-button
     type="button"
     class="secondary-action"
     (click)="changeBranch()">
     החלפת סניף
-  </button>
+  </button>-->
 </app-page-shell>
