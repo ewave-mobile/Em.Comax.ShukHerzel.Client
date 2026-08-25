@@ -4,6 +4,7 @@ using EM.Comax.ShukHerzel.Models.CustomModels;
 using EM.Comax.ShukHerzel.Models.DtoModels;
 using EM.Comax.ShukHerzel.Models.Interfaces;
 using EM.Comax.ShukHerzel.Models.Models;
+using EM.Comax.ShukHerzl.Common;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -357,13 +358,9 @@ public AllItemsService(
         {
             try
             {
-                var directoryPath = _outputSettings.ApiResponseDirectory;
-
-                // Ensure the directory exists
-                if (!Directory.Exists(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
+                var directoryPath = ApiResponsePathHelper.GetOrCreateCompanyDateDirectory(
+                    _outputSettings.ApiResponseDirectory,
+                    branch.CompanyId);
 
                 // Create a unique file name, e.g., including branch ID and timestamp
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");

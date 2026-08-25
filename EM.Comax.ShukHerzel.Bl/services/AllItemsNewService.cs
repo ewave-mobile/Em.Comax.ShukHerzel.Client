@@ -384,13 +384,9 @@ public AllItemsNewService(
         {
             try
             {
-                var directoryPath = _outputSettings.ApiResponseDirectory;
-
-                // Ensure the directory exists
-                if (!Directory.Exists(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
+                var directoryPath = ApiResponsePathHelper.GetOrCreateCompanyDateDirectory(
+                    _outputSettings.ApiResponseDirectory,
+                    branch.CompanyId);
 
                 // Create a unique file name, e.g., including branch ID and timestamp
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");

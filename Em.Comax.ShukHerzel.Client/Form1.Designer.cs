@@ -33,6 +33,7 @@
             catalogNewTempJob = new Button();
             button3 = new Button();
             PriceUpdatesButton = new Button();
+            apiResponseCleanupButton = new Button();
             logTextBox = new RichTextBox();
             eslTransferJob = new Button();
             button1 = new Button();
@@ -110,6 +111,9 @@
             promotionsApiAddAllButton = new Button();
             priceApprovalTab = new TabPage();
             priceApprovalDataGridView = new DataGridView();
+            priceApprovalGridHeaderPanel = new Panel();
+            priceApprovalCountLabel = new Label();
+            priceApprovalSelectAllCheckBox = new CheckBox();
             priceApprovalSearchPanel = new Panel();
             priceApprovalCompanyComboBox = new ComboBox();
             priceApprovalCompanyLabel = new Label();
@@ -118,9 +122,6 @@
             priceApprovalLoadButton = new Button();
             priceApprovalBarcodeTextBox = new TextBox();
             priceApprovalBarcodeLabel = new Label();
-            priceApprovalGridHeaderPanel = new Panel();
-            priceApprovalSelectAllCheckBox = new CheckBox();
-            priceApprovalCountLabel = new Label();
             priceApprovalActionsPanel = new Panel();
             priceApprovalApproveButton = new Button();
             loadingSpinner = new PictureBox();
@@ -159,8 +160,8 @@
             ((System.ComponentModel.ISupportInitialize)promotionsApiResultsDataGridView).BeginInit();
             priceApprovalTab.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)priceApprovalDataGridView).BeginInit();
-            priceApprovalSearchPanel.SuspendLayout();
             priceApprovalGridHeaderPanel.SuspendLayout();
+            priceApprovalSearchPanel.SuspendLayout();
             priceApprovalActionsPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)loadingSpinner).BeginInit();
             ((System.ComponentModel.ISupportInitialize)comaxApiResultsDataGridView).BeginInit();
@@ -184,6 +185,7 @@
             operationsTab.Controls.Add(catalogNewTempJob);
             operationsTab.Controls.Add(button3);
             operationsTab.Controls.Add(PriceUpdatesButton);
+            operationsTab.Controls.Add(apiResponseCleanupButton);
             operationsTab.Controls.Add(logTextBox);
             operationsTab.Controls.Add(eslTransferJob);
             operationsTab.Controls.Add(button1);
@@ -237,6 +239,18 @@
             PriceUpdatesButton.Text = "עדכוני מחירים";
             PriceUpdatesButton.UseVisualStyleBackColor = true;
             PriceUpdatesButton.Click += PriceUpdatesButton_Click;
+            // 
+            // apiResponseCleanupButton
+            // 
+            apiResponseCleanupButton.Location = new Point(171, 385);
+            apiResponseCleanupButton.Margin = new Padding(2, 3, 2, 3);
+            apiResponseCleanupButton.Name = "apiResponseCleanupButton";
+            apiResponseCleanupButton.Size = new Size(266, 27);
+            apiResponseCleanupButton.TabIndex = 12;
+            apiResponseCleanupButton.Text = "מחיקת קבצי API ישנים";
+            apiResponseCleanupButton.UseVisualStyleBackColor = true;
+            apiResponseCleanupButton.Visible = false;
+            apiResponseCleanupButton.Click += ApiResponseCleanupButton_Click;
             // 
             // logTextBox
             // 
@@ -579,7 +593,7 @@
             promotionsTab.Margin = new Padding(2, 3, 2, 3);
             promotionsTab.Name = "promotionsTab";
             promotionsTab.Padding = new Padding(2, 3, 2, 3);
-            promotionsTab.Size = new Size(1009, 695);
+            promotionsTab.Size = new Size(1011, 699);
             promotionsTab.TabIndex = 1;
             promotionsTab.Text = "מבצעים";
             promotionsTab.UseVisualStyleBackColor = true;
@@ -597,7 +611,7 @@
             promotionsDataGridView.ReadOnly = true;
             promotionsDataGridView.RowHeadersWidth = 62;
             promotionsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            promotionsDataGridView.Size = new Size(1001, 511);
+            promotionsDataGridView.Size = new Size(1003, 515);
             promotionsDataGridView.TabIndex = 0;
             // 
             // promotionSearchPanel
@@ -614,7 +628,7 @@
             promotionSearchPanel.Location = new Point(2, 3);
             promotionSearchPanel.Margin = new Padding(2, 3, 2, 3);
             promotionSearchPanel.Name = "promotionSearchPanel";
-            promotionSearchPanel.Size = new Size(1005, 115);
+            promotionSearchPanel.Size = new Size(1007, 115);
             promotionSearchPanel.TabIndex = 1;
             // 
             // promotionSearchBranchComboBox
@@ -703,10 +717,10 @@
             promotionActionsPanel.Controls.Add(setPromotionNotTransferredButton);
             promotionActionsPanel.Controls.Add(viewPromotionDetailsButton);
             promotionActionsPanel.Dock = DockStyle.Bottom;
-            promotionActionsPanel.Location = new Point(2, 645);
+            promotionActionsPanel.Location = new Point(2, 649);
             promotionActionsPanel.Margin = new Padding(2, 3, 2, 3);
             promotionActionsPanel.Name = "promotionActionsPanel";
-            promotionActionsPanel.Size = new Size(1005, 47);
+            promotionActionsPanel.Size = new Size(1007, 47);
             promotionActionsPanel.TabIndex = 2;
             // 
             // setPromotionNotTransferredButton
@@ -739,7 +753,7 @@
             itemsApiTab.Margin = new Padding(2, 3, 2, 3);
             itemsApiTab.Name = "itemsApiTab";
             itemsApiTab.Padding = new Padding(2, 3, 2, 3);
-            itemsApiTab.Size = new Size(1009, 695);
+            itemsApiTab.Size = new Size(1011, 699);
             itemsApiTab.TabIndex = 2;
             itemsApiTab.Text = "ממשק API פריטים";
             itemsApiTab.UseVisualStyleBackColor = true;
@@ -755,7 +769,7 @@
             itemsApiPanel.Location = new Point(2, 3);
             itemsApiPanel.Margin = new Padding(2, 3, 2, 3);
             itemsApiPanel.Name = "itemsApiPanel";
-            itemsApiPanel.Size = new Size(1005, 80);
+            itemsApiPanel.Size = new Size(1007, 80);
             itemsApiPanel.TabIndex = 0;
             // 
             // itemsApiBranchComboBox
@@ -818,13 +832,13 @@
             itemsApiResultsDataGridView.ReadOnly = true;
             itemsApiResultsDataGridView.RowHeadersWidth = 62;
             itemsApiResultsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            itemsApiResultsDataGridView.Size = new Size(1001, 543);
+            itemsApiResultsDataGridView.Size = new Size(1003, 547);
             itemsApiResultsDataGridView.TabIndex = 1;
             // 
             // itemsApiAddSelectedButton
             // 
             itemsApiAddSelectedButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            itemsApiAddSelectedButton.Location = new Point(870, 635);
+            itemsApiAddSelectedButton.Location = new Point(872, 639);
             itemsApiAddSelectedButton.Margin = new Padding(2, 3, 2, 3);
             itemsApiAddSelectedButton.Name = "itemsApiAddSelectedButton";
             itemsApiAddSelectedButton.Size = new Size(120, 27);
@@ -835,7 +849,7 @@
             // itemsApiAddAllButton
             // 
             itemsApiAddAllButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            itemsApiAddAllButton.Location = new Point(750, 635);
+            itemsApiAddAllButton.Location = new Point(752, 639);
             itemsApiAddAllButton.Margin = new Padding(2, 3, 2, 3);
             itemsApiAddAllButton.Name = "itemsApiAddAllButton";
             itemsApiAddAllButton.Size = new Size(120, 27);
@@ -1111,6 +1125,39 @@
             priceApprovalDataGridView.Size = new Size(1007, 505);
             priceApprovalDataGridView.TabIndex = 0;
             // 
+            // priceApprovalGridHeaderPanel
+            // 
+            priceApprovalGridHeaderPanel.Controls.Add(priceApprovalCountLabel);
+            priceApprovalGridHeaderPanel.Controls.Add(priceApprovalSelectAllCheckBox);
+            priceApprovalGridHeaderPanel.Dock = DockStyle.Top;
+            priceApprovalGridHeaderPanel.Location = new Point(2, 103);
+            priceApprovalGridHeaderPanel.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalGridHeaderPanel.Name = "priceApprovalGridHeaderPanel";
+            priceApprovalGridHeaderPanel.Size = new Size(1007, 40);
+            priceApprovalGridHeaderPanel.TabIndex = 3;
+            // 
+            // priceApprovalCountLabel
+            // 
+            priceApprovalCountLabel.AutoSize = true;
+            priceApprovalCountLabel.Location = new Point(12, 10);
+            priceApprovalCountLabel.Margin = new Padding(2, 0, 2, 0);
+            priceApprovalCountLabel.Name = "priceApprovalCountLabel";
+            priceApprovalCountLabel.Size = new Size(121, 20);
+            priceApprovalCountLabel.TabIndex = 0;
+            priceApprovalCountLabel.Text = "0 פריטים שנמצאו";
+            // 
+            // priceApprovalSelectAllCheckBox
+            // 
+            priceApprovalSelectAllCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            priceApprovalSelectAllCheckBox.AutoSize = true;
+            priceApprovalSelectAllCheckBox.Location = new Point(900, 8);
+            priceApprovalSelectAllCheckBox.Margin = new Padding(2, 3, 2, 3);
+            priceApprovalSelectAllCheckBox.Name = "priceApprovalSelectAllCheckBox";
+            priceApprovalSelectAllCheckBox.Size = new Size(88, 24);
+            priceApprovalSelectAllCheckBox.TabIndex = 1;
+            priceApprovalSelectAllCheckBox.Text = "בחר הכל";
+            priceApprovalSelectAllCheckBox.UseVisualStyleBackColor = true;
+            // 
             // priceApprovalSearchPanel
             // 
             priceApprovalSearchPanel.Controls.Add(priceApprovalCompanyComboBox);
@@ -1194,42 +1241,9 @@
             priceApprovalBarcodeLabel.Location = new Point(850, 61);
             priceApprovalBarcodeLabel.Margin = new Padding(2, 0, 2, 0);
             priceApprovalBarcodeLabel.Name = "priceApprovalBarcodeLabel";
-            priceApprovalBarcodeLabel.Size = new Size(52, 20);
+            priceApprovalBarcodeLabel.Size = new Size(47, 20);
             priceApprovalBarcodeLabel.TabIndex = 6;
             priceApprovalBarcodeLabel.Text = "ברקוד";
-            // 
-            // priceApprovalGridHeaderPanel
-            // 
-            priceApprovalGridHeaderPanel.Controls.Add(priceApprovalCountLabel);
-            priceApprovalGridHeaderPanel.Controls.Add(priceApprovalSelectAllCheckBox);
-            priceApprovalGridHeaderPanel.Dock = DockStyle.Top;
-            priceApprovalGridHeaderPanel.Location = new Point(2, 103);
-            priceApprovalGridHeaderPanel.Margin = new Padding(2, 3, 2, 3);
-            priceApprovalGridHeaderPanel.Name = "priceApprovalGridHeaderPanel";
-            priceApprovalGridHeaderPanel.Size = new Size(1007, 40);
-            priceApprovalGridHeaderPanel.TabIndex = 3;
-            // 
-            // priceApprovalCountLabel
-            // 
-            priceApprovalCountLabel.AutoSize = true;
-            priceApprovalCountLabel.Location = new Point(12, 10);
-            priceApprovalCountLabel.Margin = new Padding(2, 0, 2, 0);
-            priceApprovalCountLabel.Name = "priceApprovalCountLabel";
-            priceApprovalCountLabel.Size = new Size(128, 20);
-            priceApprovalCountLabel.TabIndex = 0;
-            priceApprovalCountLabel.Text = "0 פריטים שנמצאו";
-            // 
-            // priceApprovalSelectAllCheckBox
-            // 
-            priceApprovalSelectAllCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            priceApprovalSelectAllCheckBox.AutoSize = true;
-            priceApprovalSelectAllCheckBox.Location = new Point(900, 8);
-            priceApprovalSelectAllCheckBox.Margin = new Padding(2, 3, 2, 3);
-            priceApprovalSelectAllCheckBox.Name = "priceApprovalSelectAllCheckBox";
-            priceApprovalSelectAllCheckBox.Size = new Size(88, 24);
-            priceApprovalSelectAllCheckBox.TabIndex = 1;
-            priceApprovalSelectAllCheckBox.Text = "בחר הכל";
-            priceApprovalSelectAllCheckBox.UseVisualStyleBackColor = true;
             // 
             // priceApprovalActionsPanel
             // 
@@ -1387,10 +1401,10 @@
             ((System.ComponentModel.ISupportInitialize)promotionsApiResultsDataGridView).EndInit();
             priceApprovalTab.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)priceApprovalDataGridView).EndInit();
-            priceApprovalSearchPanel.ResumeLayout(false);
-            priceApprovalSearchPanel.PerformLayout();
             priceApprovalGridHeaderPanel.ResumeLayout(false);
             priceApprovalGridHeaderPanel.PerformLayout();
+            priceApprovalSearchPanel.ResumeLayout(false);
+            priceApprovalSearchPanel.PerformLayout();
             priceApprovalActionsPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)loadingSpinner).EndInit();
             ((System.ComponentModel.ISupportInitialize)comaxApiResultsDataGridView).EndInit();
@@ -1417,6 +1431,7 @@
         private RichTextBox logTextBox;
         private PictureBox loadingSpinner;
         private Button PriceUpdatesButton;
+        private Button apiResponseCleanupButton;
         private TabControl dataManagementTabControl;
         private TabPage itemsTab;
         private TabPage promotionsTab;

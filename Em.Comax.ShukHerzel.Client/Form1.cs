@@ -2,10 +2,12 @@ using EM.Comax.ShukHerzel.Bl.interfaces;
 using EM.Comax.ShukHerzel.Bl.services;
 using EM.Comax.ShukHerzel.Dal.Repositories;
 using EM.Comax.ShukHerzel.Integration.interfaces;
+using EM.Comax.ShukHerzel.Models.CustomModels;
 using EM.Comax.ShukHerzel.Models.Interfaces;
 using EM.Comax.ShukHerzel.Models.Models;
 using EM.Comax.ShukHerzl.Common;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Options;
 using System.ComponentModel;
 using System.Text;
 
@@ -26,6 +28,7 @@ namespace Em.Comax.ShukHerzel.Client
         private readonly IPromotionsRepository _promotionsRepository;
         private readonly IComaxApiClient _comaxApiClient;
         private readonly IDatabaseLogger _databaseLogger;
+        private readonly OutputSettings _outputSettings;
         private System.Windows.Forms.Timer _spinnerTimer;
         private int _spinnerAngle = 0;
         private List<PriceUpdateApprovalRow> _priceApprovalAllRows = new();
@@ -42,7 +45,8 @@ namespace Em.Comax.ShukHerzel.Client
             IPriceUpdateService priceUpdateService,
             IPromotionsRepository promotionsRepository,
             IComaxApiClient comaxApiClient,
-            IDatabaseLogger databaseLogger)
+            IDatabaseLogger databaseLogger,
+            IOptions<OutputSettings> outputSettings)
         {
             _branchService = branchService;
             _companyService = companyService;
@@ -54,6 +58,7 @@ namespace Em.Comax.ShukHerzel.Client
             _promotionsRepository = promotionsRepository;
             _comaxApiClient = comaxApiClient;
             _databaseLogger = databaseLogger;
+            _outputSettings = outputSettings.Value;
             InitializeComponent();
             _ = initForm();
             _priceUpdateService = priceUpdateService;
@@ -934,6 +939,49 @@ namespace Em.Comax.ShukHerzel.Client
             finally
             {
                 PriceUpdatesButton.Enabled = true;
+            }
+        }
+
+        private async void ApiResponseCleanupButton_Click(object sender, EventArgs e)
+        {
+            logTextBox.Clear();
+            apiResponseCleanupButton.Enabled = false;
+
+            try
+            {
+                var result = await Task.Run(() => ApiResponseCleanupHelper.Cleanup(
+                    _outputSettings.ApiResponseDirectory,
+                    _outputSettings.ApiResponseRetentionDays));
+
+                foreach (var (filePath, fileEx) in result.FileErrors)
+                {
+                    await _databaseLogger.LogErrorAsync(
+                        "ApiResponseCleanupButton",
+                        $"Failed to delete file: {filePath}",
+                        fileEx);
+                    logTextBox.AppendText($"שגיאה במחיקת קובץ: {filePath} - {fileEx.Message}{Environment.NewLine}");
+                }
+
+                await _databaseLogger.LogServiceActionAsync(result.Message);
+                logTextBox.AppendText(result.Message + Environment.NewLine);
+
+                MessageBox.Show(
+                    result.Message,
+                    "מחיקת קבצי API ישנים",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                await _databaseLogger.LogErrorAsync(
+                    "ApiResponseCleanupButton",
+                    "Error during API response file cleanup",
+                    ex);
+                MessageBox.Show($"שגיאה במחיקת קבצי API ישנים: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                apiResponseCleanupButton.Enabled = true;
             }
         }
 

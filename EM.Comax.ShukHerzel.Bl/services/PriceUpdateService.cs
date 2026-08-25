@@ -179,11 +179,10 @@ namespace EM.Comax.ShukHerzel.Bl.services
         {
             try
             {
-                var directoryPath = _outputSettings.ApiResponseDirectory;
-                if (!Directory.Exists(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
+                var directoryPath = ApiResponsePathHelper.GetOrCreateCompanyDateDirectory(
+                    _outputSettings.ApiResponseDirectory,
+                    branch.CompanyId);
+
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 var fileName = $"PriceUpdatesResponse_Branch{branch.Id}_{timestamp}_{guid}.txt";
                 var filePath = Path.Combine(directoryPath, fileName);
