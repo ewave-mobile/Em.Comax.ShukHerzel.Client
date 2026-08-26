@@ -21,9 +21,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
 
         public async Task<IEnumerable<Branch>> GetAllBranchesByCompanyIdAsync(long companyId)
         {
-            // Consider removing Task.Run if the underlying operation is already async
-            // return await _context.Branches.Where(b => b.CompanyId == companyId).ToListAsync();
-             return await Task.Run(() => _context.Branches.Where(b => b.CompanyId == companyId).ToList());
+            return await _context.Branches.Where(b => b.CompanyId == companyId).ToListAsync();
         }
 
         // --- Implementation of specific timestamp update methods ---
@@ -43,7 +41,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                     await _databaseLogger.LogServiceActionAsync($"Warning: Attempted to update LastCatalogTimeStamp for non-existent Branch ID: {branchId}");
                 }
                  // Optional: Log success if needed, but might be too verbose
-                 // await _databaseLogger.LogServiceActionAsync($"Updated LastCatalogTimeStamp for Branch ID: {branchId} to {timestamp:O}");
+                  await _databaseLogger.LogServiceActionAsync($"Updated LastCatalogTimeStamp for Branch ID: {branchId} to {timestamp:O}");
             }
             catch (Exception ex)
             {

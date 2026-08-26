@@ -95,7 +95,8 @@ namespace Em.Comax.ShukHerzel.Client
             companyList.SelectedIndexChanged += CompanyList_SelectedIndexChanged;
 
             await LoadBranchesForSelectedCompanyAsync();
-            BindPriceApprovalCompanies();
+            await BindPriceApprovalCompaniesAsync();
+            await BindDataManagementCompaniesAsync();
 
             // Set up event handlers for the new UI controls
             itemSearchButton.Click += ItemSearchButton_Click;
@@ -404,30 +405,84 @@ namespace Em.Comax.ShukHerzel.Client
             branchList.DisplayMember = "BranchName";
             branchList.ValueMember = "Id";
             branchList.DataSource = _branches;
-
-            // Separate lists for each combo box to avoid binding issues
-            itemSearchBranchComboBox.DataSource = new List<Branch>(_branches);
-            itemSearchBranchComboBox.DisplayMember = "BranchName";
-            itemSearchBranchComboBox.ValueMember = "Id";
-
-            promotionSearchBranchComboBox.DataSource = new List<Branch>(_branches);
-            promotionSearchBranchComboBox.DisplayMember = "BranchName";
-            promotionSearchBranchComboBox.ValueMember = "Id";
-
-            itemsApiBranchComboBox.DataSource = new List<Branch>(_branches);
-            itemsApiBranchComboBox.DisplayMember = "BranchName";
-            itemsApiBranchComboBox.ValueMember = "Id";
-
-            itemsApiBranchNewComboBox.DataSource = new List<Branch>(_branches);
-            itemsApiBranchNewComboBox.DisplayMember = "BranchName";
-            itemsApiBranchNewComboBox.ValueMember = "Id";
-
-            promotionsApiBranchComboBox.DataSource = new List<Branch>(_branches);
-            promotionsApiBranchComboBox.DisplayMember = "BranchName";
-            promotionsApiBranchComboBox.ValueMember = "Id";
         }
 
-        private void BindPriceApprovalCompanies()
+        private async Task BindDataManagementCompaniesAsync()
+        {
+            var pairs = new (ComboBox CompanyCombo, ComboBox BranchCombo)[]
+            {
+                (itemSearchCompanyComboBox, itemSearchBranchComboBox),
+                (promotionSearchCompanyComboBox, promotionSearchBranchComboBox),
+                (itemsApiCompanyComboBox, itemsApiBranchComboBox),
+                (itemsApiCompanyNewComboBox, itemsApiBranchNewComboBox),
+                (promotionsApiCompanyComboBox, promotionsApiBranchComboBox)
+            };
+
+            foreach (var (companyCombo, branchCombo) in pairs)
+            {
+                companyCombo.SelectedIndexChanged -= DataManagementCompanyComboBox_SelectedIndexChanged;
+                companyCombo.Tag = branchCombo;
+                companyCombo.DataSource = null;
+                companyCombo.DisplayMember = "Description";
+                companyCombo.ValueMember = "Id";
+                companyCombo.DataSource = new List<Company>(_companies ?? new List<Company>());
+                companyCombo.SelectedIndexChanged += DataManagementCompanyComboBox_SelectedIndexChanged;
+            }
+
+            // All tabs start with the same company — load branches once and reuse
+            if (pairs[0].CompanyCombo.SelectedItem is Company selectedCompany)
+            {
+                try
+                {
+                    var branches = await _branchService.GetAllBranchesByCompany(selectedCompany.Id);
+                    foreach (var (_, branchCombo) in pairs)
+                    {
+                        branchCombo.DataSource = null;
+                        branchCombo.DisplayMember = "BranchName";
+                        branchCombo.ValueMember = "Id";
+                        branchCombo.DataSource = new List<Branch>(branches);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"שגיאה בטעינת סניפים: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private async void DataManagementCompanyComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (sender is ComboBox companyCombo && companyCombo.Tag is ComboBox branchCombo)
+            {
+                await LoadBranchesForCompanyAsync(companyCombo, branchCombo);
+            }
+        }
+
+        private async Task LoadBranchesForCompanyAsync(ComboBox companyCombo, ComboBox branchCombo)
+        {
+            try
+            {
+                if (companyCombo.SelectedItem is Company selectedCompany)
+                {
+                    var branches = await _branchService.GetAllBranchesByCompany(selectedCompany.Id);
+                    branchCombo.DataSource = null;
+                    branchCombo.DisplayMember = "BranchName";
+                    branchCombo.ValueMember = "Id";
+                    branchCombo.DataSource = new List<Branch>(branches);
+                }
+                else
+                {
+                    branchCombo.DataSource = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                branchCombo.DataSource = null;
+                MessageBox.Show($"שגיאה בטעינת סניפים: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async Task BindPriceApprovalCompaniesAsync()
         {
             priceApprovalCompanyComboBox.SelectedIndexChanged -= PriceApprovalCompanyComboBox_SelectedIndexChanged;
             var approvalCompanies = (_companies ?? new List<Company>())
@@ -439,8 +494,7 @@ namespace Em.Comax.ShukHerzel.Client
             priceApprovalCompanyComboBox.DataSource = approvalCompanies;
             priceApprovalCompanyComboBox.SelectedIndexChanged += PriceApprovalCompanyComboBox_SelectedIndexChanged;
 
-            // Load branches for the initially selected approval company (if any)
-            _ = LoadPriceApprovalBranchesForSelectedCompanyAsync();
+            await LoadPriceApprovalBranchesForSelectedCompanyAsync();
         }
 
         private async void PriceApprovalCompanyComboBox_SelectedIndexChanged(object? sender, EventArgs e)
@@ -467,11 +521,10 @@ namespace Em.Comax.ShukHerzel.Client
             try
             {
                 var branches = await _branchService.GetAllBranchesByCompany(selectedCompany.Id);
-                var approvalBranches = branches.Select(b => new BranchListItem(b)).ToList();
                 priceApprovalBranchComboBox.DataSource = null;
-                priceApprovalBranchComboBox.DisplayMember = "DisplayText";
+                priceApprovalBranchComboBox.DisplayMember = "BranchName";
                 priceApprovalBranchComboBox.ValueMember = "Id";
-                priceApprovalBranchComboBox.DataSource = approvalBranches;
+                priceApprovalBranchComboBox.DataSource = new List<Branch>(branches);
             }
             catch (Exception ex)
             {
@@ -483,7 +536,7 @@ namespace Em.Comax.ShukHerzel.Client
                 priceApprovalBranchComboBox.SelectedIndexChanged += PriceApprovalBranchComboBox_SelectedIndexChanged;
             }
 
-            if (priceApprovalBranchComboBox.SelectedItem is BranchListItem)
+            if (priceApprovalBranchComboBox.SelectedItem is Branch)
             {
                 await LoadPendingPriceApprovalsAsync();
             }
@@ -528,7 +581,7 @@ namespace Em.Comax.ShukHerzel.Client
 
         private async void PriceApprovalBranchComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            if (priceApprovalBranchComboBox.SelectedItem is BranchListItem)
+            if (priceApprovalBranchComboBox.SelectedItem is Branch)
             {
                 await LoadPendingPriceApprovalsAsync();
             }
@@ -541,7 +594,7 @@ namespace Em.Comax.ShukHerzel.Client
 
         private async Task LoadPendingPriceApprovalsAsync()
         {
-            if (priceApprovalBranchComboBox.SelectedItem is not BranchListItem selected)
+            if (priceApprovalBranchComboBox.SelectedItem is not Branch selected)
             {
                 MessageBox.Show("יש לבחור סניף.", "אישור עדכוני מחירים", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;

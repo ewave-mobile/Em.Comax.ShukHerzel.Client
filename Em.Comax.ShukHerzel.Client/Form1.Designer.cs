@@ -52,6 +52,8 @@
             itemsTab = new TabPage();
             itemsDataGridView = new DataGridView();
             itemSearchPanel = new Panel();
+            itemSearchCompanyComboBox = new ComboBox();
+            itemSearchCompanyLabel = new Label();
             itemSearchBranchComboBox = new ComboBox();
             itemSearchBranchLabel = new Label();
             itemSearchBarcodeTextBox = new TextBox();
@@ -67,6 +69,8 @@
             promotionsTab = new TabPage();
             promotionsDataGridView = new DataGridView();
             promotionSearchPanel = new Panel();
+            promotionSearchCompanyComboBox = new ComboBox();
+            promotionSearchCompanyLabel = new Label();
             promotionSearchBranchComboBox = new ComboBox();
             promotionSearchBranchLabel = new Label();
             promotionSearchKodRadioButton = new RadioButton();
@@ -80,6 +84,8 @@
             viewPromotionDetailsButton = new Button();
             itemsApiTab = new TabPage();
             itemsApiPanel = new Panel();
+            itemsApiCompanyComboBox = new ComboBox();
+            itemsApiCompanyLabel = new Label();
             itemsApiBranchComboBox = new ComboBox();
             itemsApiBranchLabel = new Label();
             itemsApiItemIdTextBox = new TextBox();
@@ -93,6 +99,8 @@
             itemsApiAddAllButtonNew = new Button();
             itemsApiResultsNewDataGridView = new DataGridView();
             panel1 = new Panel();
+            itemsApiCompanyNewComboBox = new ComboBox();
+            itemsApiCompanyNewLabel = new Label();
             itemsApiBranchNewComboBox = new ComboBox();
             label1 = new Label();
             itemsApiItemIdNewTextBox = new TextBox();
@@ -100,6 +108,8 @@
             itemsApiGetItemNewButton = new Button();
             promotionsApiTab = new TabPage();
             promotionsApiPanel = new Panel();
+            promotionsApiCompanyComboBox = new ComboBox();
+            promotionsApiCompanyLabel = new Label();
             promotionsApiBranchComboBox = new ComboBox();
             promotionsApiBranchLabel = new Label();
             promotionsApiBarcodeFilterTextBox = new TextBox();
@@ -452,6 +462,8 @@
             // 
             // itemSearchPanel
             // 
+            itemSearchPanel.Controls.Add(itemSearchCompanyComboBox);
+            itemSearchPanel.Controls.Add(itemSearchCompanyLabel);
             itemSearchPanel.Controls.Add(itemSearchBranchComboBox);
             itemSearchPanel.Controls.Add(itemSearchBranchLabel);
             itemSearchPanel.Controls.Add(itemSearchBarcodeTextBox);
@@ -467,23 +479,44 @@
             itemSearchPanel.Size = new Size(1007, 115);
             itemSearchPanel.TabIndex = 1;
             // 
+            // itemSearchCompanyComboBox
+            // 
+            itemSearchCompanyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            itemSearchCompanyComboBox.FormattingEnabled = true;
+            itemSearchCompanyComboBox.Location = new Point(663, 16);
+            itemSearchCompanyComboBox.Margin = new Padding(2, 3, 2, 3);
+            itemSearchCompanyComboBox.Name = "itemSearchCompanyComboBox";
+            itemSearchCompanyComboBox.Size = new Size(182, 28);
+            itemSearchCompanyComboBox.TabIndex = 0;
+            // 
+            // itemSearchCompanyLabel
+            // 
+            itemSearchCompanyLabel.AutoSize = true;
+            itemSearchCompanyLabel.Location = new Point(850, 19);
+            itemSearchCompanyLabel.Margin = new Padding(2, 0, 2, 0);
+            itemSearchCompanyLabel.Name = "itemSearchCompanyLabel";
+            itemSearchCompanyLabel.Size = new Size(46, 20);
+            itemSearchCompanyLabel.TabIndex = 1;
+            itemSearchCompanyLabel.Text = "חברה";
+            // 
             // itemSearchBranchComboBox
             // 
+            itemSearchBranchComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             itemSearchBranchComboBox.FormattingEnabled = true;
-            itemSearchBranchComboBox.Location = new Point(560, 16);
+            itemSearchBranchComboBox.Location = new Point(320, 16);
             itemSearchBranchComboBox.Margin = new Padding(2, 3, 2, 3);
             itemSearchBranchComboBox.Name = "itemSearchBranchComboBox";
-            itemSearchBranchComboBox.Size = new Size(161, 28);
-            itemSearchBranchComboBox.TabIndex = 0;
+            itemSearchBranchComboBox.Size = new Size(251, 28);
+            itemSearchBranchComboBox.TabIndex = 2;
             // 
             // itemSearchBranchLabel
             // 
             itemSearchBranchLabel.AutoSize = true;
-            itemSearchBranchLabel.Location = new Point(728, 19);
+            itemSearchBranchLabel.Location = new Point(576, 19);
             itemSearchBranchLabel.Margin = new Padding(2, 0, 2, 0);
             itemSearchBranchLabel.Name = "itemSearchBranchLabel";
             itemSearchBranchLabel.Size = new Size(38, 20);
-            itemSearchBranchLabel.TabIndex = 1;
+            itemSearchBranchLabel.TabIndex = 3;
             itemSearchBranchLabel.Text = "סניף";
             // 
             // itemSearchBarcodeTextBox
@@ -492,7 +525,7 @@
             itemSearchBarcodeTextBox.Margin = new Padding(2, 3, 2, 3);
             itemSearchBarcodeTextBox.Name = "itemSearchBarcodeTextBox";
             itemSearchBarcodeTextBox.Size = new Size(161, 27);
-            itemSearchBarcodeTextBox.TabIndex = 2;
+            itemSearchBarcodeTextBox.TabIndex = 4;
             // 
             // itemSearchBarcodeLabel
             // 
@@ -501,7 +534,7 @@
             itemSearchBarcodeLabel.Margin = new Padding(2, 0, 2, 0);
             itemSearchBarcodeLabel.Name = "itemSearchBarcodeLabel";
             itemSearchBarcodeLabel.Size = new Size(47, 20);
-            itemSearchBarcodeLabel.TabIndex = 3;
+            itemSearchBarcodeLabel.TabIndex = 5;
             itemSearchBarcodeLabel.Text = "ברקוד";
             // 
             // itemSearchNameTextBox
@@ -510,7 +543,7 @@
             itemSearchNameTextBox.Margin = new Padding(2, 3, 2, 3);
             itemSearchNameTextBox.Name = "itemSearchNameTextBox";
             itemSearchNameTextBox.Size = new Size(161, 27);
-            itemSearchNameTextBox.TabIndex = 4;
+            itemSearchNameTextBox.TabIndex = 6;
             // 
             // itemSearchNameLabel
             // 
@@ -519,7 +552,7 @@
             itemSearchNameLabel.Margin = new Padding(2, 0, 2, 0);
             itemSearchNameLabel.Name = "itemSearchNameLabel";
             itemSearchNameLabel.Size = new Size(31, 20);
-            itemSearchNameLabel.TabIndex = 5;
+            itemSearchNameLabel.TabIndex = 7;
             itemSearchNameLabel.Text = "שם";
             // 
             // itemSearchButton
@@ -528,7 +561,7 @@
             itemSearchButton.Margin = new Padding(2, 3, 2, 3);
             itemSearchButton.Name = "itemSearchButton";
             itemSearchButton.Size = new Size(75, 27);
-            itemSearchButton.TabIndex = 6;
+            itemSearchButton.TabIndex = 8;
             itemSearchButton.Text = "חפש";
             itemSearchButton.UseVisualStyleBackColor = true;
             // 
@@ -538,7 +571,7 @@
             itemSearchClearButton.Margin = new Padding(2, 3, 2, 3);
             itemSearchClearButton.Name = "itemSearchClearButton";
             itemSearchClearButton.Size = new Size(75, 27);
-            itemSearchClearButton.TabIndex = 7;
+            itemSearchClearButton.TabIndex = 9;
             itemSearchClearButton.Text = "נקה";
             itemSearchClearButton.UseVisualStyleBackColor = true;
             // 
@@ -616,6 +649,8 @@
             // 
             // promotionSearchPanel
             // 
+            promotionSearchPanel.Controls.Add(promotionSearchCompanyComboBox);
+            promotionSearchPanel.Controls.Add(promotionSearchCompanyLabel);
             promotionSearchPanel.Controls.Add(promotionSearchBranchComboBox);
             promotionSearchPanel.Controls.Add(promotionSearchBranchLabel);
             promotionSearchPanel.Controls.Add(promotionSearchKodRadioButton);
@@ -631,23 +666,44 @@
             promotionSearchPanel.Size = new Size(1007, 115);
             promotionSearchPanel.TabIndex = 1;
             // 
+            // promotionSearchCompanyComboBox
+            // 
+            promotionSearchCompanyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            promotionSearchCompanyComboBox.FormattingEnabled = true;
+            promotionSearchCompanyComboBox.Location = new Point(663, 16);
+            promotionSearchCompanyComboBox.Margin = new Padding(2, 3, 2, 3);
+            promotionSearchCompanyComboBox.Name = "promotionSearchCompanyComboBox";
+            promotionSearchCompanyComboBox.Size = new Size(182, 28);
+            promotionSearchCompanyComboBox.TabIndex = 0;
+            // 
+            // promotionSearchCompanyLabel
+            // 
+            promotionSearchCompanyLabel.AutoSize = true;
+            promotionSearchCompanyLabel.Location = new Point(850, 19);
+            promotionSearchCompanyLabel.Margin = new Padding(2, 0, 2, 0);
+            promotionSearchCompanyLabel.Name = "promotionSearchCompanyLabel";
+            promotionSearchCompanyLabel.Size = new Size(46, 20);
+            promotionSearchCompanyLabel.TabIndex = 1;
+            promotionSearchCompanyLabel.Text = "חברה";
+            // 
             // promotionSearchBranchComboBox
             // 
+            promotionSearchBranchComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             promotionSearchBranchComboBox.FormattingEnabled = true;
-            promotionSearchBranchComboBox.Location = new Point(560, 16);
+            promotionSearchBranchComboBox.Location = new Point(320, 16);
             promotionSearchBranchComboBox.Margin = new Padding(2, 3, 2, 3);
             promotionSearchBranchComboBox.Name = "promotionSearchBranchComboBox";
-            promotionSearchBranchComboBox.Size = new Size(161, 28);
-            promotionSearchBranchComboBox.TabIndex = 0;
+            promotionSearchBranchComboBox.Size = new Size(251, 28);
+            promotionSearchBranchComboBox.TabIndex = 2;
             // 
             // promotionSearchBranchLabel
             // 
             promotionSearchBranchLabel.AutoSize = true;
-            promotionSearchBranchLabel.Location = new Point(728, 19);
+            promotionSearchBranchLabel.Location = new Point(576, 19);
             promotionSearchBranchLabel.Margin = new Padding(2, 0, 2, 0);
             promotionSearchBranchLabel.Name = "promotionSearchBranchLabel";
             promotionSearchBranchLabel.Size = new Size(38, 20);
-            promotionSearchBranchLabel.TabIndex = 1;
+            promotionSearchBranchLabel.TabIndex = 3;
             promotionSearchBranchLabel.Text = "סניף";
             // 
             // promotionSearchKodRadioButton
@@ -657,7 +713,7 @@
             promotionSearchKodRadioButton.Margin = new Padding(2, 3, 2, 3);
             promotionSearchKodRadioButton.Name = "promotionSearchKodRadioButton";
             promotionSearchKodRadioButton.Size = new Size(92, 24);
-            promotionSearchKodRadioButton.TabIndex = 2;
+            promotionSearchKodRadioButton.TabIndex = 4;
             promotionSearchKodRadioButton.Text = "קוד מבצע";
             promotionSearchKodRadioButton.UseVisualStyleBackColor = true;
             // 
@@ -669,7 +725,7 @@
             promotionSearchItemKodRadioButton.Margin = new Padding(2, 3, 2, 3);
             promotionSearchItemKodRadioButton.Name = "promotionSearchItemKodRadioButton";
             promotionSearchItemKodRadioButton.Size = new Size(86, 24);
-            promotionSearchItemKodRadioButton.TabIndex = 3;
+            promotionSearchItemKodRadioButton.TabIndex = 5;
             promotionSearchItemKodRadioButton.TabStop = true;
             promotionSearchItemKodRadioButton.Text = "קוד פריט";
             promotionSearchItemKodRadioButton.UseVisualStyleBackColor = true;
@@ -680,7 +736,7 @@
             promotionSearchValueTextBox.Margin = new Padding(2, 3, 2, 3);
             promotionSearchValueTextBox.Name = "promotionSearchValueTextBox";
             promotionSearchValueTextBox.Size = new Size(121, 27);
-            promotionSearchValueTextBox.TabIndex = 4;
+            promotionSearchValueTextBox.TabIndex = 6;
             // 
             // promotionSearchValueLabel
             // 
@@ -689,7 +745,7 @@
             promotionSearchValueLabel.Margin = new Padding(2, 0, 2, 0);
             promotionSearchValueLabel.Name = "promotionSearchValueLabel";
             promotionSearchValueLabel.Size = new Size(34, 20);
-            promotionSearchValueLabel.TabIndex = 5;
+            promotionSearchValueLabel.TabIndex = 7;
             promotionSearchValueLabel.Text = "ערך";
             // 
             // promotionSearchButton
@@ -698,7 +754,7 @@
             promotionSearchButton.Margin = new Padding(2, 3, 2, 3);
             promotionSearchButton.Name = "promotionSearchButton";
             promotionSearchButton.Size = new Size(75, 27);
-            promotionSearchButton.TabIndex = 6;
+            promotionSearchButton.TabIndex = 8;
             promotionSearchButton.Text = "חפש";
             promotionSearchButton.UseVisualStyleBackColor = true;
             // 
@@ -708,7 +764,7 @@
             promotionSearchClearButton.Margin = new Padding(2, 3, 2, 3);
             promotionSearchClearButton.Name = "promotionSearchClearButton";
             promotionSearchClearButton.Size = new Size(75, 27);
-            promotionSearchClearButton.TabIndex = 7;
+            promotionSearchClearButton.TabIndex = 9;
             promotionSearchClearButton.Text = "נקה";
             promotionSearchClearButton.UseVisualStyleBackColor = true;
             // 
@@ -760,6 +816,8 @@
             // 
             // itemsApiPanel
             // 
+            itemsApiPanel.Controls.Add(itemsApiCompanyComboBox);
+            itemsApiPanel.Controls.Add(itemsApiCompanyLabel);
             itemsApiPanel.Controls.Add(itemsApiBranchComboBox);
             itemsApiPanel.Controls.Add(itemsApiBranchLabel);
             itemsApiPanel.Controls.Add(itemsApiItemIdTextBox);
@@ -772,23 +830,44 @@
             itemsApiPanel.Size = new Size(1007, 80);
             itemsApiPanel.TabIndex = 0;
             // 
+            // itemsApiCompanyComboBox
+            // 
+            itemsApiCompanyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            itemsApiCompanyComboBox.FormattingEnabled = true;
+            itemsApiCompanyComboBox.Location = new Point(663, 8);
+            itemsApiCompanyComboBox.Margin = new Padding(2, 3, 2, 3);
+            itemsApiCompanyComboBox.Name = "itemsApiCompanyComboBox";
+            itemsApiCompanyComboBox.Size = new Size(182, 28);
+            itemsApiCompanyComboBox.TabIndex = 0;
+            // 
+            // itemsApiCompanyLabel
+            // 
+            itemsApiCompanyLabel.AutoSize = true;
+            itemsApiCompanyLabel.Location = new Point(850, 12);
+            itemsApiCompanyLabel.Margin = new Padding(2, 0, 2, 0);
+            itemsApiCompanyLabel.Name = "itemsApiCompanyLabel";
+            itemsApiCompanyLabel.Size = new Size(46, 20);
+            itemsApiCompanyLabel.TabIndex = 1;
+            itemsApiCompanyLabel.Text = "חברה";
+            // 
             // itemsApiBranchComboBox
             // 
+            itemsApiBranchComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             itemsApiBranchComboBox.FormattingEnabled = true;
-            itemsApiBranchComboBox.Location = new Point(400, 8);
+            itemsApiBranchComboBox.Location = new Point(320, 8);
             itemsApiBranchComboBox.Margin = new Padding(2, 3, 2, 3);
             itemsApiBranchComboBox.Name = "itemsApiBranchComboBox";
-            itemsApiBranchComboBox.Size = new Size(161, 28);
-            itemsApiBranchComboBox.TabIndex = 0;
+            itemsApiBranchComboBox.Size = new Size(251, 28);
+            itemsApiBranchComboBox.TabIndex = 2;
             // 
             // itemsApiBranchLabel
             // 
             itemsApiBranchLabel.AutoSize = true;
-            itemsApiBranchLabel.Location = new Point(591, 12);
+            itemsApiBranchLabel.Location = new Point(576, 12);
             itemsApiBranchLabel.Margin = new Padding(2, 0, 2, 0);
             itemsApiBranchLabel.Name = "itemsApiBranchLabel";
             itemsApiBranchLabel.Size = new Size(38, 20);
-            itemsApiBranchLabel.TabIndex = 1;
+            itemsApiBranchLabel.TabIndex = 3;
             itemsApiBranchLabel.Text = "סניף";
             // 
             // itemsApiItemIdTextBox
@@ -797,7 +876,7 @@
             itemsApiItemIdTextBox.Margin = new Padding(2, 3, 2, 3);
             itemsApiItemIdTextBox.Name = "itemsApiItemIdTextBox";
             itemsApiItemIdTextBox.Size = new Size(321, 27);
-            itemsApiItemIdTextBox.TabIndex = 2;
+            itemsApiItemIdTextBox.TabIndex = 4;
             // 
             // itemsApiItemIdLabel
             // 
@@ -806,7 +885,7 @@
             itemsApiItemIdLabel.Margin = new Padding(2, 0, 2, 0);
             itemsApiItemIdLabel.Name = "itemsApiItemIdLabel";
             itemsApiItemIdLabel.Size = new Size(208, 20);
-            itemsApiItemIdLabel.TabIndex = 3;
+            itemsApiItemIdLabel.TabIndex = 5;
             itemsApiItemIdLabel.Text = "ברקוד פריט (מופרדים בפסיקים)";
             // 
             // itemsApiGetItemButton
@@ -815,7 +894,7 @@
             itemsApiGetItemButton.Margin = new Padding(2, 3, 2, 3);
             itemsApiGetItemButton.Name = "itemsApiGetItemButton";
             itemsApiGetItemButton.Size = new Size(86, 35);
-            itemsApiGetItemButton.TabIndex = 4;
+            itemsApiGetItemButton.TabIndex = 6;
             itemsApiGetItemButton.Text = "משוך פריטים";
             itemsApiGetItemButton.UseVisualStyleBackColor = true;
             // 
@@ -911,6 +990,8 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(itemsApiCompanyNewComboBox);
+            panel1.Controls.Add(itemsApiCompanyNewLabel);
             panel1.Controls.Add(itemsApiBranchNewComboBox);
             panel1.Controls.Add(label1);
             panel1.Controls.Add(itemsApiItemIdNewTextBox);
@@ -923,23 +1004,44 @@
             panel1.Size = new Size(1011, 80);
             panel1.TabIndex = 1;
             // 
+            // itemsApiCompanyNewComboBox
+            // 
+            itemsApiCompanyNewComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            itemsApiCompanyNewComboBox.FormattingEnabled = true;
+            itemsApiCompanyNewComboBox.Location = new Point(663, 8);
+            itemsApiCompanyNewComboBox.Margin = new Padding(2, 3, 2, 3);
+            itemsApiCompanyNewComboBox.Name = "itemsApiCompanyNewComboBox";
+            itemsApiCompanyNewComboBox.Size = new Size(182, 28);
+            itemsApiCompanyNewComboBox.TabIndex = 0;
+            // 
+            // itemsApiCompanyNewLabel
+            // 
+            itemsApiCompanyNewLabel.AutoSize = true;
+            itemsApiCompanyNewLabel.Location = new Point(850, 12);
+            itemsApiCompanyNewLabel.Margin = new Padding(2, 0, 2, 0);
+            itemsApiCompanyNewLabel.Name = "itemsApiCompanyNewLabel";
+            itemsApiCompanyNewLabel.Size = new Size(46, 20);
+            itemsApiCompanyNewLabel.TabIndex = 1;
+            itemsApiCompanyNewLabel.Text = "חברה";
+            // 
             // itemsApiBranchNewComboBox
             // 
+            itemsApiBranchNewComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             itemsApiBranchNewComboBox.FormattingEnabled = true;
-            itemsApiBranchNewComboBox.Location = new Point(400, 8);
+            itemsApiBranchNewComboBox.Location = new Point(320, 8);
             itemsApiBranchNewComboBox.Margin = new Padding(2, 3, 2, 3);
             itemsApiBranchNewComboBox.Name = "itemsApiBranchNewComboBox";
-            itemsApiBranchNewComboBox.Size = new Size(161, 28);
-            itemsApiBranchNewComboBox.TabIndex = 0;
+            itemsApiBranchNewComboBox.Size = new Size(251, 28);
+            itemsApiBranchNewComboBox.TabIndex = 2;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(591, 12);
+            label1.Location = new Point(576, 12);
             label1.Margin = new Padding(2, 0, 2, 0);
             label1.Name = "label1";
             label1.Size = new Size(38, 20);
-            label1.TabIndex = 1;
+            label1.TabIndex = 3;
             label1.Text = "סניף";
             // 
             // itemsApiItemIdNewTextBox
@@ -948,7 +1050,7 @@
             itemsApiItemIdNewTextBox.Margin = new Padding(2, 3, 2, 3);
             itemsApiItemIdNewTextBox.Name = "itemsApiItemIdNewTextBox";
             itemsApiItemIdNewTextBox.Size = new Size(321, 27);
-            itemsApiItemIdNewTextBox.TabIndex = 2;
+            itemsApiItemIdNewTextBox.TabIndex = 4;
             // 
             // label2
             // 
@@ -957,7 +1059,7 @@
             label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
             label2.Size = new Size(208, 20);
-            label2.TabIndex = 3;
+            label2.TabIndex = 5;
             label2.Text = "ברקוד פריט (מופרדים בפסיקים)";
             // 
             // itemsApiGetItemNewButton
@@ -966,7 +1068,7 @@
             itemsApiGetItemNewButton.Margin = new Padding(2, 3, 2, 3);
             itemsApiGetItemNewButton.Name = "itemsApiGetItemNewButton";
             itemsApiGetItemNewButton.Size = new Size(86, 35);
-            itemsApiGetItemNewButton.TabIndex = 4;
+            itemsApiGetItemNewButton.TabIndex = 6;
             itemsApiGetItemNewButton.Text = "משוך פריטים";
             itemsApiGetItemNewButton.UseVisualStyleBackColor = true;
             // 
@@ -987,6 +1089,8 @@
             // 
             // promotionsApiPanel
             // 
+            promotionsApiPanel.Controls.Add(promotionsApiCompanyComboBox);
+            promotionsApiPanel.Controls.Add(promotionsApiCompanyLabel);
             promotionsApiPanel.Controls.Add(promotionsApiBranchComboBox);
             promotionsApiPanel.Controls.Add(promotionsApiBranchLabel);
             promotionsApiPanel.Controls.Add(promotionsApiBarcodeFilterTextBox);
@@ -1000,23 +1104,44 @@
             promotionsApiPanel.Size = new Size(1007, 80);
             promotionsApiPanel.TabIndex = 0;
             // 
+            // promotionsApiCompanyComboBox
+            // 
+            promotionsApiCompanyComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            promotionsApiCompanyComboBox.FormattingEnabled = true;
+            promotionsApiCompanyComboBox.Location = new Point(663, 8);
+            promotionsApiCompanyComboBox.Margin = new Padding(2, 3, 2, 3);
+            promotionsApiCompanyComboBox.Name = "promotionsApiCompanyComboBox";
+            promotionsApiCompanyComboBox.Size = new Size(182, 28);
+            promotionsApiCompanyComboBox.TabIndex = 0;
+            // 
+            // promotionsApiCompanyLabel
+            // 
+            promotionsApiCompanyLabel.AutoSize = true;
+            promotionsApiCompanyLabel.Location = new Point(850, 12);
+            promotionsApiCompanyLabel.Margin = new Padding(2, 0, 2, 0);
+            promotionsApiCompanyLabel.Name = "promotionsApiCompanyLabel";
+            promotionsApiCompanyLabel.Size = new Size(46, 20);
+            promotionsApiCompanyLabel.TabIndex = 1;
+            promotionsApiCompanyLabel.Text = "חברה";
+            // 
             // promotionsApiBranchComboBox
             // 
+            promotionsApiBranchComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             promotionsApiBranchComboBox.FormattingEnabled = true;
-            promotionsApiBranchComboBox.Location = new Point(400, 8);
+            promotionsApiBranchComboBox.Location = new Point(320, 8);
             promotionsApiBranchComboBox.Margin = new Padding(2, 3, 2, 3);
             promotionsApiBranchComboBox.Name = "promotionsApiBranchComboBox";
-            promotionsApiBranchComboBox.Size = new Size(161, 28);
-            promotionsApiBranchComboBox.TabIndex = 0;
+            promotionsApiBranchComboBox.Size = new Size(251, 28);
+            promotionsApiBranchComboBox.TabIndex = 2;
             // 
             // promotionsApiBranchLabel
             // 
             promotionsApiBranchLabel.AutoSize = true;
-            promotionsApiBranchLabel.Location = new Point(591, 12);
+            promotionsApiBranchLabel.Location = new Point(576, 12);
             promotionsApiBranchLabel.Margin = new Padding(2, 0, 2, 0);
             promotionsApiBranchLabel.Name = "promotionsApiBranchLabel";
             promotionsApiBranchLabel.Size = new Size(38, 20);
-            promotionsApiBranchLabel.TabIndex = 1;
+            promotionsApiBranchLabel.TabIndex = 3;
             promotionsApiBranchLabel.Text = "סניף";
             // 
             // promotionsApiBarcodeFilterTextBox
@@ -1025,7 +1150,7 @@
             promotionsApiBarcodeFilterTextBox.Margin = new Padding(2, 3, 2, 3);
             promotionsApiBarcodeFilterTextBox.Name = "promotionsApiBarcodeFilterTextBox";
             promotionsApiBarcodeFilterTextBox.Size = new Size(321, 27);
-            promotionsApiBarcodeFilterTextBox.TabIndex = 2;
+            promotionsApiBarcodeFilterTextBox.TabIndex = 4;
             // 
             // promotionsApiBarcodeFilterLabel
             // 
@@ -1034,7 +1159,7 @@
             promotionsApiBarcodeFilterLabel.Margin = new Padding(2, 0, 2, 0);
             promotionsApiBarcodeFilterLabel.Name = "promotionsApiBarcodeFilterLabel";
             promotionsApiBarcodeFilterLabel.Size = new Size(104, 20);
-            promotionsApiBarcodeFilterLabel.TabIndex = 3;
+            promotionsApiBarcodeFilterLabel.TabIndex = 5;
             promotionsApiBarcodeFilterLabel.Text = "סינון לפי ברקוד";
             // 
             // promotionsApiGetPromotionsButton
@@ -1043,7 +1168,7 @@
             promotionsApiGetPromotionsButton.Margin = new Padding(2, 3, 2, 3);
             promotionsApiGetPromotionsButton.Name = "promotionsApiGetPromotionsButton";
             promotionsApiGetPromotionsButton.Size = new Size(72, 39);
-            promotionsApiGetPromotionsButton.TabIndex = 4;
+            promotionsApiGetPromotionsButton.TabIndex = 6;
             promotionsApiGetPromotionsButton.Text = "משוך מבצעים";
             promotionsApiGetPromotionsButton.UseVisualStyleBackColor = true;
             // 
@@ -1053,7 +1178,7 @@
             promotionsApiApplyFilterButton.Margin = new Padding(2, 3, 2, 3);
             promotionsApiApplyFilterButton.Name = "promotionsApiApplyFilterButton";
             promotionsApiApplyFilterButton.Size = new Size(70, 35);
-            promotionsApiApplyFilterButton.TabIndex = 5;
+            promotionsApiApplyFilterButton.TabIndex = 7;
             promotionsApiApplyFilterButton.Text = "סנן";
             promotionsApiApplyFilterButton.UseVisualStyleBackColor = true;
             // 
@@ -1441,6 +1566,8 @@
         private DataGridView itemsDataGridView;
         private DataGridView promotionsDataGridView;
         private Panel itemSearchPanel;
+        private ComboBox itemSearchCompanyComboBox;
+        private Label itemSearchCompanyLabel;
         private ComboBox itemSearchBranchComboBox;
         private Label itemSearchBranchLabel;
         private TextBox itemSearchBarcodeTextBox;
@@ -1454,6 +1581,8 @@
         private Button removePromotionButton;
         private Button viewItemDetailsButton;
         private Panel promotionSearchPanel;
+        private ComboBox promotionSearchCompanyComboBox;
+        private Label promotionSearchCompanyLabel;
         private ComboBox promotionSearchBranchComboBox;
         private Label promotionSearchBranchLabel;
         private RadioButton promotionSearchKodRadioButton;
@@ -1480,6 +1609,8 @@
         
         // Items API Tab Controls
         private Panel itemsApiPanel;
+        private ComboBox itemsApiCompanyComboBox;
+        private Label itemsApiCompanyLabel;
         private ComboBox itemsApiBranchComboBox;
         private Label itemsApiBranchLabel;
         private TextBox itemsApiItemIdTextBox;
@@ -1491,6 +1622,8 @@
         
         // Promotions API Tab Controls
         private Panel promotionsApiPanel;
+        private ComboBox promotionsApiCompanyComboBox;
+        private Label promotionsApiCompanyLabel;
         private ComboBox promotionsApiBranchComboBox;
         private Label promotionsApiBranchLabel;
         private TextBox promotionsApiBarcodeFilterTextBox;
@@ -1508,6 +1641,8 @@
         private TabPage tabPage1;
         private DataGridView dataGridView1;
         private Panel panel1;
+        private ComboBox itemsApiCompanyNewComboBox;
+        private Label itemsApiCompanyNewLabel;
         private ComboBox itemsApiBranchNewComboBox;
         private Label label1;
         private TextBox itemsApiItemIdNewTextBox;
