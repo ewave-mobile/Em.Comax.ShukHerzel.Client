@@ -1,9 +1,11 @@
 using EM.Comax.ShukHerzel.Api.Dtos;
 using EM.Comax.ShukHerzel.Bl.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EM.Comax.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/branches")]
 public class BranchesController : ControllerBase

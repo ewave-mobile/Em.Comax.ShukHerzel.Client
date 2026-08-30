@@ -40,7 +40,7 @@ function mapHttpError(error: HttpErrorResponse): string {
   }
 
   if (error.status === 401 || error.status === 403) {
-    return 'אין הרשאה לבצע פעולה זו';
+    return serverMessage ?? 'אין הרשאה לבצע פעולה זו';
   }
 
   if (error.status === 404) {

@@ -41,6 +41,8 @@ public partial class ShukHerzelEntities : DbContext
 
     public virtual DbSet<TrailingItem> TrailingItems { get; set; }
 
+    public virtual DbSet<User> Users { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AllItem>(entity =>
@@ -1079,6 +1081,32 @@ public partial class ShukHerzelEntities : DbContext
         {
             entity.Property(e => e.Kod).HasMaxLength(50);
             entity.Property(e => e.Price).HasColumnType("money");
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_User");
+
+            entity.ToTable("User", "Management");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.Tz).HasMaxLength(50);
+            entity.Property(e => e.UserName).HasMaxLength(50);
+            entity.Property(e => e.Password).HasMaxLength(400);
+            entity.Property(e => e.FirstName).HasMaxLength(100);
+            entity.Property(e => e.LastName).HasMaxLength(100);
+            entity.Property(e => e.Phone).HasMaxLength(50);
+            entity.Property(e => e.CellPhone).HasMaxLength(50);
+            entity.Property(e => e.RoleId).HasColumnName("RoleID");
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.TempCode).HasMaxLength(200);
+            entity.Property(e => e.ResetPasswordLastDate).HasColumnType("datetime");
+            entity.Property(e => e.PasswordUpdateDate).HasColumnType("datetime");
+            entity.Property(e => e.Remark).HasMaxLength(1000);
+            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatorId).HasColumnName("CreatorID");
+            entity.Property(e => e.LastUpdate).HasColumnType("datetime");
+            entity.Property(e => e.UpdatorId).HasColumnName("UpdatorID");
         });
 
         OnModelCreatingPartial(modelBuilder);

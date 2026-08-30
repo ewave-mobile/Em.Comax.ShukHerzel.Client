@@ -1,0 +1,65 @@
+<app-page-shell>
+  <app-page-header
+    appHeader
+    [title]="step() === 'credentials' ? 'התחברות' : 'קוד אימות'"
+    [subtitle]="step() === 'credentials' ? 'הזינו שם משתמש וסיסמה' : 'הקוד נשלח ב-SMS לנייד הרשום'"
+    [showBack]="step() === 'otp'"
+    (back)="backToCredentials()" />
+
+  <app-page-status [loading]="loading()" [error]="error()" />
+
+  @if (step() === 'credentials') {
+    <form class="login-form" [formGroup]="credentialsForm" (ngSubmit)="submitCredentials()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>שם משתמש</mat-label>
+        <input matInput formControlName="userName" autocomplete="username" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>סיסמה</mat-label>
+        <input
+          matInput
+          formControlName="password"
+          [type]="hidePassword() ? 'password' : 'text'"
+          autocomplete="current-password" />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="hidePassword.set(!hidePassword())"
+          [attr.aria-label]="hidePassword() ? 'הצג סיסמה' : 'הסתר סיסמה'">
+          <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+        </button>
+      </mat-form-field>
+    </form>
+  } @else {
+    <form class="login-form otp-form" [formGroup]="otpForm" (ngSubmit)="submitOtp()">
+      <p class="otp-hint">הזינו את הקוד בן 6 הספרות</p>
+      <div class="otp-input-wrap">
+        <ngx-otp-input
+          formControlName="code"
+          [length]="6"
+          [status]="otpStatus()"
+          ariaLabel="קוד אימות"
+          [statusMessages]="{ success: 'הקוד אומת', error: 'קוד שגוי' }"
+          (otpComplete)="onOtpComplete($event)" />
+      </div>
+    </form>
+  }
+
+  @if (step() === 'credentials') {
+    <app-footer-action
+      appFooter
+      label="המשך"
+      [loading]="loading()"
+      [disabled]="credentialsForm.invalid"
+      (action)="submitCredentials()" />
+  } @else {
+    <app-footer-action
+      appFooter
+      label="כניסה למערכת"
+      [loading]="loading()"
+      [disabled]="otpForm.invalid"
+      (action)="submitOtp()" />
+  }
+</app-page-shell>

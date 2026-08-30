@@ -1,10 +1,12 @@
 using EM.Comax.ShukHerzel.Api.Dtos;
 using EM.Comax.ShukHerzel.Bl.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EM.Comax.Api.Controllers;
 
 // 13/08/2026 - Y.E
+[Authorize]
 [ApiController]
 [Route("api/branches/{branchId:long}/promotions")]
 public class PromotionsController : ControllerBase

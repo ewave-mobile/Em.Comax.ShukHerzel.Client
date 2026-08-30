@@ -5,6 +5,56 @@
   padding: 16px 16px calc(96px + var(--safe-bottom));
 }
 
+.shell-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.shell-top app-brand {
+  flex: 1;
+  min-width: 0;
+}
+
+.shell-top ::ng-deep .brand {
+  margin-bottom: 0;
+}
+
+.user-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.user-name {
+  max-width: 120px;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  --mdc-outlined-button-label-text-color: var(--brand-blue);
+  --mdc-outlined-button-outline-color: var(--border);
+  height: 36px;
+  padding-inline: 10px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+}
+
+.logout-btn mat-icon {
+  margin-inline-end: 4px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
 .page-footer {
   position: fixed;
   z-index: 10;

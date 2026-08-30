@@ -28,6 +28,8 @@ namespace EM.Comax.ShukHerzl.Infrastructure
             // Register common services, repositories, etc.
             services.Configure<OutputSettings>(configuration.GetSection("OutputSettings"));
             services.Configure<OperativeSettings>(configuration.GetSection("OperativeSettings"));
+            services.Configure<SmsSettings>(configuration.GetSection("SmsSettings"));
+            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.AddDbContext<EM.Comax.ShukHerzel.Models.Models.ShukHerzelEntities>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("ShukHerzelDb"));
@@ -67,8 +69,7 @@ namespace EM.Comax.ShukHerzl.Infrastructure
          
                 services.AddHttpClient<IComaxApiClient, ComaxApiClient>();
                 services.AddHttpClient<IEslApiClient, EslApiClient>();
-           
-
+                services.AddHttpClient<IMaskyooSmsService, MaskyooSmsService>();
 
             services.AddScoped<IBranchRepository, BranchRepository>();
             services.AddScoped<IBranchService, BranchService>();
@@ -89,6 +90,9 @@ namespace EM.Comax.ShukHerzl.Infrastructure
             services.AddScoped<IPriceUpdateRepository, PriceUpdateRepository>();
             services.AddScoped<ITrailingItemRepository, TrailingItemRepository>();
             services.AddScoped<IAllItemsNewRepository, AllItemsNewRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddScoped<IAuthService, AuthService>();
             // Possibly register Quartz only if we're in the service
             if (isService)
             {

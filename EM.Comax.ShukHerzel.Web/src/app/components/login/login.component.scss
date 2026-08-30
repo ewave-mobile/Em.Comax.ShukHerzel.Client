@@ -1,0 +1,87 @@
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.otp-form {
+  align-items: center;
+}
+
+.otp-hint {
+  margin: 0 0 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+}
+
+.otp-input-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+ngx-otp-input {
+  direction: ltr;
+  display: block;
+
+  ::ng-deep .ngx-otp-input-root {
+    display: inline-block;
+  }
+
+  ::ng-deep .ngx-otp-input-form {
+    display: inline-flex;
+    gap: 8px;
+  }
+
+  ::ng-deep .ngx-otp-input-box {
+    box-sizing: border-box;
+    flex: none;
+    width: 48px;
+    min-width: 48px;
+    height: 52px;
+    padding: 0;
+    border: 1.5px solid #b6bcc8;
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  ::ng-deep .ngx-otp-input-box.ngx-otp-input-active {
+    border-color: var(--brand-blue);
+    box-shadow: 0 0 0 3px rgba(43, 96, 228, 0.18);
+  }
+
+  ::ng-deep .ngx-otp-input-box.ngx-otp-input-failed {
+    border-color: var(--danger);
+  }
+
+  ::ng-deep .ngx-otp-input-box.ngx-otp-input-success {
+    border-color: #16a34a;
+  }
+}
+
+@media (max-width: 430px) {
+  ngx-otp-input {
+    ::ng-deep .ngx-otp-input-form {
+      gap: 6px;
+    }
+
+    ::ng-deep .ngx-otp-input-box {
+      width: 44px;
+      min-width: 44px;
+      height: 48px;
+      font-size: 1.35rem;
+    }
+  }
+}

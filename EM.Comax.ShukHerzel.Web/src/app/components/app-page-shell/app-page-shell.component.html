@@ -1,6 +1,24 @@
 <div class="page-shell">
   <header>
-    <app-brand />
+    <div class="shell-top">
+      <app-brand />
+
+      @if (isAuthenticated()) {
+        <div class="user-bar">
+          <span class="user-name" [matTooltip]="userName() ?? ''">{{ userName() }}</span>
+          <button
+            mat-stroked-button
+            type="button"
+            class="logout-btn"
+            (click)="logout()"
+            aria-label="התנתקות">
+            <mat-icon>logout</mat-icon>
+            התנתקות
+          </button>
+        </div>
+      }
+    </div>
+
     <ng-content select="[appHeader]" />
   </header>
 
