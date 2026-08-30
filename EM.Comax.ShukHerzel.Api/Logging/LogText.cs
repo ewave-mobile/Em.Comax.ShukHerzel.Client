@@ -1,4 +1,4 @@
-namespace EM.Comax.ShukHerzel.Api.Logging;
+namespace EM.Comax.Api.Logging;
 
 public static class LogText
 {

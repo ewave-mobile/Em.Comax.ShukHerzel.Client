@@ -23,9 +23,9 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Em.Comax.ShukHerzel.install
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EM.Comax.New.Service", "EM.Comax.New\EM.Comax.New.Service.csproj", "{6F13831F-90C0-40C0-8AAC-16C17324318A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EM.Comax.ShukHerzel.Api", "EM.Comax.ShukHerzel.Api\EM.Comax.ShukHerzel.Api.csproj", "{200A84D0-A417-416B-B988-438BB3AFE326}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EM.Comax.Api", "EM.Comax.ShukHerzel.Api\EM.Comax.Api.csproj", "{200A84D0-A417-416B-B988-438BB3AFE326}"
 EndProject
-Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "EM.Comax.ShukHerzel.Web", "EM.Comax.ShukHerzel.Web\EM.Comax.ShukHerzel.Web.esproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "EM.Comax.ShukHerzel.Web", "EM.Comax.ShukHerzel.Web\EM.Comax.ShukHerzel.Web.esproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

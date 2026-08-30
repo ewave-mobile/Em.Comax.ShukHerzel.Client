@@ -2,7 +2,7 @@ using EM.Comax.ShukHerzel.Models.Models;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc.Controllers;
 
-namespace EM.Comax.ShukHerzel.Api.Logging;
+namespace EM.Comax.Api.Logging;
 
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {

@@ -245,7 +245,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     TrailingItemPromotionPrice = trailingItemPromotionPrice,
                     RemarkForPrint = item.RemarkForPrint ?? string.Empty,
                     ContentPrice = item.ContentPrice?.ToString() ?? string.Empty,
-                    PromoContentPrice = item.PromoContentPrice?.ToString() ?? string.Empty
+                    PromoContentPrice = item.PromoContentPrice?.ToString() ?? string.Empty,
+                    CounterGetInSale = item.CounterGetInSale?.Trim() ?? string.Empty
 
                 }
             };

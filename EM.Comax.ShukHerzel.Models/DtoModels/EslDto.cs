@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EM.Comax.ShukHerzel.Models.DtoModels
@@ -49,6 +50,9 @@ namespace EM.Comax.ShukHerzel.Models.DtoModels
         public string RemarkForPrint { get; set; }
         public string ContentPrice { get; set; }
         public string PromoContentPrice { get; set; }
+
+        [JsonPropertyName("CounterGetInSale")]
+        public string CounterGetInSale { get; set; }
 
     }
 }

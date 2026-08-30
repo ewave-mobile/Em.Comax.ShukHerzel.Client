@@ -263,6 +263,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         item.PromotionMaxQty = null;
                                         item.Rating = null;
                                         item.RemarkForPrint = null;
+                                        item.CounterGetInSale = null;
                                         if (calculateUnitPrice)
                                             ApplyUnitPrice(item);
                                         progress.Report($"Cancelled promotion {selectedPromo.Kod} for ItemKod: {selectedPromo.ItemKod}");
@@ -391,6 +392,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         item.PromotionMaxQty = selectedPromo.MaxQty;
                                         item.Rating = selectedPromo.Rating;
                                         item.RemarkForPrint = selectedPromo.RemarkForPrint;
+                                        item.CounterGetInSale = selectedPromo.CounterGetInSale;
                                         if (calculateUnitPrice)
                                             ApplyUnitPrice(item);
                                     }
@@ -727,6 +729,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         item.PromotionMaxQty = null;
                                         item.Rating = null;
                                         item.RemarkForPrint = null;
+                                        item.CounterGetInSale = null;
                                         if (calculateUnitPrice)
                                             ApplyUnitPrice(item);
                                         progress.Report($"Cancelled promotion {selectedPromo.Kod} for ItemKod: {selectedPromo.ItemKod}");
@@ -855,6 +858,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                         item.PromotionMaxQty = selectedPromo.MaxQty;
                                         item.Rating = selectedPromo.Rating;
                                         item.RemarkForPrint = selectedPromo.RemarkForPrint;
+                                        item.CounterGetInSale = selectedPromo.CounterGetInSale;
                                         if (calculateUnitPrice)
                                             ApplyUnitPrice(item);
                                     }

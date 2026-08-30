@@ -6,7 +6,7 @@ using System;
 using EM.Comax.ShukHerzel.Models.Models;
 
 
-namespace EM.Comax.ShukHerzel.Api.Logging
+namespace EM.Comax.Api.Logging
 {
     public class WebApiCustomMiddleware
     {

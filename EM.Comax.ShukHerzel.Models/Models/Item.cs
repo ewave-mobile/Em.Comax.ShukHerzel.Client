@@ -86,4 +86,6 @@ public partial class Item
     public string PromotionBarcodes { get; set; }
 
     public string RemarkForPrint { get; set; }
+
+    public string CounterGetInSale { get; set; }
 }

@@ -796,6 +796,9 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.ContentPrice).HasColumnType("money");
             entity.Property(e => e.PromoContentPrice).HasColumnType("money");
             entity.Property(e => e.ContentUnit).HasMaxLength(50);
+            entity.Property(e => e.CounterGetInSale)
+                .HasMaxLength(50)
+                .HasColumnName("CounterGet_InSale");
             entity.Property(e => e.CreateDateTime)
                 .HasPrecision(3)
                 .HasDefaultValueSql("(sysdatetime())");

@@ -1,4 +1,4 @@
-using EM.Comax.ShukHerzel.Api.Logging;
+using EM.Comax.Api.Logging;
 using EM.Comax.ShukHerzl.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);

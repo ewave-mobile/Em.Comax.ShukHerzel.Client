@@ -2,7 +2,7 @@ using EM.Comax.ShukHerzel.Api.Dtos;
 using EM.Comax.ShukHerzel.Bl.interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EM.Comax.ShukHerzel.Api.Controllers;
+namespace EM.Comax.Api.Controllers;
 
 // 13/08/2026 - Y.E
 [ApiController]
