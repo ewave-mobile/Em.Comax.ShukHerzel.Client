@@ -45,6 +45,21 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task LogToErrorLogAsync(string? sourceName, string? request, string? message)
+        {
+            var errorLog = new ErrorLog
+            {
+                SourceName = sourceName,
+                Request = request,
+                ExceptionMessage = message ?? string.Empty,
+                InnerException = string.Empty,
+                CreateDate = DateTime.Now
+            };
+
+            _context.ErrorLogs.Add(errorLog);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task LogTraceAsync(string? url, string? request, string? response, string? status)
         {
             var traceLog = new TraceLog

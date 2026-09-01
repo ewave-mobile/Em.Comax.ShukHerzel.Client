@@ -9,18 +9,23 @@ namespace EM.Comax.ShukHerzel.Bl.services;
 
 public class AuthService : IAuthService
 {
+    private const string LogSource = "SMS_OTP_AUTH";
+
     private readonly IUserRepository _userRepository;
     private readonly IMaskyooSmsService _smsService;
     private readonly SmsSettings _smsSettings;
+    private readonly IDatabaseLogger _databaseLogger;
 
     public AuthService(
         IUserRepository userRepository,
         IMaskyooSmsService smsService,
-        IOptions<SmsSettings> smsSettings)
+        IOptions<SmsSettings> smsSettings,
+        IDatabaseLogger databaseLogger)
     {
         _userRepository = userRepository;
         _smsService = smsService;
         _smsSettings = smsSettings.Value;
+        _databaseLogger = databaseLogger;
     }
 
     public async Task<LoginResult> LoginAsync(string userName, string password, CancellationToken cancellationToken = default)
@@ -45,12 +50,21 @@ public class AuthService : IAuthService
         await _userRepository.UpdateTempCodeAsync(user.Id, code, cancellationToken);
 
         var message = BuildOtpMessage(code);
+        var phoneSuffix = user.CellPhone.Length >= 4 ? user.CellPhone[^4..] : "****";
+        var otpOrigin = string.IsNullOrWhiteSpace(_smsSettings.OtpOrigin) ? "(none)" : _smsSettings.OtpOrigin;
+        var request = $"userName={user.UserName}, userId={user.Id}, phone=***{phoneSuffix}, otpOrigin={otpOrigin}";
+
+        await LogInfoAsync(request, "Sending OTP SMS", "Information");
+
         // OTP must go as SMS text — voice dialer prefixes break SSL / are unsuitable for codes.
         var sent = await _smsService.SendAsync(message, user.CellPhone, cancellationToken, smsOnly: true);
         if (!sent)
         {
+            await LogErrorAsync(request, "FAILED: SMS provider returned failure");
             return new LoginResult(false, "שליחת קוד האימות נכשלה");
         }
+
+        await LogInfoAsync(request, "OK: SMS provider returned success", "OK");
 
         return new LoginResult(true);
     }
@@ -95,5 +109,29 @@ public class AuthService : IAuthService
         }
 
         return message;
+    }
+
+    private async Task LogInfoAsync(string request, string response, string status)
+    {
+        try
+        {
+            await _databaseLogger.LogTraceAsync(LogSource, request, response, status);
+        }
+        catch
+        {
+            // Never fail login flow because logging failed.
+        }
+    }
+
+    private async Task LogErrorAsync(string request, string message)
+    {
+        try
+        {
+            await _databaseLogger.LogToErrorLogAsync(LogSource, request, message);
+        }
+        catch
+        {
+            // Never fail login flow because logging failed.
+        }
     }
 }
