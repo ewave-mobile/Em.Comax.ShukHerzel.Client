@@ -2,7 +2,7 @@ using EM.Comax.Api.Dtos;
 using EM.Comax.ShukHerzel.Bl.interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
+using EM.Comax.ShukHerzl.Common;
 namespace EM.Comax.Api.Controllers;
 
 [ApiController]
@@ -22,7 +22,12 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        var result = await _authService.LoginAsync(request.UserName, request.Password, cancellationToken);
+        string encryptedPassword=null;
+        if (request.Password != null) {
+
+            encryptedPassword= EncryptManagement.PasswordEncrypt(request.Password);
+        }
+        var result = await _authService.LoginAsync(request.UserName, encryptedPassword, cancellationToken);
         if (!result.Success)
         {
             return Unauthorized(new { message = result.ErrorMessage });

@@ -1,4 +1,4 @@
-namespace EM.Comax.ShukHerzel.Api.Dtos;
+namespace EM.Comax.Api.Dtos;
 
 public class ApproveRequest
 {

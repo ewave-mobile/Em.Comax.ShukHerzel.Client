@@ -2093,7 +2093,10 @@ namespace Em.Comax.ShukHerzel.Client
 
         #endregion
 
-
-        
+        private void btnGenerateUserPassword_Click(object sender, EventArgs e)
+        {
+            using var dlg = new GenerateUserPasswordForm();
+            dlg.ShowDialog(this);
+        }
     }
 }

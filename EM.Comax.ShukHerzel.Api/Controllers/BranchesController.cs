@@ -1,4 +1,4 @@
-using EM.Comax.ShukHerzel.Api.Dtos;
+using EM.Comax.Api.Dtos;
 using EM.Comax.ShukHerzel.Bl.interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
