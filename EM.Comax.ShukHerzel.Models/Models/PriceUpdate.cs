@@ -54,4 +54,7 @@ public partial class PriceUpdate
 
     // 02/08/2026 - Y.E
     public DateTime? OperTransferApprovedDate { get; set; }
+
+    // 02/09/2026 - Y.E - Portal user who approved Oper transfer
+    public int? OperTransferApprovedByUserId { get; set; }
 }

@@ -1,4 +1,5 @@
-using EM.Comax.ShukHerzel.Api.Dtos;
+using System.Security.Claims;
+using EM.Comax.Api.Dtos;
 using EM.Comax.ShukHerzel.Bl.interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -49,7 +50,13 @@ public class PriceUpdatesController : ControllerBase
             return BadRequest("No ids provided.");
         }
 
-        await _priceUpdateService.ApproveOperTransferAsync(request.Ids);
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        await _priceUpdateService.ApproveOperTransferAsync(request.Ids, userId);
         return Ok(new { approved = request.Ids.Count });
     }
 }

@@ -577,9 +577,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
         }
 
         // 13/08/2026 - Y.E
-        public async Task ApproveOperTransferAsync(IEnumerable<long> ids)
+        public async Task ApproveOperTransferAsync(IEnumerable<long> ids, int? approvedByUserId)
         {
-            await _promotionsRepository.ApproveOperTransferAsync(ids);
+            await _promotionsRepository.ApproveOperTransferAsync(ids, approvedByUserId);
         }
 
     }

@@ -133,9 +133,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
             return await _priceUpdateRepository.GetPendingApprovalByBranchAsync(branchId, createdDate);
         }
 
-        public async Task ApproveOperTransferAsync(IEnumerable<long> ids)
+        public async Task ApproveOperTransferAsync(IEnumerable<long> ids, int? approvedByUserId)
         {
-            await _priceUpdateRepository.ApproveOperTransferAsync(ids);
+            await _priceUpdateRepository.ApproveOperTransferAsync(ids, approvedByUserId);
         }
 
         /// <summary>

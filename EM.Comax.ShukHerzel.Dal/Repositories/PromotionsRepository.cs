@@ -276,7 +276,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
         }
 
         // 13/08/2026 - Y.E
-        public async Task ApproveOperTransferAsync(IEnumerable<long> ids)
+        public async Task ApproveOperTransferAsync(IEnumerable<long> ids, int? approvedByUserId)
         {
             var idList = ids?.Distinct().ToList() ?? new List<long>();
             if (!idList.Any())
@@ -290,6 +290,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             {
                 x.IsOperTransferApproved = true;
                 x.OperTransferApprovedDate = approvedAt;
+                x.OperTransferApprovedByUserId = approvedByUserId;
             });
             await _context.BulkUpdateAsync(items);
         }

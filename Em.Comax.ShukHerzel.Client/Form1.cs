@@ -713,7 +713,7 @@ namespace Em.Comax.ShukHerzel.Client
                 ShowLoadingSpinner();
                 priceApprovalApproveButton.Enabled = false;
 
-                await _priceUpdateService.ApproveOperTransferAsync(selectedIds);
+                await _priceUpdateService.ApproveOperTransferAsync(selectedIds, approvedByUserId: null);
                 MessageBox.Show($"אושרו {selectedIds.Count} עדכוני מחירים.", "הצלחה", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 await LoadPendingPriceApprovalsAsync();
             }

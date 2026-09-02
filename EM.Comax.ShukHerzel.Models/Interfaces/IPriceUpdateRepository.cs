@@ -25,8 +25,8 @@ namespace EM.Comax.ShukHerzel.Models.Interfaces
         Task<List<PriceUpdate>> GetPendingApprovalByBranchAsync(long branchId, DateTime? createdDate = null);
 
         /// <summary>
-        /// Sets IsOperTransferApproved and OperTransferApprovedDate for the given IDs.
+        /// Sets IsOperTransferApproved, OperTransferApprovedDate and OperTransferApprovedByUserId for the given IDs.
         /// </summary>
-        Task ApproveOperTransferAsync(IEnumerable<long> ids);
+        Task ApproveOperTransferAsync(IEnumerable<long> ids, int? approvedByUserId);
     }
 }
