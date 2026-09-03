@@ -8,6 +8,7 @@ const TOKEN_KEY = 'shukherzel_access_token';
 
 export interface LoginResponse {
   requiresOtp: boolean;
+  message?: string;
 }
 
 export interface VerifyResponse {

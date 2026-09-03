@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
         var result = await _authService.LoginAsync(request.UserName, encryptedPassword, cancellationToken);
         if (!result.Success)
         {
-            return Unauthorized(new { message = result.ErrorMessage });
+            return Ok(new { requiresOtp = false, message = result.ErrorMessage });
         }
 
         return Ok(new { requiresOtp = true });

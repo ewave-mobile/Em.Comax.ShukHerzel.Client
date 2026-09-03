@@ -84,8 +84,13 @@ export class LoginComponent implements OnDestroy {
     const { userName, password } = this.credentialsForm.getRawValue();
     this.loading.set(true);
     this.auth.login(userName, password).subscribe({
-      next: () => {
+      next: res => {
         this.loading.set(false);
+        if (!res.requiresOtp) {
+          this.error.set(res.message?.trim() || 'שם משתמש או סיסמה שגויים');
+          return;
+        }
+
         this.otpForm.reset({ code: '' });
         this.otpStatus.set('idle');
         this.step.set('otp');
