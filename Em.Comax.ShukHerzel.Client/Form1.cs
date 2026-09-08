@@ -9,6 +9,7 @@ using EM.Comax.ShukHerzl.Common;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Options;
 using System.ComponentModel;
+using System.Globalization;
 using System.Text;
 
 namespace Em.Comax.ShukHerzel.Client
@@ -29,10 +30,11 @@ namespace Em.Comax.ShukHerzel.Client
         private readonly IComaxApiClient _comaxApiClient;
         private readonly IDatabaseLogger _databaseLogger;
         private readonly OutputSettings _outputSettings;
+        private readonly ClientSettings _clientSettings;
         private System.Windows.Forms.Timer _spinnerTimer;
         private int _spinnerAngle = 0;
         private List<PriceUpdateApprovalRow> _priceApprovalAllRows = new();
-        //private const long SHUK_HERZEL_COMPANY_ID = 1;
+        private List<PromotionApprovalRow> _promotionApprovalAllRows = new();
 
         public Form1(
             IBranchService branchService,
@@ -46,7 +48,8 @@ namespace Em.Comax.ShukHerzel.Client
             IPromotionsRepository promotionsRepository,
             IComaxApiClient comaxApiClient,
             IDatabaseLogger databaseLogger,
-            IOptions<OutputSettings> outputSettings)
+            IOptions<OutputSettings> outputSettings,
+            IOptions<ClientSettings> clientSettings)
         {
             _branchService = branchService;
             _companyService = companyService;
@@ -59,6 +62,7 @@ namespace Em.Comax.ShukHerzel.Client
             _comaxApiClient = comaxApiClient;
             _databaseLogger = databaseLogger;
             _outputSettings = outputSettings.Value;
+            _clientSettings = clientSettings.Value;
             InitializeComponent();
             _ = initForm();
             _priceUpdateService = priceUpdateService;
@@ -92,10 +96,12 @@ namespace Em.Comax.ShukHerzel.Client
             companyList.DisplayMember = "Description";
             companyList.ValueMember = "Id";
             companyList.DataSource = _companies;
+            SelectDefaultCompany(companyList);
             companyList.SelectedIndexChanged += CompanyList_SelectedIndexChanged;
 
             await LoadBranchesForSelectedCompanyAsync();
             await BindPriceApprovalCompaniesAsync();
+            await BindPromotionApprovalCompaniesAsync();
             await BindDataManagementCompaniesAsync();
 
             // Set up event handlers for the new UI controls
@@ -132,6 +138,13 @@ namespace Em.Comax.ShukHerzel.Client
             priceApprovalBarcodeTextBox.TextChanged += PriceApprovalBarcodeTextBox_TextChanged;
             SetupPriceApprovalGridColumns();
             UpdatePriceApprovalCountLabel(0);
+
+            promotionApprovalLoadButton.Click += PromotionApprovalLoadButton_Click;
+            promotionApprovalBroadcastButton.Click += PromotionApprovalBroadcastButton_Click;
+            promotionApprovalSelectAllCheckBox.CheckedChanged += PromotionApprovalSelectAllCheckBox_CheckedChanged;
+            promotionApprovalBarcodeTextBox.TextChanged += PromotionApprovalBarcodeTextBox_TextChanged;
+            SetupPromotionApprovalGridColumns();
+            UpdatePromotionApprovalCountLabel(0);
 
             // Set up DataGridView columns for items
             itemsDataGridView.AutoGenerateColumns = false;
@@ -380,6 +393,20 @@ namespace Em.Comax.ShukHerzel.Client
             return true;
         }
 
+        private void SelectDefaultCompany(ComboBox companyCombo)
+        {
+            var defaultCompanyId = _clientSettings.DefaultCompanyId;
+            if (defaultCompanyId <= 0 || companyCombo.DataSource == null)
+            {
+                return;
+            }
+
+            if (companyCombo.Items.Cast<object>().OfType<Company>().Any(c => c.Id == defaultCompanyId))
+            {
+                companyCombo.SelectedValue = defaultCompanyId;
+            }
+        }
+
         private async void CompanyList_SelectedIndexChanged(object? sender, EventArgs e)
         {
             await LoadBranchesForSelectedCompanyAsync();
@@ -426,6 +453,7 @@ namespace Em.Comax.ShukHerzel.Client
                 companyCombo.DisplayMember = "Description";
                 companyCombo.ValueMember = "Id";
                 companyCombo.DataSource = new List<Company>(_companies ?? new List<Company>());
+                SelectDefaultCompany(companyCombo);
                 companyCombo.SelectedIndexChanged += DataManagementCompanyComboBox_SelectedIndexChanged;
             }
 
@@ -492,6 +520,7 @@ namespace Em.Comax.ShukHerzel.Client
             priceApprovalCompanyComboBox.DisplayMember = "Description";
             priceApprovalCompanyComboBox.ValueMember = "Id";
             priceApprovalCompanyComboBox.DataSource = approvalCompanies;
+            SelectDefaultCompany(priceApprovalCompanyComboBox);
             priceApprovalCompanyComboBox.SelectedIndexChanged += PriceApprovalCompanyComboBox_SelectedIndexChanged;
 
             await LoadPriceApprovalBranchesForSelectedCompanyAsync();
@@ -725,6 +754,296 @@ namespace Em.Comax.ShukHerzel.Client
             {
                 HideLoadingSpinner();
                 priceApprovalApproveButton.Enabled = true;
+            }
+        }
+
+        private async Task BindPromotionApprovalCompaniesAsync()
+        {
+            promotionApprovalCompanyComboBox.SelectedIndexChanged -= PromotionApprovalCompanyComboBox_SelectedIndexChanged;
+            var approvalCompanies = (_companies ?? new List<Company>())
+                .Where(c => c.IsOperTransferApprovalRequired)
+                .ToList();
+            promotionApprovalCompanyComboBox.DataSource = null;
+            promotionApprovalCompanyComboBox.DisplayMember = "Description";
+            promotionApprovalCompanyComboBox.ValueMember = "Id";
+            promotionApprovalCompanyComboBox.DataSource = approvalCompanies;
+            SelectDefaultCompany(promotionApprovalCompanyComboBox);
+            promotionApprovalCompanyComboBox.SelectedIndexChanged += PromotionApprovalCompanyComboBox_SelectedIndexChanged;
+
+            await LoadPromotionApprovalBranchesForSelectedCompanyAsync();
+        }
+
+        private async void PromotionApprovalCompanyComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            await LoadPromotionApprovalBranchesForSelectedCompanyAsync();
+        }
+
+        private async Task LoadPromotionApprovalBranchesForSelectedCompanyAsync()
+        {
+            promotionApprovalBranchComboBox.SelectedIndexChanged -= PromotionApprovalBranchComboBox_SelectedIndexChanged;
+            _promotionApprovalAllRows = new List<PromotionApprovalRow>();
+            promotionApprovalDataGridView.DataSource = null;
+            promotionApprovalSelectAllCheckBox.Checked = false;
+            promotionApprovalBarcodeTextBox.Text = string.Empty;
+            UpdatePromotionApprovalCountLabel(0);
+
+            if (promotionApprovalCompanyComboBox.SelectedItem is not Company selectedCompany)
+            {
+                promotionApprovalBranchComboBox.DataSource = null;
+                promotionApprovalBranchComboBox.SelectedIndexChanged += PromotionApprovalBranchComboBox_SelectedIndexChanged;
+                return;
+            }
+
+            try
+            {
+                var branches = await _branchService.GetAllBranchesByCompany(selectedCompany.Id);
+                promotionApprovalBranchComboBox.DataSource = null;
+                promotionApprovalBranchComboBox.DisplayMember = "BranchName";
+                promotionApprovalBranchComboBox.ValueMember = "Id";
+                promotionApprovalBranchComboBox.DataSource = new List<Branch>(branches);
+            }
+            catch (Exception ex)
+            {
+                promotionApprovalBranchComboBox.DataSource = null;
+                MessageBox.Show($"שגיאה בטעינת סניפים: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                promotionApprovalBranchComboBox.SelectedIndexChanged += PromotionApprovalBranchComboBox_SelectedIndexChanged;
+            }
+
+            if (promotionApprovalBranchComboBox.SelectedItem is Branch)
+            {
+                await LoadPendingPromotionApprovalsAsync();
+            }
+        }
+
+        private void SetupPromotionApprovalGridColumns()
+        {
+            promotionApprovalDataGridView.AutoGenerateColumns = false;
+            promotionApprovalDataGridView.Columns.Clear();
+            promotionApprovalDataGridView.Columns.Add(new DataGridViewCheckBoxColumn
+            {
+                DataPropertyName = nameof(PromotionApprovalRow.IsSelected),
+                HeaderText = "",
+                Width = 5,
+                ReadOnly = false
+            });
+            promotionApprovalDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(PromotionApprovalRow.CreatedHourDisplay),
+                HeaderText = "תאריך",
+                Width = 25,
+
+                ReadOnly = true
+            });
+            promotionApprovalDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(PromotionApprovalRow.Kod),
+                HeaderText = "קוד תגמול",
+                Width = 25,
+
+                ReadOnly = true
+            });
+            promotionApprovalDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(PromotionApprovalRow.ItemKod),
+                HeaderText = "ברקוד",
+                Width = 50,
+
+                ReadOnly = true
+            });
+            promotionApprovalDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(PromotionApprovalRow.Nm),
+                HeaderText = "תיאור",
+                Width = 150,
+
+                ReadOnly = true
+            });
+            promotionApprovalDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(PromotionApprovalRow.DateRangeDisplay),
+                HeaderText = "טווח תאריכים",
+                Width = 100,
+
+                ReadOnly = true
+            });
+            promotionApprovalDataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = nameof(PromotionApprovalRow.Total),
+                HeaderText = "מחיר",
+                Width = 45,
+
+                ReadOnly = true
+            });
+        }
+
+        private async void PromotionApprovalBranchComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (promotionApprovalBranchComboBox.SelectedItem is Branch)
+            {
+                await LoadPendingPromotionApprovalsAsync();
+            }
+        }
+
+        private async void PromotionApprovalLoadButton_Click(object? sender, EventArgs e)
+        {
+            await LoadPendingPromotionApprovalsAsync();
+        }
+
+        private async Task LoadPendingPromotionApprovalsAsync()
+        {
+            if (promotionApprovalBranchComboBox.SelectedItem is not Branch selected)
+            {
+                MessageBox.Show("יש לבחור סניף.", "צפייה בתגמולים", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                ShowLoadingSpinner();
+                promotionApprovalLoadButton.Enabled = false;
+
+                var pending = await _promotionsService.GetPendingApprovalByBranchAsync(selected.Id);
+                _promotionApprovalAllRows = pending.Select(p => new PromotionApprovalRow
+                {
+                    IsSelected = false,
+                    Id = p.Id,
+                    CreatedHourDisplay = new DateTime(p.CreatedDateTime.Year, p.CreatedDateTime.Month, p.CreatedDateTime.Day, p.CreatedDateTime.Hour, 0, 0)
+                        .ToString("dd/MM/yyyy HH:00"),
+                    Kod = p.Kod ?? string.Empty,
+                    ItemKod = p.ItemKod ?? string.Empty,
+                    Nm = p.Nm ?? string.Empty,
+                    DateRangeDisplay = FormatPromotionDateRange(p.FromDate, p.ToDate),
+                    Total = p.Total ?? string.Empty
+                }).ToList();
+
+                promotionApprovalSelectAllCheckBox.Checked = false;
+                ApplyPromotionApprovalBarcodeFilter();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"שגיאה בטעינת תגמולים לשידור: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                HideLoadingSpinner();
+                promotionApprovalLoadButton.Enabled = true;
+            }
+        }
+
+        private static string FormatPromotionDateRange(string? fromDate, string? toDate)
+        {
+            return $"{FormatPromotionDateOnly(fromDate)} – {FormatPromotionDateOnly(toDate)}";
+        }
+
+        private static string FormatPromotionDateOnly(string? raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return "—";
+            }
+
+            var value = raw.Trim();
+            if (DateTime.TryParseExact(
+                    value,
+                    new[] { "dd/MM/yyyy HH:mm:ss", "dd/MM/yyyy", "d/M/yyyy HH:mm:ss", "d/M/yyyy" },
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var parsed))
+            {
+                return parsed.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))
+            {
+                return parsed.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+            }
+
+            var spaceIndex = value.IndexOf(' ');
+            return spaceIndex > 0 ? value[..spaceIndex] : value;
+        }
+
+        private void PromotionApprovalBarcodeTextBox_TextChanged(object? sender, EventArgs e)
+        {
+            ApplyPromotionApprovalBarcodeFilter();
+        }
+
+        private void ApplyPromotionApprovalBarcodeFilter()
+        {
+            var barcodes = ParsePriceApprovalBarcodes(promotionApprovalBarcodeTextBox.Text);
+            IEnumerable<PromotionApprovalRow> filtered = _promotionApprovalAllRows;
+            if (barcodes.Count > 0)
+            {
+                var barcodeSet = new HashSet<string>(barcodes, StringComparer.Ordinal);
+                filtered = _promotionApprovalAllRows.Where(r => barcodeSet.Contains((r.ItemKod ?? string.Empty).Trim()));
+            }
+
+            var rows = filtered.ToList();
+            promotionApprovalSelectAllCheckBox.CheckedChanged -= PromotionApprovalSelectAllCheckBox_CheckedChanged;
+            promotionApprovalSelectAllCheckBox.Checked = rows.Count > 0 && rows.All(r => r.IsSelected);
+            promotionApprovalSelectAllCheckBox.CheckedChanged += PromotionApprovalSelectAllCheckBox_CheckedChanged;
+
+            promotionApprovalDataGridView.DataSource = new BindingList<PromotionApprovalRow>(rows);
+            UpdatePromotionApprovalCountLabel(rows.Count);
+        }
+
+        private void UpdatePromotionApprovalCountLabel(int count)
+        {
+            promotionApprovalCountLabel.Text = $"{count} תגמולים שנמצאו";
+        }
+
+        private void PromotionApprovalSelectAllCheckBox_CheckedChanged(object? sender, EventArgs e)
+        {
+            if (promotionApprovalDataGridView.DataSource is not BindingList<PromotionApprovalRow> rows)
+            {
+                return;
+            }
+
+            promotionApprovalDataGridView.EndEdit();
+            var selectAll = promotionApprovalSelectAllCheckBox.Checked;
+            foreach (var row in rows)
+            {
+                row.IsSelected = selectAll;
+            }
+
+            promotionApprovalDataGridView.Refresh();
+        }
+
+        private async void PromotionApprovalBroadcastButton_Click(object? sender, EventArgs e)
+        {
+            if (promotionApprovalDataGridView.DataSource is not BindingList<PromotionApprovalRow> rows)
+            {
+                return;
+            }
+
+            promotionApprovalDataGridView.EndEdit();
+
+            var selectedIds = rows.Where(r => r.IsSelected).Select(r => r.Id).ToList();
+            if (selectedIds.Count == 0)
+            {
+                MessageBox.Show("יש לבחור לפחות תגמול אחד לשידור.", "צפייה בתגמולים", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                ShowLoadingSpinner();
+                promotionApprovalBroadcastButton.Enabled = false;
+
+                await _promotionsService.ApproveOperTransferAsync(selectedIds, approvedByUserId: null);
+                MessageBox.Show($"שודרו {selectedIds.Count} תגמולים.", "הצלחה", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await LoadPendingPromotionApprovalsAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"שגיאה בשידור תגמולים: {ex.Message}", "שגיאה", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                HideLoadingSpinner();
+                promotionApprovalBroadcastButton.Enabled = true;
             }
         }
 

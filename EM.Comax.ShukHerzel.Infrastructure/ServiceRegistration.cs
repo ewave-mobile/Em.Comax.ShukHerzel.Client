@@ -28,6 +28,7 @@ namespace EM.Comax.ShukHerzl.Infrastructure
             // Register common services, repositories, etc.
             services.Configure<OutputSettings>(configuration.GetSection("OutputSettings"));
             services.Configure<OperativeSettings>(configuration.GetSection("OperativeSettings"));
+            services.Configure<ClientSettings>(configuration.GetSection("ClientSettings"));
             services.Configure<SmsSettings>(configuration.GetSection("SmsSettings"));
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.AddDbContext<EM.Comax.ShukHerzel.Models.Models.ShukHerzelEntities>(options =>
