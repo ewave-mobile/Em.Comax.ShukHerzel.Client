@@ -508,9 +508,10 @@ namespace EM.Comax.ShukHerzel.Integration.services
                 var config = await _configService.getCompanyConfig(branch.CompanyId ?? Constants.SHUK_HERZEL_COMPANY_ID);
                 // e.g. config.LoginId, config.LoginPassword, etc.
 
+                var justActiveParam = config.PromotionJustActive == true ? "'JustActive':true," : string.Empty;
                 var body = new
                 {
-                    Params = $"{{'LastUpdatedDate':'{lastUpdateDate:dd/MM/yyyy HH:mm:ss}','JustActive':{config.PromotionJustActive?.ToString().ToLower() ?? "false"}, 'StoreList':'{branch.PromotionStoreListId ?? 1}'}}",
+                    Params = $"{{'LastUpdatedDate':'{lastUpdateDate:dd/MM/yyyy HH:mm:ss}',{justActiveParam} 'StoreList':'{branch.PromotionStoreListId ?? 1}'}}",
                     LoginID = config.LoginId,
                     LoginPassword = config.LoginPassword
                 };
