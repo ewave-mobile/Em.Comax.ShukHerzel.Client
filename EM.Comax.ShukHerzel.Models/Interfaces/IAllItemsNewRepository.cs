@@ -1,4 +1,5 @@
-﻿using EM.Comax.ShukHerzel.Models.Models;
+﻿using EM.Comax.ShukHerzel.Models.CustomModels;
+using EM.Comax.ShukHerzel.Models.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,5 +23,9 @@ namespace EM.Comax.ShukHerzel.Models.Interfaces
         Task DeleteTransferredItemsOlderThanAsync(int days);
         Task MarkAsBad(IEnumerable<long> ids);
 
+        Task MarkCatalogPricePendingAsync(IEnumerable<long> ids);
+        Task<List<PendingCatalogPriceRow>> GetCatalogPricePendingByBranchAsync(long branchId, DateTime? createdDate = null);
+        Task ApproveCatalogPriceAsync(IEnumerable<long> ids, int? approvedByUserId);
+        Task<List<(string Barcode, string XmlId, long BranchId)>> GetPendingCatalogKeysAsync();
     }
 }

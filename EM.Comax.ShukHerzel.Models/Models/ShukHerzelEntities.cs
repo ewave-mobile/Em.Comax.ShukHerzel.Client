@@ -667,6 +667,8 @@ public partial class ShukHerzelEntities : DbContext
             entity.Property(e => e.XmlId)
                 .HasMaxLength(50)
                 .HasColumnName("Xml_ID");
+            // 12/10/2026 - Y.E
+            entity.Property(e => e.OperTransferApprovedDate).HasPrecision(3);
         });
 
         modelBuilder.Entity<BadItemLog>(entity =>
@@ -716,6 +718,8 @@ public partial class ShukHerzelEntities : DbContext
                 .IsUnicode(false);
             // 02/08/2026 - Y.E
             entity.Property(e => e.IsOperTransferApprovalRequired).HasDefaultValue(false);
+            // 12/10/2026 - Y.E
+            entity.Property(e => e.IsCatalogPriceApprovalRequired).HasDefaultValue(false);
         });
 
         modelBuilder.Entity<Configuration>(entity =>

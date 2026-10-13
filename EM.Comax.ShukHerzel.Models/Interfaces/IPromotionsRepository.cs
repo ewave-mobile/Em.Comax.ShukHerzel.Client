@@ -21,5 +21,6 @@ namespace EM.Comax.ShukHerzel.Models.Interfaces
         // 13/08/2026 - Y.E
         Task<List<Promotion>> GetPendingApprovalByBranchAsync(long branchId, DateTime? createdDate = null);
         Task ApproveOperTransferAsync(IEnumerable<long> ids, int? approvedByUserId);
+        Task<List<Promotion>> GetByIdsAsync(IEnumerable<long> ids);
     }
 }

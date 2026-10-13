@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { BranchStoreService } from '../../services/branch-store.service';
 import { PriceApprovalService } from '../../services/price-approval.service';
 import { PromotionApprovalService } from '../../services/promotion-approval.service';
+import { CatalogPriceApprovalService } from '../../services/catalog-price-approval.service';
 import { AppPageShellComponent } from '../app-page-shell/app-page-shell.component';
 import { AppPageHeaderComponent } from '../app-page-header/app-page-header.component';
 import { PageStatusComponent } from '../page-status/page-status.component';
@@ -31,12 +32,16 @@ export class BranchActionsComponent implements OnInit {
   private readonly store = inject(BranchStoreService);
   private readonly priceApi = inject(PriceApprovalService);
   private readonly promotionApi = inject(PromotionApprovalService);
+  private readonly catalogApi = inject(CatalogPriceApprovalService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
   readonly branchId = signal<number | null>(null);
   readonly pendingItemsCount = signal(0);
   readonly pendingPromotionsCount = signal(0);
+  readonly pendingCatalogCount = signal(0);
+  readonly showOperApproval = computed(() => this.branch()?.isOperTransferApprovalRequired === true);
+  readonly showCatalogPrices = computed(() => this.branch()?.isCatalogPriceApprovalRequired === true);
   readonly error = signal<string | null>(null);
   readonly branch = computed(() => this.store.byId(this.branchId()));
 
@@ -62,20 +67,32 @@ export class BranchActionsComponent implements OnInit {
 
   private loadPendingCounts(branchId: number): void {
     const date = todayKey();
-    this.priceApi.getPending(branchId, date).subscribe({
-      next: items => this.pendingItemsCount.set(items.length),
-      error: err => {
-        this.pendingItemsCount.set(0);
-        this.error.set(getApiErrorMessage(err));
-      }
-    });
-    this.promotionApi.getPending(branchId, date).subscribe({
-      next: items => this.pendingPromotionsCount.set(items.length),
-      error: err => {
-        this.pendingPromotionsCount.set(0);
-        this.error.set(getApiErrorMessage(err));
-      }
-    });
+    const branch = this.store.byId(branchId);
+    if (branch?.isOperTransferApprovalRequired) {
+      this.priceApi.getPending(branchId, date).subscribe({
+        next: items => this.pendingItemsCount.set(items.length),
+        error: err => {
+          this.pendingItemsCount.set(0);
+          this.error.set(getApiErrorMessage(err));
+        }
+      });
+      this.promotionApi.getPending(branchId, date).subscribe({
+        next: items => this.pendingPromotionsCount.set(items.length),
+        error: err => {
+          this.pendingPromotionsCount.set(0);
+          this.error.set(getApiErrorMessage(err));
+        }
+      });
+    }
+    if (branch?.isCatalogPriceApprovalRequired) {
+      this.catalogApi.getPending(branchId).subscribe({
+        next: items => this.pendingCatalogCount.set(items.length),
+        error: err => {
+          this.pendingCatalogCount.set(0);
+          this.error.set(getApiErrorMessage(err));
+        }
+      });
+    }
   }
 
   openPriceUpdates(): void {
@@ -84,6 +101,10 @@ export class BranchActionsComponent implements OnInit {
 
   openPromotions(): void {
     this.router.navigate(['/branch', this.branchId(), 'promotions']);
+  }
+
+  openCatalogPrices(): void {
+    this.router.navigate(['/branch', this.branchId(), 'catalog-prices']);
   }
 
   changeBranch(): void {

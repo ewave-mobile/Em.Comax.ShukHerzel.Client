@@ -1,0 +1,17 @@
+:host {
+  display: block;
+}
+
+.price-pair {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.price-old {
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-decoration: line-through;
+  white-space: nowrap;
+}

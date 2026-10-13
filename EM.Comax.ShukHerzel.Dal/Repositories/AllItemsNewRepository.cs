@@ -1,4 +1,5 @@
 ﻿using EFCore.BulkExtensions;
+using EM.Comax.ShukHerzel.Models.CustomModels;
 using EM.Comax.ShukHerzel.Models.Interfaces;
 using EM.Comax.ShukHerzel.Models.Models;
 using EM.Comax.ShukHerzl.Common;
@@ -115,8 +116,9 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                     // Items that ARE transferred AND their transfer date is old
                     // OR items (regardless of transfer status) whose creation date is old
                     var idsToDelete = await _context.AllItemComax
-                        .Where(item => (item.IsTransferredToOper == true && item.TransferredDateTime < cutoffDate)
+                        .Where(item => ((item.IsTransferredToOper == true && item.TransferredDateTime < cutoffDate)
                                     || item.CreatedDateTime < cutoffDate)
+                                    && !(item.IsCatalogPriceApprovalPending == true && item.IsTransferredToOper == false))
                         .Select(item => item.Id) // Select only the IDs
                         .Take(batchSize)         // Take only a batch
                         .ToListAsync();          // Materialize the batch of IDs
@@ -206,6 +208,120 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                     throw; // For this example, we'll re-throw
                 }
             }
+        }
+
+        public async Task MarkCatalogPricePendingAsync(IEnumerable<long> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return;
+            }
+
+            var batchSize = Constants.OPERATIVE_BATCH_SIZE;
+            var idList = ids.Distinct().ToList();
+
+            for (int i = 0; i < idList.Count; i += batchSize)
+            {
+                var batchIds = idList.Skip(i).Take(batchSize).ToList();
+                var itemsToUpdate = batchIds.Select(id => new AllItemComax
+                {
+                    Id = id,
+                    IsCatalogPriceApprovalPending = true
+                }).ToList();
+
+                var bulkConfig = new BulkConfig
+                {
+                    PreserveInsertOrder = true,
+                    BatchSize = batchSize,
+                    NotifyAfter = 1000,
+                    UpdateByProperties = new List<string> { "Id" },
+                    PropertiesToInclude = new List<string> { "IsCatalogPriceApprovalPending" }
+                };
+
+                try
+                {
+                    await _context.BulkUpdateAsync(itemsToUpdate, bulkConfig);
+                }
+                catch (Exception ex)
+                {
+                    await _databaseLogger.LogErrorAsync("OPERATIVE_SERVICE", "MarkCatalogPricePendingAsync - Batch Update", ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<List<PendingCatalogPriceRow>> GetCatalogPricePendingByBranchAsync(long branchId, DateTime? createdDate = null)
+        {
+            var query = _context.AllItemComax.Where(x =>
+                x.BranchId == branchId
+                && x.IsCatalogPriceApprovalPending == true
+                && x.IsTransferredToOper == false
+                && x.IsBad == false
+                && x.IsOperTransferApproved != true);
+
+            if (createdDate.HasValue)
+            {
+                var dayStart = createdDate.Value.Date;
+                var dayEnd = dayStart.AddDays(1);
+                query = query.Where(x => x.CreatedDateTime >= dayStart && x.CreatedDateTime < dayEnd);
+            }
+
+            var pending = await query.OrderByDescending(x => x.CreatedDateTime).ToListAsync();
+            if (!pending.Any())
+            {
+                return new List<PendingCatalogPriceRow>();
+            }
+
+            var barcodes = pending.Select(p => p.Barcode).Where(b => b != null).Distinct().ToList();
+            var items = await _context.Items
+                .Where(i => i.BranchId == branchId && barcodes.Contains(i.Barcode))
+                .Select(i => new { i.Barcode, i.Price })
+                .ToListAsync();
+            var priceByBarcode = items
+                .GroupBy(i => i.Barcode)
+                .ToDictionary(g => g.Key, g => g.First().Price);
+
+            return pending.Select(p => new PendingCatalogPriceRow
+            {
+                Id = p.Id,
+                Barcode = p.Barcode,
+                Name = p.Name,
+                OldPrice = p.Barcode != null && priceByBarcode.TryGetValue(p.Barcode, out var price) ? price : null,
+                NewPrice = p.Price,
+                CreatedDateTime = p.CreatedDateTime
+            }).ToList();
+        }
+
+        public async Task ApproveCatalogPriceAsync(IEnumerable<long> ids, int? approvedByUserId)
+        {
+            var idList = ids?.Distinct().ToList() ?? new List<long>();
+            if (!idList.Any())
+            {
+                return;
+            }
+
+            var approvedAt = DateTime.Now;
+            var items = await _context.AllItemComax.Where(x => idList.Contains(x.Id)).ToListAsync();
+            items.ForEach(x =>
+            {
+                x.IsOperTransferApproved = true;
+                x.OperTransferApprovedDate = approvedAt;
+                x.OperTransferApprovedByUserId = approvedByUserId;
+            });
+            await _context.BulkUpdateAsync(items);
+        }
+
+        public async Task<List<(string Barcode, string XmlId, long BranchId)>> GetPendingCatalogKeysAsync()
+        {
+            var rows = await _context.AllItemComax
+                .Where(x => x.IsCatalogPriceApprovalPending == true
+                    && x.IsTransferredToOper == false
+                    && x.IsBad == false
+                    && x.IsOperTransferApproved != true)
+                .Select(x => new { x.Barcode, x.XmlId, x.BranchId })
+                .ToListAsync();
+
+            return rows.Select(x => (x.Barcode, x.XmlId, x.BranchId)).ToList();
         }
     }
 }

@@ -13,5 +13,6 @@ namespace EM.Comax.ShukHerzl.Common
         public const int COMAX_API_TIMEOUT_MINUTES = 10;
         public const int OPERATIVE_BATCH_SIZE = 20000;
         public const int ESL_BATCH_SIZE = 20000;
+        public const string CatalogPricePendingMessage = "קיים עדכון מחיר קטלוגי , יש לשדרו לפני";
     }
 }

@@ -3,4 +3,6 @@ export interface Branch {
   branchName: string;
   comaxStoreId: number | null;
   description: string | null;
+  isOperTransferApprovalRequired: boolean;
+  isCatalogPriceApprovalRequired: boolean;
 }

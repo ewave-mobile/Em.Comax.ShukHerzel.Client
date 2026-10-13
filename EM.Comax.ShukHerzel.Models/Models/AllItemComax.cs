@@ -397,5 +397,15 @@ public partial class AllItemComax
 
     public string MaxQtyForSale { get; set; }
 
-  
+    // 12/10/2026 - Y.E - Catalog price differs from Oper.items and waits for approval
+    public bool? IsCatalogPriceApprovalPending { get; set; }
+
+    // 12/10/2026 - Y.E
+    public bool? IsOperTransferApproved { get; set; }
+
+    // 12/10/2026 - Y.E
+    public DateTime? OperTransferApprovedDate { get; set; }
+
+    // 12/10/2026 - Y.E
+    public int? OperTransferApprovedByUserId { get; set; }
 }

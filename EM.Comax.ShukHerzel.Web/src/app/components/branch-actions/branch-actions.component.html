@@ -8,6 +8,7 @@
   <div class="section-label">פעולות</div>
 
   <main class="action-list">
+    @if (showOperApproval()) {
     <button matRipple type="button" class="action-card" (click)="openPriceUpdates()">
       <span class="action-icon items" aria-hidden="true">
         <mat-icon>sell</mat-icon>
@@ -29,6 +30,20 @@
       </span>
       <mat-icon class="chevron">chevron_left</mat-icon>
     </button>
+    }
+
+    @if (showCatalogPrices()) {
+    <button matRipple type="button" class="action-card" (click)="openCatalogPrices()">
+      <span class="action-icon catalog" aria-hidden="true">
+        <mat-icon>price_change</mat-icon>
+      </span>
+      <span class="action-body">
+        <span class="action-title">עדכון מחיר קטלוגי ({{ pendingCatalogCount() }})</span>
+        <span class="action-sub">אישור ושידור שינוי מחיר שהגיע בקטלוג</span>
+      </span>
+      <mat-icon class="chevron">chevron_left</mat-icon>
+    </button>
+    }
   </main>
 
   <app-footer-action appFooter

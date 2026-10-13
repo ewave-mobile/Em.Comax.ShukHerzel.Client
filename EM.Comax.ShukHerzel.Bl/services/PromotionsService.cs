@@ -22,18 +22,21 @@ namespace EM.Comax.ShukHerzel.Bl.services
         private readonly IPromotionsRepository _promotionsRepository;
         private readonly IDatabaseLogger _databaseLogger;
         private readonly IBranchRepository _branchRepository;
+        private readonly ICatalogPriceApprovalService _catalogPriceApprovalService;
         private readonly OutputSettings _outputSettings;
         public PromotionsService(
      IComaxApiClient comaxApiClient,
      IPromotionsRepository promotionsRepository,
      IDatabaseLogger databaseLogger,
      IBranchRepository branchRepository,
+     ICatalogPriceApprovalService catalogPriceApprovalService,
      IOptions<OutputSettings> outputSettings)
         {
             _comaxApiClient = comaxApiClient;
             _promotionsRepository = promotionsRepository;
             _databaseLogger = databaseLogger;
             _branchRepository = branchRepository;
+            _catalogPriceApprovalService = catalogPriceApprovalService;
             _outputSettings = outputSettings.Value;
         }
 
@@ -579,6 +582,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
         // 13/08/2026 - Y.E
         public async Task ApproveOperTransferAsync(IEnumerable<long> ids, int? approvedByUserId)
         {
+            var rows = await _promotionsRepository.GetByIdsAsync(ids);
+            await _catalogPriceApprovalService.ThrowIfBlockedAsync(rows.Select(row => (row.ItemKod, row.BranchId)));
             await _promotionsRepository.ApproveOperTransferAsync(ids, approvedByUserId);
         }
 

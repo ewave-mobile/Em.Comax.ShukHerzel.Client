@@ -15,4 +15,7 @@ public partial class Company
 
     // 02/08/2026 - Y.E - When true, PriceUpdates/Promotions require user approval before Oper transfer
     public bool IsOperTransferApprovalRequired { get; set; }
+
+    // 12/10/2026 - Y.E - When true, a catalog price change from EM.Comax.New waits for approval
+    public bool IsCatalogPriceApprovalRequired { get; set; }
 }

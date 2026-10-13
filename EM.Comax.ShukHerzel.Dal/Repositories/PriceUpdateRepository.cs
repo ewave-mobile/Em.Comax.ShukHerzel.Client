@@ -159,6 +159,17 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             await _context.BulkUpdateAsync(items);
         }
 
+        public async Task<List<PriceUpdate>> GetByIdsAsync(IEnumerable<long> ids)
+        {
+            var idList = ids?.Distinct().ToList() ?? new List<long>();
+            if (!idList.Any())
+            {
+                return new List<PriceUpdate>();
+            }
+
+            return await _context.PriceUpdates.Where(x => idList.Contains(x.Id)).ToListAsync();
+        }
+
         public async Task RemoveDuplicateItemsAsync()
         {
             string sql = @"

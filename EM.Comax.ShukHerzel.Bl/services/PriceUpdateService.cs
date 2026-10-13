@@ -21,6 +21,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
         private readonly IPriceUpdateRepository _priceUpdateRepository;
         private readonly IDatabaseLogger _databaseLogger;
         private readonly IBranchRepository _branchRepository;
+        private readonly ICatalogPriceApprovalService _catalogPriceApprovalService;
         private readonly OutputSettings _outputSettings;
 
         public PriceUpdateService(
@@ -28,12 +29,14 @@ namespace EM.Comax.ShukHerzel.Bl.services
             IPriceUpdateRepository priceUpdateRepository,
             IDatabaseLogger databaseLogger,
             IBranchRepository branchRepository,
+            ICatalogPriceApprovalService catalogPriceApprovalService,
             IOptions<OutputSettings> outputSettings)
         {
             _comaxApiClient = comaxApiClient;
             _priceUpdateRepository = priceUpdateRepository;
             _databaseLogger = databaseLogger;
             _branchRepository = branchRepository;
+            _catalogPriceApprovalService = catalogPriceApprovalService;
             _outputSettings = outputSettings.Value;
         }
 
@@ -135,6 +138,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
 
         public async Task ApproveOperTransferAsync(IEnumerable<long> ids, int? approvedByUserId)
         {
+            var rows = await _priceUpdateRepository.GetByIdsAsync(ids);
+            await _catalogPriceApprovalService.ThrowIfBlockedAsync(rows.Select(row => (row.Barcode, row.BranchId)));
             await _priceUpdateRepository.ApproveOperTransferAsync(ids, approvedByUserId);
         }
 

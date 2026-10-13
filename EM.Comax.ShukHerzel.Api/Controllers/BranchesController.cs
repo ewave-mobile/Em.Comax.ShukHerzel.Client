@@ -23,26 +23,31 @@ public class BranchesController : ControllerBase
     public async Task<ActionResult<List<BranchDto>>> GetBranches()
     {
         var companies = await _companyService.GetAllCompanies();
-        var approvalCompanyIds = companies
-            .Where(c => c.IsOperTransferApprovalRequired)
-            .Select(c => c.Id)
-            .ToHashSet();
+        var approvalCompanies = companies
+            .Where(c => c.IsOperTransferApprovalRequired || c.IsCatalogPriceApprovalRequired)
+            .ToDictionary(c => c.Id);
 
-        if (approvalCompanyIds.Count == 0)
+        if (approvalCompanies.Count == 0)
         {
             return Ok(new List<BranchDto>());
         }
 
         var branches = await _branchService.GetAllBranches();
         var result = branches
-            .Where(b => b.CompanyId.HasValue && approvalCompanyIds.Contains(b.CompanyId.Value))
+            .Where(b => b.CompanyId.HasValue && approvalCompanies.ContainsKey(b.CompanyId.Value))
             .OrderBy(b => b.BranchName)
-            .Select(b => new BranchDto
+            .Select(b =>
             {
-                Id = b.Id,
-                BranchName = b.BranchName ?? string.Empty,
-                ComaxStoreId = b.ComaxStoreId,
-                Description = b.Description
+                var company = approvalCompanies[b.CompanyId!.Value];
+                return new BranchDto
+                {
+                    Id = b.Id,
+                    BranchName = b.BranchName ?? string.Empty,
+                    ComaxStoreId = b.ComaxStoreId,
+                    Description = b.Description,
+                    IsOperTransferApprovalRequired = company.IsOperTransferApprovalRequired,
+                    IsCatalogPriceApprovalRequired = company.IsCatalogPriceApprovalRequired
+                };
             })
             .ToList();
 

@@ -294,5 +294,16 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             });
             await _context.BulkUpdateAsync(items);
         }
+
+        public async Task<List<Promotion>> GetByIdsAsync(IEnumerable<long> ids)
+        {
+            var idList = ids?.Distinct().ToList() ?? new List<long>();
+            if (!idList.Any())
+            {
+                return new List<Promotion>();
+            }
+
+            return await _context.Promotions.Where(x => idList.Contains(x.Id)).ToListAsync();
+        }
     }
 }

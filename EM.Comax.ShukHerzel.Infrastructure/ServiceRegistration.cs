@@ -91,6 +91,7 @@ namespace EM.Comax.ShukHerzl.Infrastructure
             services.AddScoped<IPriceUpdateRepository, PriceUpdateRepository>();
             services.AddScoped<ITrailingItemRepository, TrailingItemRepository>();
             services.AddScoped<IAllItemsNewRepository, AllItemsNewRepository>();
+            services.AddScoped<ICatalogPriceApprovalService, CatalogPriceApprovalService>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IAuthService, AuthService>();

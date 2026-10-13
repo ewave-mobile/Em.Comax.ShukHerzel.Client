@@ -27,6 +27,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
         private readonly IBadItemLogRepository _badItemLogRepository;
         private readonly IPriceUpdateRepository _priceUpdateRepository;
         private readonly IBranchRepository _branchRepository;
+        private readonly ICompanyRepository _companyRepository;
         private readonly OperativeSettings _operativeSettings;
 
         // You may have a constant defined for the batch size
@@ -40,6 +41,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
             IBadItemLogRepository badItemLogRepository,
             IPriceUpdateRepository priceUpdateRepository,
             IBranchRepository branchRepository,
+            ICompanyRepository companyRepository,
             IOptions<OperativeSettings> operativeSettings)
         {
             _allItemsRepo = allItemsRepo;
@@ -50,6 +52,7 @@ namespace EM.Comax.ShukHerzel.Bl.services
             _badItemLogRepository = badItemLogRepository;
             _priceUpdateRepository = priceUpdateRepository;
             _branchRepository = branchRepository;
+            _companyRepository = companyRepository;
             _operativeSettings = operativeSettings?.Value ?? new OperativeSettings();
         }
 
@@ -563,6 +566,8 @@ namespace EM.Comax.ShukHerzel.Bl.services
                     allItems = allItems.Except(itemsWithZeroPrice).ToList();
                 }
 
+                allItems = await HoldUnapprovedCatalogPriceChangesAsync(allItems, progress);
+
                 // New sync path always calculates unit prices (ContentPrice / PromoContentPrice).
                 const bool calculateUnitPrice = true;
                 progress.Report("Unit price calculation is enabled (ContentPrice / PromoContentPrice).");
@@ -620,6 +625,10 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 await _allItemsNewRepo.MarkAsTransferredAsync(allItemIds, now);
                 progress.Report("Marked AllItems as transferred.");
 
+                var catalogPendingLookup = BuildCatalogPendingLookup(await _allItemsNewRepo.GetPendingCatalogKeysAsync());
+                var blockedPromoBarcodes = new List<string>();
+                var blockedPriceBarcodes = new List<string>();
+
                 // ---------------------------
                 // ROUND 2: Process Promotions (existing logic)
                 // ---------------------------
@@ -675,6 +684,14 @@ namespace EM.Comax.ShukHerzel.Bl.services
                                     return decimal.MaxValue; // If can't parse, put at end
                                 })
                                 .First();
+
+                            if (!string.IsNullOrEmpty(selectedPromo.ItemKod)
+                                && catalogPendingLookup.Contains((selectedPromo.ItemKod, selectedPromo.BranchId)))
+                            {
+                                blockedPromoBarcodes.Add(selectedPromo.ItemKod);
+                                progress.Report($"Skipping promotion for ItemKod {selectedPromo.ItemKod}: {Constants.CatalogPricePendingMessage}");
+                                continue;
+                            }
 
                             // Mark all other promotions in this group as transferred since we're only using the selected one
                             var otherPromosInGroup = promoGroup.Where(p => p.Id != selectedPromo.Id).ToList();
@@ -948,6 +965,14 @@ namespace EM.Comax.ShukHerzel.Bl.services
 
                     foreach (var pu in groupedPriceUpdates)
                     {
+                        if (!string.IsNullOrEmpty(pu.Barcode)
+                            && catalogPendingLookup.Contains((pu.Barcode, pu.BranchId)))
+                        {
+                            blockedPriceBarcodes.Add(pu.Barcode);
+                            progress.Report($"Skipping price update for barcode {pu.Barcode}: {Constants.CatalogPricePendingMessage}");
+                            continue;
+                        }
+
                         if (itemDictForPrices.TryGetValue((pu.Barcode, pu.BranchId), out var item))
                         {
                             UpdateItemWithPriceUpdate(item, pu, calculateUnitPrice);
@@ -979,6 +1004,9 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 {
                     progress.Report("No Price Updates to process.");
                 }
+
+                await LogCatalogPriceBlocksAsync(blockedPromoBarcodes, progress);
+                await LogCatalogPriceBlocksAsync(blockedPriceBarcodes, progress);
 
                 await _databaseLogger.LogServiceActionAsync("SyncAllItemsAndPromotions completed successfully.");
                 progress.Report("Synchronization completed successfully.");
@@ -1271,6 +1299,105 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 await _databaseLogger.LogErrorAsync("OPERATIVE_SERVICE", "RemovePromotionAsync", ex);
                 throw;
             }
+        }
+
+        private async Task<List<AllItemComax>> HoldUnapprovedCatalogPriceChangesAsync(List<AllItemComax> allItems, IProgress<string> progress)
+        {
+            var approvalCompanyIds = (await _companyRepository.GetAllAsync())
+                .Where(c => c.IsCatalogPriceApprovalRequired)
+                .Select(c => c.Id)
+                .ToHashSet();
+            if (approvalCompanyIds.Count == 0 || allItems.Count == 0)
+            {
+                return allItems;
+            }
+
+            var candidates = allItems
+                .Where(item => approvalCompanyIds.Contains(item.CompanyId) && item.IsOperTransferApproved != true)
+                .ToList();
+            if (candidates.Count == 0)
+            {
+                return allItems;
+            }
+
+            var keys = candidates
+                .Where(item => !string.IsNullOrEmpty(item.Barcode))
+                .Select(item => (item.Barcode, item.BranchId))
+                .Distinct()
+                .ToList();
+            if (keys.Count == 0)
+            {
+                return allItems;
+            }
+
+            var existingItems = await _itemRepo.GetItemsByBarcodesAndBranchIdsAsync(keys);
+            var existingByKey = existingItems
+                .GroupBy(item => (item.Barcode, item.BranchId))
+                .ToDictionary(group => group.Key, group => group.First());
+
+            var held = candidates.Where(temp =>
+            {
+                if (string.IsNullOrEmpty(temp.Barcode)
+                    || !existingByKey.TryGetValue((temp.Barcode, temp.BranchId), out var existing))
+                {
+                    return false;
+                }
+
+                return TryParseDecimal(temp.Price) != existing.Price;
+            }).ToList();
+
+            if (held.Count == 0)
+            {
+                return allItems;
+            }
+
+            await _allItemsNewRepo.MarkCatalogPricePendingAsync(held.Select(item => item.Id));
+            var heldIds = held.Select(item => item.Id).ToHashSet();
+            progress.Report($"Held {held.Count} catalog rows for price approval.");
+            return allItems.Where(item => !heldIds.Contains(item.Id)).ToList();
+        }
+
+        private static HashSet<(string Code, long BranchId)> BuildCatalogPendingLookup(
+            IEnumerable<(string Barcode, string XmlId, long BranchId)> keys)
+        {
+            var lookup = new HashSet<(string Code, long BranchId)>();
+            foreach (var key in keys)
+            {
+                if (!string.IsNullOrEmpty(key.Barcode))
+                {
+                    lookup.Add((key.Barcode, key.BranchId));
+                }
+
+                if (!string.IsNullOrEmpty(key.XmlId))
+                {
+                    lookup.Add((key.XmlId, key.BranchId));
+                }
+            }
+
+            return lookup;
+        }
+
+        private async Task LogCatalogPriceBlocksAsync(IEnumerable<string> barcodes, IProgress<string> progress)
+        {
+            var logs = barcodes
+                .Where(barcode => !string.IsNullOrEmpty(barcode))
+                .Distinct()
+                .Select(barcode => new BadItemLog
+                {
+                    Barcode = barcode.Length > 50 ? barcode.Substring(0, 50) : barcode,
+                    Message = Constants.CatalogPricePendingMessage,
+                    Guid = Guid.NewGuid().ToString(),
+                    TimeStamp = DateTime.Now
+                })
+                .ToList();
+
+            if (logs.Count == 0)
+            {
+                return;
+            }
+
+            await _badItemLogRepository.BulkInsertBadItemsAsync(logs, BatchSize);
+            progress.Report($"Skipped {logs.Count} updates: {Constants.CatalogPricePendingMessage}");
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using EM.Comax.Api.Dtos;
+using EM.Comax.ShukHerzel.Bl;
 using EM.Comax.ShukHerzel.Bl.interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -56,7 +57,15 @@ public class PriceUpdatesController : ControllerBase
             return Unauthorized();
         }
 
-        await _priceUpdateService.ApproveOperTransferAsync(request.Ids, userId);
+        try
+        {
+            await _priceUpdateService.ApproveOperTransferAsync(request.Ids, userId);
+        }
+        catch (CatalogPriceApprovalBlockedException ex)
+        {
+            return BadRequest(new { message = ex.Message, barcodes = ex.Barcodes });
+        }
+
         return Ok(new { approved = request.Ids.Count });
     }
 }
