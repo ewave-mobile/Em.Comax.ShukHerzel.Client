@@ -243,7 +243,12 @@ namespace EM.Comax.ShukHerzel.Bl.services
                 var operationGuid = Guid.NewGuid();
                 var promotions = new List<Promotion>();
                 var promoListJson = JsonConvert.SerializeObject(promoList, Formatting.Indented);
-                await WriteApiResponseToFileAsync(promoListJson, branch, Guid.NewGuid());
+                await WriteApiResponseToFileAsync(
+                    promoListJson,
+                    branch,
+                    Guid.NewGuid(),
+                    Constants.CLIENT_API_RESPONSE_SUBFOLDER,
+                    Constants.CLIENT_API_RESPONSE_FILE_PREFIX);
                 
                 foreach (var clsPromo in promoList?.d ?? [])
                 {
@@ -530,17 +535,21 @@ namespace EM.Comax.ShukHerzel.Bl.services
         /// Safely serializes an object to JSON, catches exceptions, and truncates to a specified max length.
         /// </summary>
         /// 
-        private async Task WriteApiResponseToFileAsync(string apiResponse, Branch branch, Guid guid)
+        private async Task WriteApiResponseToFileAsync(string apiResponse, Branch branch, Guid guid, string? subFolder = null, string? fileNamePrefix = null)
         {
             try
             {
+                var baseDirectory = string.IsNullOrWhiteSpace(subFolder)
+                    ? _outputSettings.ApiResponseDirectory
+                    : Path.Combine(_outputSettings.ApiResponseDirectory, subFolder);
+
                 var directoryPath = ApiResponsePathHelper.GetOrCreateCompanyDateDirectory(
-                    _outputSettings.ApiResponseDirectory,
+                    baseDirectory,
                     branch.CompanyId);
 
                 // Create a unique file name, e.g., including branch ID and timestamp
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                var fileName = $"PromotionsResponse_Branch{branch.Id}_{timestamp}_{guid}.txt";
+                var fileName = $"{fileNamePrefix}PromotionsResponse_Branch{branch.Id}_{timestamp}_{guid}.txt";
                 var filePath = Path.Combine(directoryPath, fileName);
 
                 // Write the API response to the file asynchronously

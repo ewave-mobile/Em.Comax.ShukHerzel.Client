@@ -14,5 +14,7 @@ namespace EM.Comax.ShukHerzl.Common
         public const int OPERATIVE_BATCH_SIZE = 20000;
         public const int ESL_BATCH_SIZE = 20000;
         public const string CatalogPricePendingMessage = "קיים עדכון מחיר קטלוגי , יש לשדרו לפני";
+        public const string CLIENT_API_RESPONSE_SUBFOLDER = "Client";
+        public const string CLIENT_API_RESPONSE_FILE_PREFIX = "Client_";
     }
 }

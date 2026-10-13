@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Em.Comax.ShukHerzel.Client
 {
@@ -976,8 +977,11 @@ namespace Em.Comax.ShukHerzel.Client
             IEnumerable<PromotionApprovalRow> filtered = _promotionApprovalAllRows;
             if (barcodes.Count > 0)
             {
-                var barcodeSet = new HashSet<string>(barcodes, StringComparer.Ordinal);
-                filtered = _promotionApprovalAllRows.Where(r => barcodeSet.Contains((r.ItemKod ?? string.Empty).Trim()));
+                filtered = _promotionApprovalAllRows.Where(r =>
+                {
+                    var itemKod = r.ItemKod ?? string.Empty;
+                    return barcodes.Any(b => itemKod.Contains(b, StringComparison.Ordinal));
+                });
             }
 
             var rows = filtered.ToList();
@@ -1675,7 +1679,7 @@ namespace Em.Comax.ShukHerzel.Client
         #endregion
 
         // For the new API tabs
-        private List<AllItem> _itemsApiResults = new List<AllItem>();  
+        private List<AllItem> _itemsApiResults = new List<AllItem>();
         private List<AllItemComax> _itemsComaxApiResults = new List<AllItemComax>();
         private List<Promotion> _promotionsApiResults = new List<Promotion>();
         private List<Promotion> _filteredPromotionsApiResults = new List<Promotion>();
@@ -1892,7 +1896,7 @@ namespace Em.Comax.ShukHerzel.Client
                 itemsApiGetItemButton.Enabled = true;
             }
         }
-        
+
         private async void ItemsApiGetItemNewButton_Click(object sender, EventArgs e)
         {
             try
@@ -1959,33 +1963,33 @@ namespace Em.Comax.ShukHerzel.Client
                     }
                     else
                     {*/
-                        // Save the XML response to a file (optional)
-                        // Skip this step as WriteApiResponseToFileAsync is not accessible
+                    // Save the XML response to a file (optional)
+                    // Skip this step as WriteApiResponseToFileAsync is not accessible
 
-                        // Deserialize the XML to get the catalog items
-                        var allClsItems = _allItemsNewService.DeserializeCatalogItemsNew(xml);
+                    // Deserialize the XML to get the catalog items
+                    var allClsItems = _allItemsNewService.DeserializeCatalogItemsNew(xml);
 
-                        if (allClsItems == null || !allClsItems.Any())
-                        {
-                            logTextBox.AppendText($"לא נמצאו פריטים בתגובת ה-XML.{Environment.NewLine}");
-                            _itemsComaxApiResults = new List<AllItemComax>();
-                        }
-                        else
-                        {
-                            // Filter the items by the specified barcodes if needed
-                            var filteredClsItems = allClsItems.Where(item =>
-                                itemIds.Contains(item.Barcode.ToString()) ||
-                                (item.AnotherBarkods != null && itemIds.Any(b => item.AnotherBarkods.ToString().Contains(b)))
-                            ).ToList();
+                    if (allClsItems == null || !allClsItems.Any())
+                    {
+                        logTextBox.AppendText($"לא נמצאו פריטים בתגובת ה-XML.{Environment.NewLine}");
+                        _itemsComaxApiResults = new List<AllItemComax>();
+                    }
+                    else
+                    {
+                        // Filter the items by the specified barcodes if needed
+                        var filteredClsItems = allClsItems.Where(item =>
+                            itemIds.Contains(item.Barcode.ToString()) ||
+                            (item.AnotherBarkods != null && itemIds.Any(b => item.AnotherBarkods.ToString().Contains(b)))
+                        ).ToList();
 
-                            logTextBox.AppendText($"נמצאו {filteredClsItems.Count} פריטים עבור הברקודים שצוינו. ממפה...{Environment.NewLine}");
+                        logTextBox.AppendText($"נמצאו {filteredClsItems.Count} פריטים עבור הברקודים שצוינו. ממפה...{Environment.NewLine}");
 
-                            // Map to AllItems but don't insert into database
-                            _itemsComaxApiResults = await _allItemsNewService.MapToAllItems(filteredClsItems, now, branch, guid);
+                        // Map to AllItems but don't insert into database
+                        _itemsComaxApiResults = await _allItemsNewService.MapToAllItems(filteredClsItems, now, branch, guid);
 
-                            logTextBox.AppendText($"מופו {_itemsComaxApiResults.Count} פריטים. מציג בטבלה...{Environment.NewLine}");
-                        }
-                   /* }*/
+                        logTextBox.AppendText($"מופו {_itemsComaxApiResults.Count} פריטים. מציג בטבלה...{Environment.NewLine}");
+                    }
+                    /* }*/
                 }
                 catch (Exception ex)
                 {
@@ -1995,7 +1999,7 @@ namespace Em.Comax.ShukHerzel.Client
                 }
 
                 // Display results
-                itemsApiResultsNewDataGridView .DataSource = _itemsComaxApiResults ;
+                itemsApiResultsNewDataGridView.DataSource = _itemsComaxApiResults;
 
                 // Enable/disable action buttons based on results
                 bool hasResults = _itemsComaxApiResults != null && _itemsComaxApiResults.Count > 0;
@@ -2147,7 +2151,7 @@ namespace Em.Comax.ShukHerzel.Client
                 HideLoadingSpinner(); // ADDED
                 itemsApiAddAllButtonNew.Enabled = true;
             }
-        }   
+        }
 
         private async void ItemsApiResultsDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -2416,6 +2420,11 @@ namespace Em.Comax.ShukHerzel.Client
         {
             using var dlg = new GenerateUserPasswordForm();
             dlg.ShowDialog(this);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            dataManagementTabControl.TabPages.Remove(itemsApiTab);
         }
     }
 }
