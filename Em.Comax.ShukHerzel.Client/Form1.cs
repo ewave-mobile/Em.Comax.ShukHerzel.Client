@@ -672,8 +672,11 @@ namespace Em.Comax.ShukHerzel.Client
             IEnumerable<PriceUpdateApprovalRow> filtered = _priceApprovalAllRows;
             if (barcodes.Count > 0)
             {
-                var barcodeSet = new HashSet<string>(barcodes, StringComparer.Ordinal);
-                filtered = _priceApprovalAllRows.Where(r => barcodeSet.Contains((r.Barcode ?? string.Empty).Trim()));
+                filtered = _priceApprovalAllRows.Where(r =>
+                {
+                    var barcode = r.Barcode ?? string.Empty;
+                    return barcodes.Any(b => barcode.Contains(b, StringComparison.Ordinal));
+                });
             }
 
             var rows = filtered.ToList();
