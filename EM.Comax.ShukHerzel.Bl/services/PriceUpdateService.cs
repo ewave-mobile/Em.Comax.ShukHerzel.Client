@@ -143,6 +143,11 @@ namespace EM.Comax.ShukHerzel.Bl.services
             await _priceUpdateRepository.ApproveOperTransferAsync(ids, approvedByUserId);
         }
 
+        public async Task RejectOperTransferAsync(IEnumerable<long> ids, int? rejectedByUserId)
+        {
+            await _priceUpdateRepository.RejectOperTransferAsync(ids, rejectedByUserId);
+        }
+
         /// <summary>
         /// Maps an individual ItemSalePriceDto (from Comax) to a PriceUpdate entity.
         /// </summary>

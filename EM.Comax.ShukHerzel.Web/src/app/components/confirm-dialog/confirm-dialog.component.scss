@@ -1,0 +1,23 @@
+.confirm-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.confirm-icon {
+  flex-shrink: 0;
+  color: var(--brand-blue);
+}
+
+p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.confirm-accept {
+  background: var(--brand-blue) !important;
+  color: #fff !important;
+}

@@ -72,4 +72,22 @@ public class PromotionsController : ControllerBase
 
         return Ok(new { approved = request.Ids.Count });
     }
+
+    [HttpPost("reject")]
+    public async Task<IActionResult> Reject(long branchId, [FromBody] ApproveRequest request)
+    {
+        if (request?.Ids == null || request.Ids.Count == 0)
+        {
+            return BadRequest("No ids provided.");
+        }
+
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        await _promotionsService.RejectOperTransferAsync(request.Ids, userId);
+        return Ok(new { rejected = request.Ids.Count });
+    }
 }

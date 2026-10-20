@@ -57,5 +57,6 @@ namespace EM.Comax.ShukHerzel.Bl.interfaces
         // 13/08/2026 - Y.E
         Task<List<Promotion>> GetPendingApprovalByBranchAsync(long branchId, DateTime? createdDate = null);
         Task ApproveOperTransferAsync(IEnumerable<long> ids, int? approvedByUserId);
+        Task RejectOperTransferAsync(IEnumerable<long> ids, int? rejectedByUserId);
     }
 }

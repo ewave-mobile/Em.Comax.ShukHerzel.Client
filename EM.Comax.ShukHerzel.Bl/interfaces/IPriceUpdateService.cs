@@ -38,5 +38,6 @@ namespace EM.Comax.ShukHerzel.Bl.interfaces
         /// Approves Oper transfer for the given price update IDs.
         /// </summary>
         Task ApproveOperTransferAsync(IEnumerable<long> ids, int? approvedByUserId);
+        Task RejectOperTransferAsync(IEnumerable<long> ids, int? rejectedByUserId);
     }
 }

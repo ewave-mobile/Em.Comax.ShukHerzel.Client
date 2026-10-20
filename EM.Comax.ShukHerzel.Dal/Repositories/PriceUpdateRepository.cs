@@ -122,7 +122,7 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
             var query = _context.PriceUpdates
                 .Where(x => x.BranchId == branchId
                     && x.IsTransferredToOper == false
-                    && x.IsOperTransferApproved != true);
+                    && x.IsOperTransferApproved == null);
 
             if (createdDate.HasValue)
             {
@@ -155,6 +155,25 @@ namespace EM.Comax.ShukHerzel.Dal.Repositories
                 x.IsOperTransferApproved = true;
                 x.OperTransferApprovedDate = approvedAt;
                 x.OperTransferApprovedByUserId = approvedByUserId;
+            });
+            await _context.BulkUpdateAsync(items);
+        }
+
+        public async Task RejectOperTransferAsync(IEnumerable<long> ids, int? rejectedByUserId)
+        {
+            var idList = ids?.Distinct().ToList() ?? new List<long>();
+            if (!idList.Any())
+            {
+                return;
+            }
+
+            var rejectedAt = DateTime.Now;
+            var items = await _context.PriceUpdates.Where(x => idList.Contains(x.Id)).ToListAsync();
+            items.ForEach(x =>
+            {
+                x.IsOperTransferApproved = false;
+                x.OperTransferApprovedDate = rejectedAt;
+                x.OperTransferApprovedByUserId = rejectedByUserId;
             });
             await _context.BulkUpdateAsync(items);
         }

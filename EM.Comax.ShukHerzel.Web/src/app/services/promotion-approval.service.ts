@@ -31,4 +31,11 @@ export class PromotionApprovalService {
       { ids }
     );
   }
+
+  reject(branchId: number, ids: number[]): Observable<{ rejected: number }> {
+    return this.http.post<{ rejected: number }>(
+      `${this.baseUrl}/api/branches/${branchId}/promotions/reject`,
+      { ids }
+    );
+  }
 }

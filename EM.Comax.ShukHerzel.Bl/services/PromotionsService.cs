@@ -596,5 +596,10 @@ namespace EM.Comax.ShukHerzel.Bl.services
             await _promotionsRepository.ApproveOperTransferAsync(ids, approvedByUserId);
         }
 
+        public async Task RejectOperTransferAsync(IEnumerable<long> ids, int? rejectedByUserId)
+        {
+            await _promotionsRepository.RejectOperTransferAsync(ids, rejectedByUserId);
+        }
+
     }
 }

@@ -1,6 +1,9 @@
 import { Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PriceApprovalService } from '../../services/price-approval.service';
 import { PendingPriceUpdate } from '../../models/pending-price-update';
 import { AppPageShellComponent } from '../app-page-shell/app-page-shell.component';
@@ -16,8 +19,11 @@ import { PricePipe } from '../../pipes/price.pipe';
 @Component({
   selector: 'app-price-approval',
   imports: [
+    MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
+    MatIconModule,
+    MatTooltipModule,
     AppPageShellComponent,
     AppPageHeaderComponent,
     ApprovalFiltersComponent,
@@ -32,7 +38,8 @@ import { PricePipe } from '../../pipes/price.pipe';
 export class PriceApprovalComponent extends ApprovalPageBase<PendingPriceUpdate> {
   protected override readonly api = inject(PriceApprovalService);
   protected override readonly text: ApprovalPageText = {
-    successEntity: 'פריטים'
+    successEntity: 'פריטים',
+    rejectConfirm: 'האם להסיר פריט זה משידור?'
   };
 
   protected override matchesSearch(item: PendingPriceUpdate, query: string): boolean {

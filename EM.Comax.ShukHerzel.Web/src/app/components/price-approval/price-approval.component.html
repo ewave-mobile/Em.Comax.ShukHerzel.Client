@@ -55,6 +55,16 @@
             </div>
           </div>
           <div class="item-price">{{ item.netPrice | price }}</div>
+          <button
+            mat-icon-button
+            type="button"
+            class="reject-btn"
+            matTooltip="הסרה משידור"
+            aria-label="הסרה משידור"
+            [disabled]="rejecting() || approving()"
+            (click)="rejectItem(item, $event)">
+            <mat-icon>delete</mat-icon>
+          </button>
         </mat-card>
       }
     </main>
@@ -64,7 +74,7 @@
     appFooter
     [label]="selectedCount() > 0 ? 'שדר (' + selectedCount() + ')' : 'שדר'"
     loadingLabel="משדר..."
-    [disabled]="selectedCount() === 0"
+    [disabled]="selectedCount() === 0 || rejecting()"
     [loading]="approving()"
     (action)="broadcast()" />
 </app-page-shell>

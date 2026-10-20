@@ -1,5 +1,6 @@
 import { Directive, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { BranchStoreService } from '../services/branch-store.service';
 import {
   ApprovalPageText,
@@ -8,12 +9,14 @@ import {
 } from '../models/pending-approval';
 import { todayKey } from '../pipes/comax-date.pipe';
 import { getApiErrorMessage } from '../interceptors/api-error';
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 
 @Directive()
 export abstract class ApprovalPageBase<T extends PendingApprovalItem> implements OnInit {
   protected readonly store = inject(BranchStoreService);
   protected readonly route = inject(ActivatedRoute);
   protected readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   protected abstract readonly api: PendingApprovalApi<T>;
   protected abstract readonly text: ApprovalPageText;
@@ -26,6 +29,7 @@ export abstract class ApprovalPageBase<T extends PendingApprovalItem> implements
   readonly dateFilter = signal(todayKey());
   readonly loadingItems = signal(false);
   readonly approving = signal(false);
+  readonly rejecting = signal(false);
   readonly error = signal<string | null>(null);
   readonly success = signal<string | null>(null);
 
@@ -132,7 +136,7 @@ export abstract class ApprovalPageBase<T extends PendingApprovalItem> implements
 
   broadcast(): void {
     const branchId = this.branchId();
-    if (branchId == null || this.selectedCount() === 0 || this.approving()) {
+    if (branchId == null || this.selectedCount() === 0 || this.approving() || this.rejecting()) {
       return;
     }
 
@@ -155,6 +159,54 @@ export abstract class ApprovalPageBase<T extends PendingApprovalItem> implements
         this.approving.set(false);
         this.error.set(getApiErrorMessage(err));
       }
+    });
+  }
+
+  rejectItem(item: T, event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const branchId = this.branchId();
+    const api = this.api;
+    if (branchId == null || this.rejecting() || this.approving() || !api.reject) {
+      return;
+    }
+
+    const reject = api.reject.bind(api);
+
+    this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'אישור',
+        message: this.text.rejectConfirm ?? 'האם להסיר משידור?',
+        confirmLabel: 'הסר',
+        cancelLabel: 'ביטול',
+        icon: 'delete'
+      },
+      width: '420px',
+      maxWidth: 'calc(100vw - 32px)',
+      autoFocus: 'first-tabbable',
+      restoreFocus: true,
+      direction: 'rtl'
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) {
+        return;
+      }
+
+      this.rejecting.set(true);
+      this.error.set(null);
+      this.success.set(null);
+
+      reject(branchId, [item.id]).subscribe({
+        next: result => {
+          this.rejecting.set(false);
+          this.success.set(`הוסרו ${result.rejected} ${this.text.successEntity}`);
+          this.loadPending();
+        },
+        error: err => {
+          this.rejecting.set(false);
+          this.error.set(getApiErrorMessage(err));
+        }
+      });
     });
   }
 }

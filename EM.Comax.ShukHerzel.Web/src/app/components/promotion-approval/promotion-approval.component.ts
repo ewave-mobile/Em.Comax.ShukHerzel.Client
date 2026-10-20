@@ -1,6 +1,9 @@
 import { Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PromotionApprovalService } from '../../services/promotion-approval.service';
 import { PendingPromotion } from '../../models/pending-promotion';
 import { AppPageShellComponent } from '../app-page-shell/app-page-shell.component';
@@ -17,8 +20,11 @@ import { ComaxDatePipe } from '../../pipes/comax-date.pipe';
 @Component({
   selector: 'app-promotion-approval',
   imports: [
+    MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
+    MatIconModule,
+    MatTooltipModule,
     AppPageShellComponent,
     AppPageHeaderComponent,
     ApprovalFiltersComponent,
@@ -34,7 +40,8 @@ import { ComaxDatePipe } from '../../pipes/comax-date.pipe';
 export class PromotionApprovalComponent extends ApprovalPageBase<PendingPromotion> {
   protected override readonly api = inject(PromotionApprovalService);
   protected override readonly text: ApprovalPageText = {
-    successEntity: 'תגמולים'
+    successEntity: 'תגמולים',
+    rejectConfirm: 'האם להסיר תגמול זה משידור?'
   };
 
   protected override matchesSearch(item: PendingPromotion, query: string): boolean {

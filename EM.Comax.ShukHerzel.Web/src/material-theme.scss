@@ -26,4 +26,8 @@ html {
   @include mat.form-field-overrides((
     outlined-container-shape: 12px,
   ));
+
+  @include mat.dialog-overrides((
+    container-shape: 16px,
+  ));
 }

@@ -36,4 +36,11 @@ export class PriceApprovalService {
       { ids }
     );
   }
+
+  reject(branchId: number, ids: number[]): Observable<{ rejected: number }> {
+    return this.http.post<{ rejected: number }>(
+      `${this.baseUrl}/api/branches/${branchId}/price-updates/reject`,
+      { ids }
+    );
+  }
 }

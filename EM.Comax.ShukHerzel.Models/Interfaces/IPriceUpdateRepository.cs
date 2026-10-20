@@ -28,6 +28,7 @@ namespace EM.Comax.ShukHerzel.Models.Interfaces
         /// Sets IsOperTransferApproved, OperTransferApprovedDate and OperTransferApprovedByUserId for the given IDs.
         /// </summary>
         Task ApproveOperTransferAsync(IEnumerable<long> ids, int? approvedByUserId);
+        Task RejectOperTransferAsync(IEnumerable<long> ids, int? rejectedByUserId);
         Task<List<PriceUpdate>> GetByIdsAsync(IEnumerable<long> ids);
     }
 }
